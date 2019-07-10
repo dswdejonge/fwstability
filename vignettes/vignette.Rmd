@@ -1,0 +1,46 @@
+---
+title: "Assessing food web stability with the fwstability R-package."
+author: "D.S.W. de Jonge"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(fwstability)
+```
+
+This vignette explains how you can use the fwstability package to assess food web stability. There are basically three sections: 1) how to prepare your food web model for stability analysis, 2) how to conduct stability analysis, and 3) how to assess your food web for characteristics related to stability.
+
+# 1. Prepare a food web model for stability analysis
+
+# 2. Stability analysis
+For now we prepare a fake Jacobian matrix (JM).
+```{r JM}
+JM <- matrix(data = c(
+  0,     0.2, 0,   0.4,  -0.1,
+  -0.05, 0,   0.1, -0.5, 0.2,
+  -0.2,  0.1, 0,   0.1,  -0.6,
+  0.4,  -0.3, -0.1, 0,   0.3,
+  0.1,  -0.2, 0.1, -0.5, 0
+  ), nrow = 5, ncol = 5, byrow = TRUE
+)
+```
+
+The stability of this Jacobian matrix is calculated as the maximum real value of the eigenvalues. A negative value indicates the food web is stable. 
+```{r}
+getStability(JM)
+```
+
+
+# 3. Analysize food web for (de)stabilizing characteristics
