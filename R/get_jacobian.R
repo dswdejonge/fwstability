@@ -115,11 +115,11 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 getJacobian <- function(FM, BM, AE, GE, dead, externals,
                         diagonal = 0) {
   # Remove external compartments, keep internals
-  internals <- !(rownames(flow_matrix) %in% externals)
+  internals <- !(rownames(FM) %in% externals)
   FM_int <- FM[internals, internals]
 
   # Get indices of dead compartments
-  dead_i <- which(rownames(flow_matrix) %in% dead)
+  dead_i <- which(rownames(FM) %in% dead)
 
    # Get interaction strengths
   eff.on.pred <- effectOnConsumer(FM_int, BM, AE, GE)
