@@ -1,7 +1,6 @@
 ---
 title: "Assessing food web stability with the fwstability R-package."
 author: "D.S.W. de Jonge"
-date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{vignette}
@@ -23,6 +22,34 @@ library(fwstability)
 This vignette explains how you can use the fwstability package to assess food web stability. There are basically three sections: 1) how to prepare your food web model for stability analysis, 2) how to conduct stability analysis, and 3) how to assess your food web for characteristics related to stability.
 
 # 1. Prepare a food web model for stability analysis
+A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). The food web model used in this vignette is the same food web model as used in the LIM vignette, please refer to this document to understand the concept and set-up of a LIM.
+
+A linear inverse model is set-up, solved with the least-distance solution (function Ldei) and written as a flow matrix (flow from row compartment to column compartment).
+```{r LIM}
+require(LIM)
+lim <- Setup("foodweb.lim")
+flow_matrix <- Flowmatrix(lim)
+```
+
+The flows between compartments can be used to calculate interaction strengths, which form the entries for a Jacobian matrix.
+
+The effect of a predator on its prey ($\alpha_{ij}$):
+
+$$\alpha_{ij}=-\frac{F_{ij}}{x{j}}$$
+and the effect of a prey on its predator($\alpha_{ji}$):
+
+$$\alpha_{ji}=\frac{a_jp_jF_{ij}}{x{i}}$$
+where $F_{ij}$ is the flux between resource population $i$ and consumer population $j$, $a_j$ is the assimilation efficiency of the consumer, $p_j$ is the production efficiency of the consumer, and $x_{i,j}$ is the biomass of the respective population (de Ruiter et al., 1995; Neutel et al., 2002).
+
+The effect of a population $j$ on detritus is ($\alpha_{dj}$):
+
+$$\alpha_{dj}=\frac{1}{x_j}(\sum_{i=1}^n a_j p_j F_{ij} - \sum_{i=1}^n F_{ji} + \sum_{i=1}^n (1-a_j)F_{ij} + \sum_{i=1}^n (1-a_i)F_{ji}-F_{dj})$$
+where $n$ is the total number of compartments in the food web (Neutel & Thorne, 2014).
+
+The diagonal of a Jacobian matrix represents intraspecific interactions. Diagonal values (Neutel & Thorne, 2014) for fauna are found as their non-predatory mortality:
+$$\alpha_{ii}=-\frac{\sum_{j=1}^n a_i p_i F_{ji}-\sum_{j=1}^n F_{ij}}{x_i}$$
+and for detritus as:
+$$\alpha_{dd}=-\frac{1}{x_d} \sum_{j=1}^n (a_j F_{dj})$$
 
 # 2. Stability analysis
 For now we prepare a fake Jacobian matrix (JM).
@@ -41,6 +68,5 @@ The stability of this Jacobian matrix is calculated as the maximum real value of
 ```{r}
 getStability(JM)
 ```
-
 
 # 3. Analysize food web for (de)stabilizing characteristics
