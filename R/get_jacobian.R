@@ -68,16 +68,82 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 
 # equation 13; diagonal for species
 # is the negative mortality rate of species
-diagonalSpecies <- function(flow_solutions, BM, dead){
-  result <- -getMortalityRate(flow_solutions, BM, dead)
-  result <- result[-dead]
-  return(result)
-}
+#diagonalSpecies <- function(flow_solutions, BM, dead){
+#  result <- -getMortalityRate(flow_solutions, BM, dead)
+#  result <- result[-dead]
+#  return(result)
+#}
 
 # equation 14; diagonal for detritus
 # the total assimilated detritus is all consumers,
 # divided by the biomass of detritus
-diagonalDetritus <- function(FM, BM, AE, dead){
-  detritus_ingestion <- colSums(t(FM[dead,-dead])*AE[-dead])
-  result <- -detritus_ingestion/BM[dead]
+#diagonalDetritus <- function(FM, BM, AE, dead){
+#  detritus_ingestion <- colSums(t(FM[dead,-dead])*AE[-dead])
+#  result <- -detritus_ingestion/BM[dead]
+#}
+
+#' Jacobian matrix with interaction strengths
+#'
+#' This functions calculates interaction strengths from a resolved energy-flux
+#' food web model and uses these values as entries for a Jacobian matrix.
+#' The diagonal can be either be user-defined, set to zero (default), or calculated
+#' from the energy-flux model.
+#' @param FM A square flowmatrix, source compartments as rows,
+#' sink compartments as columns.
+#' @param BM Numeric vector with biomasses of all compartments, must be in the same order as the flow matrix.
+#' @param AE Numeric vector with assimilation efficiencies of all
+#' compartments,must be in the same order as the flow matrix.
+#' AE should be set to NA for non-faunal compartments.
+#' @param GE Numeric vector with growth efficiencies of all compartments,
+#' must be in the same order as the flow matrix. GE should be set to NA
+#' for non-faunal compartments.
+#' @param dead Character vector with all names of detritus and nutrient
+#' compartments (everything that is not fauna).
+#' @param externals Character vector with all names of external
+#' compartments, i.e. which have no biomass.
+#' @param diagonal Either a single value, a numeric vector, or the
+#' charcter string "model". A single value with set all diagonal
+#' values to this number, a vector will set the diagonal to this
+#' user-specified diagonal, "model" will calculate diagonal values from
+#' the energy-flux model. Default is a zero diagonal.
+#' @return A matrix containing interaction strengths, i.e. the
+#' effect of the resources (rows) on the consumers (columns) - for all
+#' interactions in the food web.
+#' @export
+#' @examples
+#' getJacobian(FM = Flowmatrix(lim), BM = lim$Components$val)
+getJacobian <- function(FM, BM, AE, GE, dead, externals,
+                        diagonal = 0) {
+  # Remove external compartments, keep internals
+  internals <- !(rownames(flow_matrix) %in% externals)
+  FM_int <- FM[internals, internals]
+
+  # Get indices of dead compartments
+  dead_i <- which(rownames(flow_matrix) %in% dead)
+
+   # Get interaction strengths
+  eff.on.pred <- effectOnConsumer(FM_int, BM, AE, GE)
+  eff.on.prey <- effectOnResource(FM_int, BM, AE, dead_i)
+
+  # Set interaction strength to 0 if NA
+  a <- which(is.na(eff.on.pred))
+  if(length(a) > 0){
+    eff.on.pred[a] <- 0
+  }
+  b <- which(is.na(eff.on.prey))
+  if(length(b) > 0){
+    eff.on.prey[b] <- 0
+  }
+
+  JM <- eff.on.pred + eff.on.prey
+  diag(JM) <- 0
+
+  #diagonal <- diag(FM)
+  #aii <- diagonalSpecies(flow_solutions = pars$X, BM, dead)
+  #add <- diagonalDetritus(FM[-externals, -externals], BM, AE, dead)
+  #diagonal[names(aii)] <- aii
+  #diagonal[names(add)] <- add
+  #diag(JM2) <- diagonal[-externals]
+  #JM2[is.na(JM2)] <- 0
+  return(JM)
 }

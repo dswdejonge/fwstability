@@ -28,7 +28,6 @@ A linear inverse model is set-up, solved with the least-distance solution (funct
 ```{r LIM}
 require(LIM)
 lim <- Setup("foodweb.lim")
-flow_matrix <- Flowmatrix(lim)
 ```
 
 The flows between compartments can be used to calculate interaction strengths, which form the entries for a Jacobian matrix.
@@ -46,24 +45,27 @@ The effect of a population $j$ on detritus is ($\alpha_{dj}$):
 $$\alpha_{dj}=\frac{1}{x_j}(\sum_{i=1}^n a_j p_j F_{ij} - \sum_{i=1}^n F_{ji} + \sum_{i=1}^n (1-a_j)F_{ij} + \sum_{i=1}^n (1-a_i)F_{ji}-F_{dj})$$
 where $n$ is the total number of compartments in the food web (Neutel & Thorne, 2014).
 
-The diagonal of a Jacobian matrix represents intraspecific interactions. Diagonal values (Neutel & Thorne, 2014) for fauna are found as their non-predatory mortality:
+The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is to set it all to zero. Neutel & Thorne (2014) show that an all-zero diagonal (with exception of detritus flows) has the biological meaning of a tipping point where any loss of self-dampening effect or intraspecific competition will cause the system to collapse. Diagonal values can also be caluclated from the energy-flux model. Diagonal values (Neutel & Thorne, 2014) for fauna are found as their non-predatory mortality:
 $$\alpha_{ii}=-\frac{\sum_{j=1}^n a_i p_i F_{ji}-\sum_{j=1}^n F_{ij}}{x_i}$$
 and for detritus as:
 $$\alpha_{dd}=-\frac{1}{x_d} \sum_{j=1}^n (a_j F_{dj})$$
-
-# 2. Stability analysis
-For now we prepare a fake Jacobian matrix (JM).
-```{r JM}
-JM <- matrix(data = c(
-  0,     0.2, 0,   0.4,  -0.1,
-  -0.05, 0,   0.1, -0.5, 0.2,
-  -0.2,  0.1, 0,   0.1,  -0.6,
-  0.4,  -0.3, -0.1, 0,   0.3,
-  0.1,  -0.2, 0.1, -0.5, 0
-  ), nrow = 5, ncol = 5, byrow = TRUE
+We can calculate the Jacobian matrix of the example linear inverse food web like this:
+```{r getJacobian}
+JM <- getJacobian(
+  FM = Flowmatrix(lim),
+  BM = lim$Components$val,
+  AE = c(0.9, 0.6, NA),
+  GE = c(0.8, 0.7, NA),
+  dead = c("DET"),
+  externals = c("CO2", "EXP")
 )
 ```
 
+Some notes:
+- all internal compartments must have quantified biomasses. If there are compartments that do not have biomasses, they must either be quantified anyway or excluded by adding them to the functions as 'externals'. External compartments are often not quantified in biomass.
+- Assimilation efficiency can be found from literature or calculated by dividing the assimilated amount by the total ingested amount.
+
+# 2. Stability analysis
 The stability of this Jacobian matrix is calculated as the maximum real value of the eigenvalues. A negative value indicates the food web is stable. 
 ```{r}
 getStability(JM)
