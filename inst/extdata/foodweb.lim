@@ -6,6 +6,8 @@ require(LIM)
 lim <- Setup("foodweb.lim")
 Ldei(lim)
 Xranges(lim)
+Adjusted from the original vignette example:
+- added biomasses of food web compartments
 =====================================================
 
 ## EXTERNAL
@@ -14,9 +16,9 @@ EXP ! export
 ## END EXTERNAL
 
 ## COMPONENT
-Pl ! plant
-AN ! Animal
-Det ! Detritus
+Pl = 700 {g C m-2} ! plant
+AN = 50 {g C m-2} ! Animal
+Det = 1000 {g C m-2} ! Detritus
 ## END COMPONENT
 
 ## FLOWS
