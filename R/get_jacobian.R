@@ -1,12 +1,22 @@
 #' Per capita effect on resource population.
 #'
 #' This function finds the per capita effect of a consumer on the growth
-#' of the resource population. It uses functions from de Ruiter et al.
+#' of the resource population. It implements the functions from de Ruiter et al.
 #' (1995), Neutel et al. (2002) and Neutel & Thorne (2014). The flow
 #' from prey to predator is divided by the biomass of the consumer.
 #' The flow from consumer to detritus, plus the defecation of predators of
 #' the consumer into the detritus pool, minus the uptake of detritus, is
 #' divided by the biomass of the consumer.
+#'
+#' References:
+#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+#' Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
+#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+#' Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326
+#' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+#' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
+#' 651–661. https://doi.org/10.1111/ele.12266
 #' @param FM A square flowmatrix, source compartments as rows,
 #' sink compartments as columns. (required)
 #' @param BM Numeric vector with biomasses of all compartments,
@@ -51,6 +61,13 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
 #' (1995) and Neutel et al. (2002). The flow from resource to consumer is
 #' adjusted for conversion efficiency and divided by the biomass of the
 #' resource.
+#'
+#' References:
+#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+#' Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
+#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+#' Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326
 #' @param FM A square flowmatrix, source compartments as rows,
 #' sink compartments as columns. (required)
 #' @param BM Numeric vector with biomasses of all compartments, must be in the same
@@ -93,7 +110,16 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' This functions calculates interaction strengths from a resolved energy-flux
 #' food web model and uses these values as entries for a Jacobian matrix.
 #' The diagonal can be either be user-defined, set to zero (default), or calculated
-#' from the energy-flux model.
+#' from the energy-flux model. This function is an implementation of the equations
+#' from the following references:
+#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+#' Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
+#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+#' Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326
+#' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+#' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
+#' 651–661. https://doi.org/10.1111/ele.12266
 #' @param FM A square flowmatrix, source compartments as rows,
 #' sink compartments as columns. (required)
 #' @param BM Numeric vector with biomasses of all compartments, must be in the same
