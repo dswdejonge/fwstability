@@ -42,10 +42,13 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
     for(i in 1:dim(dead_interactions)[1]){
       consumer <- as.character(dead_interactions[i,1])
       resource <- as.character(dead_interactions[i,2])
+
       result[consumer, resource] <-
-        FM[consumer, resource] +
-        sum(FM[consumer,-dead]*AE[-dead]) -
-        FM[resource,consumer]
+        (FM[consumer, resource] -
+        FM[resource,consumer] +
+        sum(FM[consumer,-dead]*(1-AE[-dead]))) /
+        BM[consumer]
+
       # Consumer of detritus is not a resource if it deposits detritus.
       result[resource, consumer] <- NA
     }
@@ -125,11 +128,11 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' @param BM Numeric vector with biomasses of all compartments, must be in the same
 #' order as the flow matrix. (required)
 #' @param AE Numeric vector with assimilation efficiencies of all
-#' compartments,must be in the same order as the flow matrix.
-#' AE should be set to NA for non-faunal compartments. (required)
+#' compartments, must be in the same order as the flow matrix.
+#' AE should be set to NA for dead/non-faunal compartments (see argument 'dead' below). (required)
 #' @param GE Numeric vector with growth efficiencies of all compartments,
 #' must be in the same order as the flow matrix. GE should be set to NA
-#' for non-faunal compartments. (required)
+#' for dead/non-faunal compartments (see argument 'dead' below). (required)
 #' @param diagonal Either a single value, a numeric vector, or the
 #' charcter string "model". A single value with set all diagonal
 #' values to this number, a vector will set the diagonal to this
@@ -182,7 +185,8 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     eff.on.resource[b] <- 0
   }
 
-  JM <- eff.on.consumer + eff.on.resource
+  JM <- eff.on.consumer
+  JM[lower.tri(JM)] <- eff.on.resource[lower.tri(eff.on.resource)]
   diag(JM) <- 0
 
   #diagonal <- diag(FM)

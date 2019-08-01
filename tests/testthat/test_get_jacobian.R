@@ -2,20 +2,36 @@ context("Jacobian matrix creation")
 library(fwstability)
 
 # Test data
-FM <- matrix(1:9, nrow = 3, ncol = 3)
-rownames(FM) <- c("DETRITUS", "PLANT", "ANIMAL")
-colnames(FM) <- c("DETRITUS", "PLANT", "ANIMAL")
-BM <- c(10, 20, 30)
+FM <- matrix(c(0, 3, 8, 7, 0, 0, 4, 4, 0), nrow = 3, ncol = 3)
+BM <- c(30, 20, 10)
 AE <- c(0.1, 0.2, 0.3)
 GE <- c(0.1, 0.2, 0.3)
 
+rownames(FM) <- c("DETRITUS", "PLANT", "ANIMAL")
+colnames(FM) <- c("DETRITUS", "PLANT", "ANIMAL")
+names(BM) <- c("DETRITUS", "PLANT", "ANIMAL")
+names(AE) <- c("DETRITUS", "PLANT", "ANIMAL")
+names(GE) <- c("DETRITUS", "PLANT", "ANIMAL")
 
+results <- c(0,
+             (FM[2,1] - FM[1,2] + FM[2,3]*(1-AE[3])) / BM[2],
+             (FM[3,1] - FM[1,3]) / BM[3],
+             AE[2] * GE[2] * FM[1,2] / BM[1],
+             0,
+             -FM[2,3] / BM[3],
+             AE[3] * GE[3] * FM[1,3] / BM[1],
+             AE[3] * GE[3] * FM[2,3] / BM[2],
+             0
+             )
+JM <- matrix(results, nrow = 3, ncol = 3)
+rownames(JM) <- c("DETRITUS", "PLANT", "ANIMAL")
+colnames(JM) <- c("DETRITUS", "PLANT", "ANIMAL")
 
 test_that("the function works with and without optional arguments", {
   expect_equal(dim(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE)),
                c(3,3))
-  expect_equal(dim(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = "DETRITUS")),
-               c(3,3))
+  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = "DETRITUS"),
+               JM)
   expect_equal(dim(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, externals = "DETRITUS")),
                c(2,2))
 })
@@ -50,3 +66,8 @@ test_that("the function only executes if all biomasses are greater than zero", {
                "biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
 
 })
+
+
+#test_that("the function checks the indices of dead compartments against the presence of NA in the AE and GE vector", {
+
+#})
