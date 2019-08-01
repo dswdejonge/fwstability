@@ -123,14 +123,14 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 #' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 #' 651–661. https://doi.org/10.1111/ele.12266
-#' @param FM A square flowmatrix, source compartments as rows,
+#' @param FM A named square flowmatrix, source compartments as rows,
 #' sink compartments as columns. (required)
-#' @param BM Numeric vector with biomasses of all compartments, must be in the same
+#' @param BM Named numeric vector with biomasses of all compartments, must be in the same
 #' order as the flow matrix. (required)
-#' @param AE Numeric vector with assimilation efficiencies of all
+#' @param AE Named numeric vector with assimilation efficiencies of all
 #' compartments, must be in the same order as the flow matrix.
 #' AE should be set to NA for dead/non-faunal compartments (see argument 'dead' below). (required)
-#' @param GE Numeric vector with growth efficiencies of all compartments,
+#' @param GE Named numeric vector with growth efficiencies of all compartments,
 #' must be in the same order as the flow matrix. GE should be set to NA
 #' for dead/non-faunal compartments (see argument 'dead' below). (required)
 #' @param diagonal Either a single value, a numeric vector, or the
