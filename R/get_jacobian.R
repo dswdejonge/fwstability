@@ -150,14 +150,28 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' getJacobian(FM = Flowmatrix(lim), BM = lim$Components$val)
 getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
                         dead = NULL, externals = NULL) {
-  # Check for square matrix
+  # Do checks for required data formats
   if(dim(FM)[1] != dim(FM)[2]) {
     stop("flow matrix is not square")
-  }
-
-  # Check biomass values
-  if( (TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
+  } else if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
     stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
+  } else if(is.null(rownames(FM)) | is.null(colnames(FM)) |
+            is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE))) {
+    stop("all required vectors and matrices must be named")
+  } else if(!all(names(BM) == rownames(FM)) | !all(names(BM) == colnames(FM)) |
+            !all(names(BM) == names(AE))    | !all(names(BM) == names(GE))) {
+    stop("the names and their order must be equal in all named vectors and matrices")
+  } else if(FALSE %in% (dead %in% names(BM))) {
+    stop("the names of the dead compartments are unknown")
+  } else if(FALSE %in% (externals %in% names(BM))) {
+    stop("the names of the external compartments are unknown")
+  } else if(!is.null(dead)) {
+    if(!all(is.na(AE[which(names(AE) == dead)])) |
+       !all(is.na(GE[which(names(GE) == dead)]))) {
+      AE[which(names(AE) == dead)] <- NA
+      GE[which(names(GE) == dead)] <- NA
+      warning("physiological values set to NA for dead compartments")
+    }
   }
 
   # Remove external compartments, keep internals
@@ -185,8 +199,7 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     eff.on.resource[b] <- 0
   }
 
-  JM <- eff.on.consumer
-  JM[lower.tri(JM)] <- eff.on.resource[lower.tri(eff.on.resource)]
+  JM <- eff.on.consumer + eff.on.resource
   diag(JM) <- 0
 
   #diagonal <- diag(FM)
