@@ -17,7 +17,12 @@
 #' biomass per unit time per surface area then BM must be biomass per surface area.
 #' @export
 #' @examples
-getDiagonalSpecies <- function(MR, BM){
+getDiagonalSpecies <- function(MR, BM) {
+  if(length(MR) != length(BM)) {
+    stop("input vectors have unequal lengths")
+  } else if(!is.numeric(MR) | !is.numeric(BM)) {
+    stop("input vectors must be numeric")
+  }
   result <- -MR/BM
   #result <- -getMortalityRate(flow_solutions, BM, dead)
   #result <- result[-dead]
