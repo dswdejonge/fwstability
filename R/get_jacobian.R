@@ -117,14 +117,23 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' must be in the same order as the flow matrix after externals are excluded.
 #' GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
 #' 'externals' below). (required)
-#' @param diagonal Either a single value or a numeric vector. A single value will
-#' set all diagonal values to this number, a vector will set the diagonal to this
-#' user-specified diagonal. Default is an all-zero diagonal. (required)
+#' @param diagonal Either a single value, a numeric vector or the string "model". A single value will
+#' set all diagonal values to this number. A vector will set the diagonal to this
+#' user-specified diagonal. The string "model" calculates the diagonal values from flux
+#' values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
+#' (required)
 #' @param dead Character vector with all names of detritus and nutrient
 #' compartments (everything that is not fauna). (optional)
 #' @param externals Character vector with all names of external
 #' compartments, i.e. which have no biomass, that have to be removed from
 #' the flow matrix. (optional)
+#' @param MR A named numeric vector with non-predatory mortality rates for all
+#' compartments (biomass per unit time or biomass per unit time per surface area).
+#' Sometimes this information can be extracted from the food web model, for example when
+#' natural death results in a flux from the faunal compartment to a carcass compartment.
+#' It can also be calculated as the inverse of the natural lifespan of the species
+#' (per unit time) multiplied by the biomass of the compartment.
+#' (required when diagonal is set to "model").
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
@@ -132,7 +141,7 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' @examples
 #' getJacobian(FM = Flowmatrix(lim), BM = lim$Components$val)
 getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
-                        dead = NULL, externals = NULL) {
+                        dead = NULL, externals = NULL, MR = NULL) {
 
   # Remove externals
   if(!is.null(externals)) {
@@ -161,8 +170,8 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     stop("the names and their order must be equal in all named vectors and matrices")
   } else if(FALSE %in% (dead %in% names(BM))) {
     stop("the names of the dead compartments are unknown")
-  } else if(!is.numeric(diagonal)) {
-    stop("given diagonal not numeric")
+  } else if(!is.numeric(diagonal) & all(diagonal != "model")) {
+    stop("given diagonal not numeric or set to \"model\"")
   } else if(length(diagonal) != 1 & length(diagonal) != length(BM)) {
     stop("given diagonal has incorrect length")
   } else if(!is.null(dead)) {
@@ -197,7 +206,16 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
 
   # Combine matrices and add diagonal
   JM <- eff.on.consumer + eff.on.resource
+  if(all(diagonal == "model")) {
+    if(is.null(dead)) {
+      diagonal <- getDiagonal(MR = MR, BM = BM)
+    } else {
+      diagonal <- getDiagonal(MR = MR, BM = BM,
+                              dead = dead, FM = FM, AE = AE)
+    }
+  }
   diag(JM) <- diagonal
+
 
   return(JM)
 }

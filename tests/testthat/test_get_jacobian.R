@@ -69,6 +69,18 @@ test_that("the function incorporates vector diagonal correctly", {
                JM2)
 })
 
+# Proper data format, include vector calculated from model
+MR <- c(NA, 10, 5) ; names(MR) <- c("DETRITUS", "PLANT", "ANIMAL")
+JM3 <- JM; JM3[c(1,5,9)] <- c(-1/BM[1] * (AE[2] * FM[1,2] + AE[3] * FM[1,3]),
+                              -MR[2] / BM[2],
+                              -MR[3] / BM[3]
+                              )
+test_that("the function calculates the diagonal from flux values", {
+  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
+                           dead = "DETRITUS", diagonal = "model", MR = MR),
+               JM3)
+})
+
 # Error: Diagonal vector has the wrong length
 DIAG2 <- c(-1,-2,-3,-4)
 
@@ -182,6 +194,7 @@ test_that("the function only executes if all biomasses are greater than zero", {
   expect_error(getJacobian(FM, BM = BM9, AE, GE, dead = "DETRITUS"),
                "biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
 })
+
 
 
 ### Externals
