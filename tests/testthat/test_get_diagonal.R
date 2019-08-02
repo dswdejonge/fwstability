@@ -85,3 +85,8 @@ test_that("getDiagonal works with correct data input", {
   expect_equal(getDiagonal(MR = MR, FM = FM, BM = BM, AE = AE, dead = "DETRITUS"),
                result)
 })
+
+# Error: optional dead compartment is present, but not all other required data.
+test_that("getDiagonal asks for all required data for dead compartments", {
+  expect_error(getDiagonal(MR = MR, BM = BM, dead = "DETRITUS"))
+})
