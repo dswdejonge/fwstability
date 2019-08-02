@@ -4,36 +4,38 @@
 \alias{getJacobian}
 \title{Jacobian matrix with interaction strengths}
 \usage{
-getJacobian(FM, BM, AE, GE, dead, externals, diagonal = 0)
+getJacobian(FM, BM, AE, GE, diagonal = 0, dead = NULL,
+  externals = NULL)
 }
 \arguments{
-\item{FM}{A square flowmatrix, source compartments as rows,
-sink compartments as columns.}
+\item{FM}{A named square flowmatrix, source compartments as rows,
+sink compartments as columns. (required)}
 
-\item{BM}{Numeric vector with biomasses of all compartments, must be in the same order as the flow matrix.}
+\item{BM}{Named numeric vector with biomasses of all compartments, must be in the same
+order as the flow matrix. (required)}
 
-\item{AE}{Numeric vector with assimilation efficiencies of all
-compartments,must be in the same order as the flow matrix.
-AE should be set to NA for non-faunal compartments.}
+\item{AE}{Named numeric vector with assimilation efficiencies of all
+compartments, must be in the same order as the flow matrix.
+AE should be set to NA for dead/non-faunal compartments (see argument 'dead' below). (required)}
 
-\item{GE}{Numeric vector with growth efficiencies of all compartments,
+\item{GE}{Named numeric vector with growth efficiencies of all compartments,
 must be in the same order as the flow matrix. GE should be set to NA
-for non-faunal compartments.}
-
-\item{dead}{Character vector with all names of detritus and nutrient
-compartments (everything that is not fauna).}
-
-\item{externals}{Character vector with all names of external
-compartments, i.e. which have no biomass.}
+for dead/non-faunal compartments (see argument 'dead' below). (required)}
 
 \item{diagonal}{Either a single value, a numeric vector, or the
 charcter string "model". A single value with set all diagonal
 values to this number, a vector will set the diagonal to this
 user-specified diagonal, "model" will calculate diagonal values from
-the energy-flux model. Default is a zero diagonal.}
+the energy-flux model. Default is a zero diagonal. (required)}
+
+\item{dead}{Character vector with all names of detritus and nutrient
+compartments (everything that is not fauna). (optional)}
+
+\item{externals}{Character vector with all names of external
+compartments, i.e. which have no biomass. (optional)}
 }
 \value{
-A matrix containing interaction strengths, i.e. the
+This function returns a matrix containing interaction strengths, i.e. the
 effect of the resources (rows) on the consumers (columns) - for all
 interactions in the food web.
 }
@@ -41,7 +43,16 @@ interactions in the food web.
 This functions calculates interaction strengths from a resolved energy-flux
 food web model and uses these values as entries for a Jacobian matrix.
 The diagonal can be either be user-defined, set to zero (default), or calculated
-from the energy-flux model.
+from the energy-flux model. This function is an implementation of the equations
+from the following references: \cr
+de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
+1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
+Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326 \cr
+Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
+651–661. https://doi.org/10.1111/ele.12266
 }
 \examples{
 getJacobian(FM = Flowmatrix(lim), BM = lim$Components$val)

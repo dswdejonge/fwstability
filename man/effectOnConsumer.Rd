@@ -8,18 +8,19 @@ effectOnConsumer(FM, BM, AE, GE)
 }
 \arguments{
 \item{FM}{A square flowmatrix, source compartments as rows,
-sink compartments as columns.}
+sink compartments as columns. (required)}
 
-\item{BM}{Numeric vector with biomasses of all compartments, must be in the same order as the flow matrix.}
+\item{BM}{Numeric vector with biomasses of all compartments, must be in the same
+order as the flow matrix. (required)}
 
 \item{AE}{Numeric vector with assimilation efficiencies of all
-compartments,must be in the same order as the flow matrix.}
+compartments, must be in the same order as the flow matrix. (required)}
 
 \item{GE}{Numeric vector with growth efficiencies of all compartments,
-must be in the same order as the flow matrix.}
+must be in the same order as the flow matrix. (required)}
 }
 \value{
-A matrix containing interaction strengths - measured as the
+This function returns a matrix containing interaction strengths - measured as the
 effect of the resources (rows) on the consumers (columns) - for all
 interactions in the food web.
 }
@@ -28,5 +29,11 @@ This function finds the per capita effect of a resource on the growth
 of the consumer population. It uses functions from de Ruiter et al.
 (1995) and Neutel et al. (2002). The flow from resource to consumer is
 adjusted for conversion efficiency and divided by the biomass of the
-resource.
+resource. \cr
+References: \cr
+de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
+1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
+Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326 \cr
 }
