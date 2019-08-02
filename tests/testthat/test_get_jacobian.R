@@ -59,6 +59,36 @@ test_that("the function works with dead compartments", {
                JM)
 })
 
+# Proper data format, include vector diagonal
+DIAG <- c(-1,-2,-3)
+JM2 <- JM; JM2[c(1,5,9)] <- DIAG
+
+test_that("the function incorporates vector diagonal correctly", {
+  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
+                           dead = "DETRITUS", diagonal = DIAG),
+               JM2)
+})
+
+# Error: Diagonal vector has the wrong length
+DIAG2 <- c(-1,-2,-3,-4)
+
+test_that("the function only executes with correct diagonal length", {
+  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
+                           dead = "DETRITUS", diagonal = DIAG2),
+               "given diagonal has incorrect length")
+  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
+                           dead = "DETRITUS", diagonal = DIAG2[1:2]),
+               "given diagonal has incorrect length")
+})
+
+# Error: Diagonal vector is not numeric
+DIAG3 <- c("a", "b", "c")
+test_that("the function only executes with a numeric diagonal", {
+  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
+                           dead = "DETRITUS", diagonal = DIAG3),
+               "given diagonal not numeric")
+})
+
 # Error: Physiological values exist for dead compartments
 AEe <- c(0.1, 0.2, 0.3) ; names(AEe) <- c("DETRITUS", "PLANT", "ANIMAL")
 GEe <- c(0.1, 0.2, 0.3) ; names(GEe) <- c("DETRITUS", "PLANT", "ANIMAL")
@@ -155,10 +185,10 @@ test_that("the function only executes if all biomasses are greater than zero", {
 
 
 ### Externals
-test_that("the function works with external compartments", {
-  expect_equal(dim(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, externals = "DETRITUS")),
-               c(2,2))
-})
+#test_that("the function works with external compartments", {
+#  expect_equal(dim(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, externals = "DETRITUS")),
+#               c(2,2))
+#})
 
 
 ### Both dead compartments and externals.

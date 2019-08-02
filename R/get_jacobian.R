@@ -90,29 +90,13 @@ effectOnConsumer <- function(FM, BM, AE, GE){
   return(result)
 }
 
-# equation 13; diagonal for species
-# is the negative mortality rate of species
-#diagonalSpecies <- function(flow_solutions, BM, dead){
-#  result <- -getMortalityRate(flow_solutions, BM, dead)
-#  result <- result[-dead]
-#  return(result)
-#}
-
-# equation 14; diagonal for detritus
-# the total assimilated detritus is all consumers,
-# divided by the biomass of detritus
-#diagonalDetritus <- function(FM, BM, AE, dead){
-#  detritus_ingestion <- colSums(t(FM[dead,-dead])*AE[-dead])
-#  result <- -detritus_ingestion/BM[dead]
-#}
 
 #' Jacobian matrix with interaction strengths
 #'
 #' This functions calculates interaction strengths from a resolved energy-flux
 #' food web model and uses these values as entries for a Jacobian matrix.
-#' The diagonal can be either be user-defined, set to zero (default), or calculated
-#' from the energy-flux model. This function is an implementation of the equations
-#' from the following references: \cr
+#' The diagonal can be all-zero (default) or user-defined. This function is an
+#' implementation of the equations from the following references: \cr
 #' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
 #' Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
 #' 1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
@@ -133,11 +117,9 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' must be in the same order as the flow matrix after externals are excluded.
 #' GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
 #' 'externals' below). (required)
-#' @param diagonal Either a single value, a numeric vector, or the
-#' charcter string "model". A single value with set all diagonal
-#' values to this number, a vector will set the diagonal to this
-#' user-specified diagonal, "model" will calculate diagonal values from
-#' the energy-flux model. Default is a zero diagonal. (required)
+#' @param diagonal Either a single value or a numeric vector. A single value will
+#' set all diagonal values to this number, a vector will set the diagonal to this
+#' user-specified diagonal. Default is an all-zero diagonal. (required)
 #' @param dead Character vector with all names of detritus and nutrient
 #' compartments (everything that is not fauna). (optional)
 #' @param externals Character vector with all names of external
@@ -152,7 +134,19 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
                         dead = NULL, externals = NULL) {
 
-  # Do checks for required data formats and remove externals if necessary
+  # Remove externals
+  if(!is.null(externals)) {
+    if((FALSE %in% (externals %in% rownames(FM))) |
+       (FALSE %in% (externals %in% colnames(FM)))) {
+      stop("the names of the external compartments are unknown")
+    } else {
+      # Remove external compartments, keep internals
+      internals <- !(rownames(FM) %in% externals)
+      FM <- FM[internals, internals]
+    }
+  }
+
+  # Do checks for required data formats: throws errors
   if(dim(FM)[1] != dim(FM)[2]) {
     stop("flow matrix is not square")
   } else if(is.null(rownames(FM)) | is.null(colnames(FM)) |
@@ -160,14 +154,6 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     stop("all required vectors and matrices must be named")
   } else if(!all(rownames(FM) == colnames(FM))) {
     stop("row names and column names of flow matrix do not match")
-  } else if(!is.null(externals)) {
-    if(FALSE %in% (externals %in% rownames(FM))) {
-      stop("the names of the external compartments are unknown")
-    } else {
-      # Remove external compartments, keep internals
-      internals <- !(rownames(FM) %in% externals)
-      FM <- FM[internals, internals]
-    }
   } else if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
     stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
   } else if(!all(names(BM) == rownames(FM)) | !all(names(BM) == colnames(FM)) |
@@ -175,6 +161,10 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     stop("the names and their order must be equal in all named vectors and matrices")
   } else if(FALSE %in% (dead %in% names(BM))) {
     stop("the names of the dead compartments are unknown")
+  } else if(!is.numeric(diagonal)) {
+    stop("given diagonal not numeric")
+  } else if(length(diagonal) != 1 & length(diagonal) != length(BM)) {
+    stop("given diagonal has incorrect length")
   } else if(!is.null(dead)) {
     if(!all(is.na(AE[which(names(AE) == dead)])) |
        !all(is.na(GE[which(names(GE) == dead)]))) {
@@ -205,22 +195,9 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     eff.on.resource[b] <- 0
   }
 
+  # Combine matrices and add diagonal
   JM <- eff.on.consumer + eff.on.resource
+  diag(JM) <- diagonal
 
-  # Set correct diagonal
-  if(is.numeric(diagonal)) {
-    diag(JM) <- diagonal
-  } else if(diagonal == "model") {
-    # code for diagonal from model
-  }
-
-
-  #diagonal <- diag(FM)
-  #aii <- diagonalSpecies(flow_solutions = pars$X, BM, dead)
-  #add <- diagonalDetritus(FM[-externals, -externals], BM, AE, dead)
-  #diagonal[names(aii)] <- aii
-  #diagonal[names(add)] <- add
-  #diag(JM2) <- diagonal[-externals]
-  #JM2[is.na(JM2)] <- 0
   return(JM)
 }
