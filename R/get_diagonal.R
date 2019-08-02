@@ -1,10 +1,28 @@
-# equation 13; diagonal for species
-# is the negative mortality rate of species
-#diagonalSpecies <- function(flow_solutions, BM, dead){
-#  result <- -getMortalityRate(flow_solutions, BM, dead)
-#  result <- result[-dead]
-#  return(result)
-#}
+#' Calculate diagonal value for species
+#'
+#' This function find the diagonal value for species based on their non-predatory
+#' mortality rate and biomass. Based on the equation from Neutel & Thorne (2014). \cr
+#' References: \cr
+#' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+#' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
+#' 651–661. https://doi.org/10.1111/ele.12266
+#' @param MR A named numeric vector with non-predatory mortality rates for all
+#' compartments (biomass per unit time or biomass per unit time per surface area).
+#' (required)
+#' @param BM A named numeric vector with biomasses of all compartments
+#' (just biomass or biomass per unit area), must be in the same order as MR. (required)
+#' @return This function returns a named numeric vector with diagonal values for the
+#' species in the food web (per unit time). It is important to review the units of the
+#' input data. If MR is biomass per unit time then BM must be just biomass. If MR is
+#' biomass per unit time per surface area then BM must be biomass per surface area.
+#' @export
+#' @examples
+getDiagonalSpecies <- function(MR, BM){
+  result <- -MR/BM
+  #result <- -getMortalityRate(flow_solutions, BM, dead)
+  #result <- result[-dead]
+  return(result)
+}
 
 # equation 14; diagonal for detritus
 # the total assimilated detritus is all consumers,
