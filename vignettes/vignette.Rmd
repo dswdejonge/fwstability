@@ -1,6 +1,7 @@
 ---
 title: "Assessing food web stability with the fwstability R-package."
 author: "D.S.W. de Jonge"
+date: "`r date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{vignette}
@@ -26,7 +27,6 @@ A linear inverse food web model (LIM) can be prepared with the R-package LIM (ht
 
 A linear inverse model is set-up, solved with the least-distance solution (function Ldei) and written as a flow matrix (flow from row compartment to column compartment).
 ```{r LIM}
-# add to documentation?
 library(LIM)
 lim <- Setup(system.file("extdata", "foodweb.lim", package = "fwstability"))
 ```
