@@ -26,3 +26,16 @@ test_that("getDiagonalSpecies needs numeric input vectors", {
   expect_error(getDiagonalSpecies(MR = c("a", "b", "c"), BM = BM),
                "input vectors must be numeric")
 })
+
+
+#### getDetritusDiagonal
+
+# Proper data
+CR <- c(10,20,30)
+AE <- c(0.3, 0.2, 0.1)
+BM <- 25
+
+test_that("getDiagonalDetritus works with correct data input", {
+  expect_equal(getDiagonalDetritus(CR = CR, AE = AE, BM = BM),
+               -sum(AE * CR) / BM)
+})

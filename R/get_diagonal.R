@@ -1,7 +1,8 @@
 #' Calculate diagonal value for species
 #'
-#' This function find the diagonal value for species based on their non-predatory
-#' mortality rate and biomass. Based on the equation from Neutel & Thorne (2014). \cr
+#' This function finds the diagonal values for species to be used in the Jacobian matrix.
+#' The calculation is based on their non-predatory mortality rate and biomass, and is
+#' an implementation of the equation from Neutel & Thorne (2014). \cr
 #' References: \cr
 #' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 #' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
@@ -29,13 +30,32 @@ getDiagonalSpecies <- function(MR, BM) {
   return(result)
 }
 
-# equation 14; diagonal for detritus
-# the total assimilated detritus is all consumers,
-# divided by the biomass of detritus
-#diagonalDetritus <- function(FM, BM, AE, dead){
-#  detritus_ingestion <- colSums(t(FM[dead,-dead])*AE[-dead])
-#  result <- -detritus_ingestion/BM[dead]
-#}
+#' Calculate diagonal for dead (detritus) compartments
+#'
+#' This function finds diagonal values for detritus compartments to be used in the Jacobian
+#' matrix. The calculation is based on the total amount of assimilated detritus in all
+#' consumers of detritus and the biomass of the detritus compartment, and is an
+#' implementation of the equation from Neutel & Thorne (2014). \cr
+#' References: \cr
+#' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+#' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
+#' 651–661. https://doi.org/10.1111/ele.12266
+#' @param CR A named numeric vector with detritus consumption rates of all compartments
+#' feeding on the detritus compartment. (required)
+#' @param AE A named numeric vector with assimilation efficiencies of all compartments
+#' feeding on the detritus compartment. Must be in the same order as CR. Must be a
+#' fraction i.e. between 0 and 1 (required)
+#' @param BM The biomass of the detritus compartment.
+#' @return This function returns a value which is the diagonal value for the
+#' detritus compartment in the food web (per unit time). It is important to review the units of the
+#' input data. If CR is biomass per unit time then BM must be just biomass. If CR is
+#' biomass per unit time per surface area then BM must be biomass per surface area.
+getDiagonalDetritus <- function(CR, BM, AE){
+  result <- -sum(AE * CR) / BM
+  #detritus_ingestion <- colSums(t(FM[dead,-dead])*AE[-dead])
+  #result <- -detritus_ingestion/BM[dead]
+  return(result)
+}
 
 #diagonal <- diag(FM)
 #aii <- diagonalSpecies(flow_solutions = pars$X, BM, dead)
