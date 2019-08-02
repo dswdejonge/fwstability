@@ -16,5 +16,7 @@ Suggests:
     rmarkdown,
     LIM,
     testthat
-VignetteBuilder: knitr
+VignetteBuilder: 
+	knitr,
+	LIM
 RoxygenNote: 6.1.1.9000
