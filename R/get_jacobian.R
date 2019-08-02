@@ -107,13 +107,13 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' 651–661. https://doi.org/10.1111/ele.12266
 #' @param FM A named square flowmatrix, source compartments as rows,
 #' sink compartments as columns. (required)
-#' @param BM Named numeric vector with biomasses of all compartments, must be in the same
+#' @param BM A named numeric vector with biomasses of all compartments, must be in the same
 #' order as the flow matrix after externals are excluded. (required)
-#' @param AE Named numeric vector with assimilation efficiencies of all
+#' @param AE A named numeric vector with assimilation efficiencies of all
 #' compartments, must be in the same order as the flow matrix after externals
 #' are excluded. AE should be set to NA for dead/non-faunal compartments
 #' (see argument 'dead' below). (required)
-#' @param GE Named numeric vector with growth efficiencies of all compartments,
+#' @param GE A named numeric vector with growth efficiencies of all compartments,
 #' must be in the same order as the flow matrix after externals are excluded.
 #' GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
 #' 'externals' below). (required)
