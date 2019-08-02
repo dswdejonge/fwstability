@@ -98,9 +98,9 @@ test_that("all vectors and matrices have the same names", {
   expect_error(getJacobian(FM = FM2, BM = BM, AE = AE, GE = GE, dead = "DETRITUS"),
                "the names and their order must be equal in all named vectors and matrices")
   expect_error(getJacobian(FM = FM3, BM = BM, AE = AE, GE = GE, dead = "DETRITUS"),
-               "the names and their order must be equal in all named vectors and matrices")
+               "row names and column names of flow matrix do not match")
   expect_error(getJacobian(FM = FM4, BM = BM, AE = AE, GE = GE, dead = "DETRITUS"),
-               "the names and their order must be equal in all named vectors and matrices")
+               "row names and column names of flow matrix do not match")
   expect_error(getJacobian(FM = FM, BM = BM2, AE = AE, GE = GE, dead = "DETRITUS"),
                "the names and their order must be equal in all named vectors and matrices")
   expect_error(getJacobian(FM = FM, BM = BM3, AE = AE, GE = GE, dead = "DETRITUS"),
@@ -119,15 +119,18 @@ test_that("the function only executes when the dead and external compartments ha
                "the names of the external compartments are unknown")
 })
 
-
+BM4 <- BM; BM4[2] <- 0
+BM5 <- BM; BM5[2] <- -10
+BM6 <- BM; BM6[2] <- NA
+BM7 <- BM; BM7[2] <- "foo"
 test_that("the function only executes if all biomasses are greater than zero", {
-  expect_error(getJacobian(FM, BM = c(10,0,30), AE, GE, dead = "DETRITUS"),
+  expect_error(getJacobian(FM, BM = BM4, AE, GE, dead = "DETRITUS"),
                "biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
-  expect_error(getJacobian(FM, BM = c(10,-10,30), AE, GE, dead = "DETRITUS"),
+  expect_error(getJacobian(FM, BM = BM5, AE, GE, dead = "DETRITUS"),
                "biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
-  expect_error(getJacobian(FM, BM = c(10,NA,30), AE, GE, dead = "DETRITUS"),
+  expect_error(getJacobian(FM, BM = BM6, AE, GE, dead = "DETRITUS"),
                "biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
-  expect_error(getJacobian(FM, BM = c("10","NA","30"), AE, GE, dead = "DETRITUS"),
+  expect_error(getJacobian(FM, BM = BM7, AE, GE, dead = "DETRITUS"),
                "biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
 })
 

@@ -124,13 +124,15 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' @param FM A named square flowmatrix, source compartments as rows,
 #' sink compartments as columns. (required)
 #' @param BM Named numeric vector with biomasses of all compartments, must be in the same
-#' order as the flow matrix. (required)
+#' order as the flow matrix after externals are excluded. (required)
 #' @param AE Named numeric vector with assimilation efficiencies of all
-#' compartments, must be in the same order as the flow matrix.
-#' AE should be set to NA for dead/non-faunal compartments (see argument 'dead' below). (required)
+#' compartments, must be in the same order as the flow matrix after externals
+#' are excluded. AE should be set to NA for dead/non-faunal compartments
+#' (see argument 'dead' below). (required)
 #' @param GE Named numeric vector with growth efficiencies of all compartments,
-#' must be in the same order as the flow matrix. GE should be set to NA
-#' for dead/non-faunal compartments (see argument 'dead' below). (required)
+#' must be in the same order as the flow matrix after externals are excluded.
+#' GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
+#' 'externals' below). (required)
 #' @param diagonal Either a single value, a numeric vector, or the
 #' charcter string "model". A single value with set all diagonal
 #' values to this number, a vector will set the diagonal to this
@@ -139,7 +141,8 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' @param dead Character vector with all names of detritus and nutrient
 #' compartments (everything that is not fauna). (optional)
 #' @param externals Character vector with all names of external
-#' compartments, i.e. which have no biomass. (optional)
+#' compartments, i.e. which have no biomass, that have to be removed from
+#' the flow matrix. (optional)
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
@@ -148,21 +151,30 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' getJacobian(FM = Flowmatrix(lim), BM = lim$Components$val)
 getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
                         dead = NULL, externals = NULL) {
-  # Do checks for required data formats
+
+  # Do checks for required data formats and remove externals if necessary
   if(dim(FM)[1] != dim(FM)[2]) {
     stop("flow matrix is not square")
-  } else if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
-    stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
   } else if(is.null(rownames(FM)) | is.null(colnames(FM)) |
             is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE))) {
     stop("all required vectors and matrices must be named")
+  } else if(!all(rownames(FM) == colnames(FM))) {
+    stop("row names and column names of flow matrix do not match")
+  } else if(!is.null(externals)) {
+    if(FALSE %in% (externals %in% rownames(FM))) {
+      stop("the names of the external compartments are unknown")
+    } else {
+      # Remove external compartments, keep internals
+      internals <- !(rownames(FM) %in% externals)
+      FM <- FM[internals, internals]
+    }
+  } else if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
+    stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
   } else if(!all(names(BM) == rownames(FM)) | !all(names(BM) == colnames(FM)) |
             !all(names(BM) == names(AE))    | !all(names(BM) == names(GE))) {
     stop("the names and their order must be equal in all named vectors and matrices")
   } else if(FALSE %in% (dead %in% names(BM))) {
     stop("the names of the dead compartments are unknown")
-  } else if(FALSE %in% (externals %in% names(BM))) {
-    stop("the names of the external compartments are unknown")
   } else if(!is.null(dead)) {
     if(!all(is.na(AE[which(names(AE) == dead)])) |
        !all(is.na(GE[which(names(GE) == dead)]))) {
@@ -172,10 +184,6 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     }
   }
 
-  # Remove external compartments, keep internals
-  internals <- !(rownames(FM) %in% externals)
-  FM_int <- FM[internals, internals]
-
   # Get indices of dead compartments
   if(is.null(dead)) {
     dead_i <- NULL
@@ -184,8 +192,8 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
   }
 
    # Get interaction strengths
-  eff.on.consumer <- effectOnConsumer(FM_int, BM, AE, GE)
-  eff.on.resource <- effectOnResource(FM_int, BM, AE, dead_i)
+  eff.on.consumer <- effectOnConsumer(FM, BM, AE, GE)
+  eff.on.resource <- effectOnResource(FM, BM, AE, dead_i)
 
   # Set interaction strength to 0 if NA
   a <- which(is.na(eff.on.consumer))
@@ -200,8 +208,10 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
   JM <- eff.on.consumer + eff.on.resource
 
   # Set correct diagonal
-  if(is.numeric(diagonal) & length(diagonal) == 1) {
+  if(is.numeric(diagonal)) {
     diag(JM) <- diagonal
+  } else if(diagonal == "model") {
+    # code for diagonal from model
   }
 
 
