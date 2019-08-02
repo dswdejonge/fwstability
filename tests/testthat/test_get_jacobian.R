@@ -1,6 +1,7 @@
 context("Jacobian matrix creation")
 
 ### No optional arguments
+
 # Proper data format
 FM <- matrix(c(0, 3, 2, 5, 0, 3, 0, 5, 0), nrow = 3, ncol = 3)
 rownames(FM) <- c("PLANT", "WORM", "ANT")
@@ -8,8 +9,21 @@ colnames(FM) <- c("PLANT", "WORM", "ANT")
 BM <- c(30, 20, 10) ; names(BM) <- c("PLANT", "WORM", "ANT")
 AE <- c(0.1, 0.2, 0.3) ; names(AE) <- c("PLANT", "WORM", "ANT")
 GE <- c(0.1, 0.2, 0.3) ; names(GE) <- c("PLANT", "WORM", "ANT")
+JM <- matrix(c(0,
+               AE[1] * GE[1] * FM[2,1] / BM[2] + -FM[1,2] / BM[2],
+               AE[1] * GE[1] * FM[3,1] / BM[3],
 
-# TODO: calculate answer
+               AE[2] * GE[2] * FM[1,2] / BM[1] + -FM[2,1] / BM[1],
+               0,
+               AE[2] * GE[2] * FM[3,2] / BM[3] + -FM[2,3] / BM[3],
+
+               -FM[3,1] / BM[1],
+               AE[3] * GE[3] * FM[2,3] / BM[2] + -FM[3,2] / BM[2],
+               0
+), nrow = 3, ncol = 3)
+rownames(JM) <- c("PLANT", "WORM", "ANT")
+colnames(JM) <- c("PLANT", "WORM", "ANT")
+
 test_that("the function works without optional arguments", {
   expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE),
                JM)
@@ -46,13 +60,13 @@ test_that("the function works with dead compartments", {
 })
 
 # Error: Physiological values exist for dead compartments
-AEe <- c(0.1, 0.2, 0.3) ; names(AE) <- c("DETRITUS", "PLANT", "ANIMAL")
-GEe <- c(0.1, 0.2, 0.3) ; names(GE) <- c("DETRITUS", "PLANT", "ANIMAL")
+AEe <- c(0.1, 0.2, 0.3) ; names(AEe) <- c("DETRITUS", "PLANT", "ANIMAL")
+GEe <- c(0.1, 0.2, 0.3) ; names(GEe) <- c("DETRITUS", "PLANT", "ANIMAL")
 
 test_that("dead compartments cannot have physiological values", {
   expect_equal(getJacobian(FM = FM, BM = BM, AE = AEe, GE = GEe, dead = "DETRITUS"),
                JM)
-  expect_warning(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = "DETRITUS"),
+  expect_warning(getJacobian(FM = FM, BM = BM, AE = AEe, GE = GEe, dead = "DETRITUS"),
                  "physiological values set to NA for dead compartments")
 })
 
