@@ -81,7 +81,6 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
 #' @export
-#' @examples
 effectOnConsumer <- function(FM, BM, AE, GE){
   # Conversion efficiencies of the predators must be included, which are in the
   # columns. So, transposition is needed before multiplying for AE and GE.
@@ -138,7 +137,6 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
 #' @export
-#' @examples
 #' getJacobian(FM = Flowmatrix(lim), BM = lim$Components$val)
 getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
                         dead = NULL, externals = NULL, MR = NULL) {

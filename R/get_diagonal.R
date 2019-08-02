@@ -17,7 +17,6 @@
 #' input data. If MR is biomass per unit time then BM must be just biomass. If MR is
 #' biomass per unit time per surface area then BM must be biomass per surface area.
 #' @export
-#' @examples
 getDiagonalSpecies <- function(MR, BM) {
   if(length(MR) != length(BM)) {
     stop("input vectors have unequal lengths")
@@ -100,7 +99,6 @@ getDiagonalDetritus <- function(FM, BM, AE, dead){
 #' input data. If MR is biomass per unit time then BM must be just biomass. If MR is
 #' biomass per unit time per surface area then BM must be biomass per surface area.
 #' @export
-#' @examples
 getDiagonal <- function(MR, BM, dead = NULL, FM = NULL, AE = NULL) {
 
   # Get diagonal, and find detritus values if necessary
