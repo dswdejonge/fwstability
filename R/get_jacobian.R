@@ -198,7 +198,12 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
   }
 
   JM <- eff.on.consumer + eff.on.resource
-  diag(JM) <- 0
+
+  # Set correct diagonal
+  if(is.numeric(diagonal) & length(diagonal) == 1) {
+    diag(JM) <- diagonal
+  }
+
 
   #diagonal <- diag(FM)
   #aii <- diagonalSpecies(flow_solutions = pars$X, BM, dead)
