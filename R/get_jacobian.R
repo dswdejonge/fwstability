@@ -181,7 +181,7 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     dead_i <- which(rownames(FM) %in% dead)
   }
 
-   # Get interaction strengths
+  # Get interaction strengths
   eff.on.consumer <- effectOnConsumer(FM, BM, AE, GE)
   eff.on.resource <- effectOnResource(FM, BM, AE, dead_i)
 
