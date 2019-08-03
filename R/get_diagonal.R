@@ -101,6 +101,10 @@ getDiagonalDetritus <- function(FM, BM, AE, dead){
 #' @export
 getDiagonal <- function(MR, BM, dead = NULL, FM = NULL, AE = NULL) {
 
+  if(!is.null(dead) & is.null(FM) | is.null(AE)) {
+    stop("please provide all required data to calculate dead diagonal values")
+  }
+
   # Get diagonal, and find detritus values if necessary
   if(!is.null(dead)) {
     diagonal <- diag(FM)
