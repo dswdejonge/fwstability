@@ -137,7 +137,6 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
 #' @export
-#' getJacobian(FM = Flowmatrix(lim), BM = lim$Components$val)
 getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
                         dead = NULL, externals = NULL, MR = NULL) {
 
