@@ -198,18 +198,69 @@ test_that("the function only executes if all biomasses are greater than zero", {
 
 
 ### Externals
-#test_that("the function works with external compartments", {
-#  expect_equal(dim(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, externals = "DETRITUS")),
-#               c(2,2))
-#})
+
+# Proper data format
+FM <- matrix(c(0, 3, 2, 1, 5, 0, 3, 0, 0, 5, 0, 0, 0, 0, 1, 0), nrow = 4, ncol = 4)
+rownames(FM) <- c("PLANT", "WORM", "ANT", "CO2")
+colnames(FM) <- c("PLANT", "WORM", "ANT", "CO2")
+BM <- c(30, 20, 10) ; names(BM) <- c("PLANT", "WORM", "ANT")
+AE <- c(0.1, 0.2, 0.3) ; names(AE) <- c("PLANT", "WORM", "ANT")
+GE <- c(0.1, 0.2, 0.3) ; names(GE) <- c("PLANT", "WORM", "ANT")
+JM <- matrix(c(0,
+               AE[1] * GE[1] * FM[2,1] / BM[2] + -FM[1,2] / BM[2],
+               AE[1] * GE[1] * FM[3,1] / BM[3],
+
+               AE[2] * GE[2] * FM[1,2] / BM[1] + -FM[2,1] / BM[1],
+               0,
+               AE[2] * GE[2] * FM[3,2] / BM[3] + -FM[2,3] / BM[3],
+
+               -FM[3,1] / BM[1],
+               AE[3] * GE[3] * FM[2,3] / BM[2] + -FM[3,2] / BM[2],
+               0
+), nrow = 3, ncol = 3)
+rownames(JM) <- c("PLANT", "WORM", "ANT")
+colnames(JM) <- c("PLANT", "WORM", "ANT")
+
+test_that("the function works with external compartments", {
+  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, externals = "CO2"),
+               JM)
+})
 
 
 ### Both dead compartments and externals.
-test_that("the function only executes when the dead and external compartments have a existing name", {
-  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = "CARCASS"),
-               "the names of the dead compartments are unknown")
-  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, externals = "CARCASS"),
-               "the names of the external compartments are unknown")
+
+# Proper data format
+FM <- matrix(c(0, 3, 8, 1, 7, 0, 0, 0, 4, 4, 0, 0, 0, 0, 1, 0), nrow = 4, ncol = 4)
+rownames(FM) <- c("DETRITUS", "PLANT", "ANIMAL", "CO2")
+colnames(FM) <- c("DETRITUS", "PLANT", "ANIMAL", "CO2")
+BM <- c(30, 20, 10) ; names(BM) <- c("DETRITUS", "PLANT", "ANIMAL")
+AE <- c(NA, 0.2, 0.3) ; names(AE) <- c("DETRITUS", "PLANT", "ANIMAL")
+GE <- c(NA, 0.2, 0.3) ; names(GE) <- c("DETRITUS", "PLANT", "ANIMAL")
+JM <- matrix(c(0,
+               (FM[2,1] - FM[1,2] + FM[2,3]*(1-AE[3])) / BM[2],
+               (FM[3,1] - FM[1,3]) / BM[3],
+               AE[2] * GE[2] * FM[1,2] / BM[1],
+               0,
+               -FM[2,3] / BM[3],
+               AE[3] * GE[3] * FM[1,3] / BM[1],
+               AE[3] * GE[3] * FM[2,3] / BM[2],
+               0
+), nrow = 3, ncol = 3)
+rownames(JM) <- c("DETRITUS", "PLANT", "ANIMAL")
+colnames(JM) <- c("DETRITUS", "PLANT", "ANIMAL")
+
+test_that("the function works correctly with both dead and external arguments", {
+  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
+                           dead = "DETRITUS", externals = "CO2"),
+               JM)
 })
 
+test_that("the function only executes when the dead and external compartments have an existing name", {
+  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
+                           dead = "CARCASS", externals = "CO2"),
+               "the names of the dead compartments are unknown")
+  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
+                           dead = "DETRITUS", externals = "CARCASS"),
+               "the names of the external compartments are unknown")
+})
 
