@@ -1,6 +1,7 @@
 ---
 title: "Assessing food web stability with the fwstability R-package."
 author: "D.S.W. de Jonge"
+date: "`r date()`"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{vignette}
@@ -26,8 +27,8 @@ A linear inverse food web model (LIM) can be prepared with the R-package LIM (ht
 
 A linear inverse model is set-up, solved with the least-distance solution (function Ldei) and written as a flow matrix (flow from row compartment to column compartment).
 ```{r LIM}
-require(LIM)
-lim <- Setup("foodweb.lim")
+library(LIM)
+lim <- Setup(system.file("extdata", "foodweb.lim", package = "fwstability"))
 ```
 
 The flows between compartments can be used to calculate interaction strengths, which form the entries for a Jacobian matrix.
@@ -68,7 +69,7 @@ Some notes:
 # 2. Stability analysis
 The stability of this Jacobian matrix is calculated as the maximum real value of the eigenvalues. A negative value indicates the food web is stable. 
 ```{r}
-getStability(JM)
+#getStability(JM)
 ```
 
 # 3. Analysize food web for (de)stabilizing characteristics

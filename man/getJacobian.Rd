@@ -5,34 +5,45 @@
 \title{Jacobian matrix with interaction strengths}
 \usage{
 getJacobian(FM, BM, AE, GE, diagonal = 0, dead = NULL,
-  externals = NULL)
+  externals = NULL, MR = NULL)
 }
 \arguments{
 \item{FM}{A named square flowmatrix, source compartments as rows,
 sink compartments as columns. (required)}
 
-\item{BM}{Named numeric vector with biomasses of all compartments, must be in the same
-order as the flow matrix. (required)}
+\item{BM}{A named numeric vector with biomasses of all compartments, must be in the same
+order as the flow matrix after externals are excluded. (required)}
 
-\item{AE}{Named numeric vector with assimilation efficiencies of all
-compartments, must be in the same order as the flow matrix.
-AE should be set to NA for dead/non-faunal compartments (see argument 'dead' below). (required)}
+\item{AE}{A named numeric vector with assimilation efficiencies of all
+compartments, must be in the same order as the flow matrix after externals
+are excluded. AE should be set to NA for dead/non-faunal compartments
+(see argument 'dead' below). (required)}
 
-\item{GE}{Named numeric vector with growth efficiencies of all compartments,
-must be in the same order as the flow matrix. GE should be set to NA
-for dead/non-faunal compartments (see argument 'dead' below). (required)}
+\item{GE}{A named numeric vector with growth efficiencies of all compartments,
+must be in the same order as the flow matrix after externals are excluded.
+GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
+'externals' below). (required)}
 
-\item{diagonal}{Either a single value, a numeric vector, or the
-charcter string "model". A single value with set all diagonal
-values to this number, a vector will set the diagonal to this
-user-specified diagonal, "model" will calculate diagonal values from
-the energy-flux model. Default is a zero diagonal. (required)}
+\item{diagonal}{Either a single value, a numeric vector or the string "model". A single value will
+set all diagonal values to this number. A vector will set the diagonal to this
+user-specified diagonal. The string "model" calculates the diagonal values from flux
+values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
+(required)}
 
 \item{dead}{Character vector with all names of detritus and nutrient
 compartments (everything that is not fauna). (optional)}
 
 \item{externals}{Character vector with all names of external
-compartments, i.e. which have no biomass. (optional)}
+compartments, i.e. which have no biomass, that have to be removed from
+the flow matrix. (optional)}
+
+\item{MR}{A named numeric vector with non-predatory mortality rates for all
+compartments (biomass per unit time or biomass per unit time per surface area).
+Sometimes this information can be extracted from the food web model, for example when
+natural death results in a flux from the faunal compartment to a carcass compartment.
+It can also be calculated as the inverse of the natural lifespan of the species
+(per unit time) multiplied by the biomass of the compartment.
+(required when diagonal is set to "model").}
 }
 \value{
 This function returns a matrix containing interaction strengths, i.e. the
@@ -42,9 +53,8 @@ interactions in the food web.
 \description{
 This functions calculates interaction strengths from a resolved energy-flux
 food web model and uses these values as entries for a Jacobian matrix.
-The diagonal can be either be user-defined, set to zero (default), or calculated
-from the energy-flux model. This function is an implementation of the equations
-from the following references: \cr
+The diagonal can be all-zero (default) or user-defined. This function is an
+implementation of the equations from the following references: \cr
 de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
 Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
 1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
@@ -53,7 +63,4 @@ Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/sci
 Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 651–661. https://doi.org/10.1111/ele.12266
-}
-\examples{
-getJacobian(FM = Flowmatrix(lim), BM = lim$Components$val)
 }

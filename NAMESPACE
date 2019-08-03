@@ -2,5 +2,7 @@
 
 export(effectOnConsumer)
 export(effectOnResource)
+export(getDiagonal)
+export(getDiagonalSpecies)
 export(getJacobian)
 export(getStability)
