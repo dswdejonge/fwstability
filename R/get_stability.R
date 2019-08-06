@@ -75,6 +75,8 @@ getStability <- function(JM, method = "eigenvalue",
     stop("unknown method chosen")
   } else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
     stop("for the eigenvalue method the diagonal cannot contain NAs")
+  } else if(method == "scalar" & is.null(mortalities)) {
+    stop("mortalities vector required for the scalar method")
   } else if(is.null(rownames(JM)) | is.null(colnames(JM)) |
             (!is.null(mortalities) & is.null(names(mortalities)))) {
     stop("all required vectors and matrices must be named")
