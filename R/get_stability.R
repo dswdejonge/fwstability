@@ -33,7 +33,7 @@ getScalarStability <- function(JM, mortalities, stepsize, to_scale) {
 #' finding the maximum value of the real part of its eigenvalues (requires a quantified
 #' diagonal) or as the scalar of natural mortality rates that results in a stable matrix
 #' (requires mortality rate estimates).
-#' @param JM A named Jacobian matrix, with the effect of one compartment (rows)
+#' @param JM A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
 #' on another compartment (columns). (required)
 #' @param method Either "eigenvalue" (default) or "scalar". The method "eigenvalue" finds
 #' stability as the maximum real part of the eigenvalues calculated from the Jacobian
@@ -57,7 +57,7 @@ getScalarStability <- function(JM, mortalities, stepsize, to_scale) {
 #' order as the Jacobian matrix, and the values for dead compartments should be
 #' set to NA. (required if method is "scalar")
 #' @param dead Character vector with all names of detritus and nutrient
-#' compartments (everything that is not fauna). (optional)
+#' compartments (everything that is not fauna). (optional if method is "scalar")
 #' @return This function returns a numeric value. For the "eigenvalue" method
 #' a negative value indicates a stable matrix. For the "scalar" method the value represents
 #' the fraction self-dampening effect needed for system stability.
@@ -66,6 +66,40 @@ getScalarStability <- function(JM, mortalities, stepsize, to_scale) {
 #' getStability(JM)
 getStability <- function(JM, method = "eigenvalue",
                          mortalities = NULL, dead = NULL) {
+  # Errors
+  if(dim(JM)[1] != dim(JM)[2]) {
+    stop("Jacobian matrix is not square")
+  } else if(!is.numeric(JM)) {
+    stop("Jacobian matrix must be numeric")
+  } else if(method != "eigenvalue" & method != "scalar") {
+    stop("unknown method chosen")
+  } else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
+    stop("for the eigenvalue method the diagonal cannot contain NAs")
+  } else if(is.null(rownames(JM)) | is.null(colnames(JM)) |
+            (!is.null(mortalities) & is.null(names(mortalities)))) {
+    stop("all required vectors and matrices must be named")
+  } else if(!all(rownames(JM) == colnames(JM))) {
+    stop("row names and column names of Jacobian matrix do not match")
+  } else if(!is.null(mortalities) & (
+    (min(mortalities, na.rm = T) <= 0) | (!is.numeric(mortalities)))) {
+    stop("the mortalities vector contains values equal or smaller than zero, or is non-numeric")
+  } else if(!all(rownames(JM) == colnames(JM)) |
+            (!is.null(mortalities) & !all(names(mortalities) == rownames(JM)))) {
+    stop("the names and their order must be equal in all named vectors and matrices")
+  } else if(!is.null(dead) & FALSE %in% (dead %in% rownames(JM))) {
+    stop("the names of the dead compartments are unknown")
+  } else if((TRUE %in% is.na(mortalities)) &
+            (!all(names(which(is.na(mortalities))) %in% dead)) | is.null(dead)) {
+    stop("mortalities values are set to NA for non-dead compartments")
+  }
+
+  # Warnings
+  if(method == "eigenvalue" & !is.null(mortalities) | !is.null(dead)) {
+    warning("mortality values or dead compartments are given but
+            irrelevant for the chosen eigenvalue method")
+  }
+
+
   # Get indices compartments to scale (excluding dead compartments)
   to_scale <- 1:dim(JM)[1]
   if(!is.null(dead)) {
