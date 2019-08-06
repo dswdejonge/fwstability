@@ -23,8 +23,8 @@ test_that("the default getStability provides the correct answer", {
 JM1 <- JM[1:2,]
 JM2 <- matrix(c("a","b","c","d"), nrow = 2, ncol = 2)
 JM3 <- JM ; rownames(JM3) <- NULL
-JM4 <- JM ; colnames(JM3) <- NULL
-JM5 <- JM ; rownames(JM3) <- NULL ; colnames(JM3) <- NULL
+JM4 <- JM ; colnames(JM4) <- NULL
+JM5 <- JM ; rownames(JM5) <- NULL ; colnames(JM5) <- NULL
 JM6 <- JM ; rownames(JM6) <- rownames(JM6)[c(2,1,3)]
 JM8 <- JM ; rownames(JM8)[1] <- "nonexistent"
 test_that("the function only executes with a square, numeric, and correctly named JM", {
@@ -60,20 +60,13 @@ test_that("the eigenvalue method doesn't execute with diagonal NAs", {
 # Warning: mortalities and/or dead compartments are given, which is irrelevant for the
 # eigenvalue method
 test_that("a warning is produced when data irrelevant to the method is given", {
-  expect_warning(getStability(JM, method = "eigenvalue",
-                            mortalities = c(1,1,1)),
-                "mortality values or dead compartments are given but
-                irrelevant for the chosen eigenvalue method")
-  expect_warning(getStability(JM, method = "eigenvalue",
-                              dead = "DETRITUS"),
-                 "mortality values or dead compartments are given but
-                 irrelevant for the chosen eigenvalue method")
-  expect_warning(getStability(JM, method = "eigenvalue",
-                              mortalities = c(1,1,1), dead = "DETRITUS"),
-                 "mortality values or dead compartments are given but
-                 irrelevant for the chosen eigenvalue method")
-  expect_equal(getStability(JM, method = "eigenvalue",
-                              mortalities = c(1,1,1), dead = "DETRITUS"),
+  expect_warning(getStability(JM, method = "eigenvalue", mortalities),
+                "given mortality values or dead compartments are irrelevant for the eigenvalue method")
+  expect_warning(getStability(JM, method = "eigenvalue", dead = "DETRITUS"),
+                 "given mortality values or dead compartments are irrelevant for the eigenvalue method")
+  expect_warning(getStability(JM, method = "eigenvalue", mortalities, dead = "DETRITUS"),
+                 "given mortality values or dead compartments are irrelevant for the eigenvalue method")
+  expect_equal(getStability(JM, method = "eigenvalue", mortalities, dead = "DETRITUS"),
                  stability)
 })
 
@@ -105,24 +98,21 @@ test_that("the scalar getStability provides the correct answer including detritu
 })
 
 # Error: the mortalities vector is not numeric, named correctly, or has <=0 values
-mort <- c("a", "b", "c")
+mort <- c("a", "b", "c") ; names(mort) <- names(mortalities)
 mort2 <- mortalities[1:2]
 mort3 <- mortalities ; names(mort3) <- NULL
 mort4 <- mortalities ; names(mort4) <- names(mortalities)[c(2,3,1)]
 mort5 <- mortalities ; names(mort5)[1] <- "nonexistent"
-mort7 <- c(1,1,0)
-mort8 <- c(-1,-1,-1)
+mort7 <- c(1,1,0) ; names(mort7) <- names(mortalities)
+mort8 <- c(-1,-1,-1) ; names(mort8) <- names(mortalities)
 
 test_that("the scalar method only works with a correct mortality vector", {
   expect_error(getStability(JM, method = "scalar", mortalities = mort),
-               "the mortalities vector contains values equal or smaller than zero,
-                or is non-numeric")
+               "the mortalities vector contains values equal or smaller than zero, or is non-numeric")
   expect_error(getStability(JM, method = "scalar", mortalities = mort7),
-               "the mortalities vector contains values equal or smaller than zero,
-               or is non-numeric")
+               "the mortalities vector contains values equal or smaller than zero, or is non-numeric")
   expect_error(getStability(JM, method = "scalar", mortalities = mort8),
-               "the mortalities vector contains values equal or smaller than zero,
-               or is non-numeric")
+               "the mortalities vector contains values equal or smaller than zero, or is non-numeric")
   expect_error(getStability(JM, method = "scalar", mortalities = mort2),
                "the names and their order must be equal in all named vectors and matrices")
   expect_error(getStability(JM, method = "scalar", mortalities = mort3),
@@ -154,3 +144,4 @@ test_that("the scalar method asks for the correct input", {
   expect_error(getStability(JM, method = "scalar", dead = "DETRITUS"),
                "mortalities vector required for the scalar method")
 })
+

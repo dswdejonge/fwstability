@@ -76,29 +76,28 @@ getStability <- function(JM, method = "eigenvalue",
   } else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
     stop("for the eigenvalue method the diagonal cannot contain NAs")
   } else if(method == "scalar" & is.null(mortalities)) {
-    stop("mortalities vector required for the scalar method")
+      stop("mortalities vector required for the scalar method")
+  } else if(method == "scalar" && TRUE %in% is.na(mortalities) &&
+            (is.null(dead) | !all(names(which(is.na(mortalities))) %in% dead))) {
+    stop("mortalities values are set to NA for non-dead compartments")
   } else if(is.null(rownames(JM)) | is.null(colnames(JM)) |
             (!is.null(mortalities) & is.null(names(mortalities)))) {
     stop("all required vectors and matrices must be named")
   } else if(!all(rownames(JM) == colnames(JM))) {
     stop("row names and column names of Jacobian matrix do not match")
-  } else if(!is.null(mortalities) & (
-    (min(mortalities, na.rm = T) <= 0) | (!is.numeric(mortalities)))) {
+  } else if(!is.null(mortalities) &&
+            (min(mortalities, na.rm = T) <= 0 | !is.numeric(mortalities))) {
     stop("the mortalities vector contains values equal or smaller than zero, or is non-numeric")
   } else if(!all(rownames(JM) == colnames(JM)) |
             (!is.null(mortalities) & !all(names(mortalities) == rownames(JM)))) {
     stop("the names and their order must be equal in all named vectors and matrices")
   } else if(!is.null(dead) & FALSE %in% (dead %in% rownames(JM))) {
     stop("the names of the dead compartments are unknown")
-  } else if((TRUE %in% is.na(mortalities)) &
-            (!all(names(which(is.na(mortalities))) %in% dead)) | is.null(dead)) {
-    stop("mortalities values are set to NA for non-dead compartments")
   }
 
   # Warnings
-  if(method == "eigenvalue" & !is.null(mortalities) | !is.null(dead)) {
-    warning("mortality values or dead compartments are given but
-            irrelevant for the chosen eigenvalue method")
+  if(method == "eigenvalue" && (!is.null(mortalities) | !is.null(dead))) {
+    warning("given mortality values or dead compartments are irrelevant for the eigenvalue method")
   }
 
 
