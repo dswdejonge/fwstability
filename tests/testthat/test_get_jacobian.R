@@ -54,12 +54,12 @@ JM <- matrix(c(0,
                AE[2] * GE[2] * FM[1,2] / BM[1],
                0,
                0,
-               0,
+               - FM[2,4] / BM[4],
 
                AE[3] * GE[3] * FM[1,3] / BM[1],
                0,
                0,
-               0,
+               - FM[3,4] / BM[4],
 
                AE[4] * GE[4] * FM[1,4] / BM[1],
                AE[4] * GE[4] * FM[2,4] / BM[2],
@@ -70,7 +70,7 @@ rownames(JM) <- c("DET", "BAC", "FUN", "ENCH")
 colnames(JM) <- c("DET", "BAC", "FUN", "ENCH")
 
 test_that("the function works with data from literature", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = "DETRITUS"),
+  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = "DET"),
                JM)
 })
 
