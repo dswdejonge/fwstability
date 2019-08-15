@@ -1,7 +1,15 @@
 context("Jacobian matrix creation with no optional arguments")
-# No optional arguments
 
-#### Proper data format ####
+#### Model without optional arguments
+# Plants are eaten by worms.
+# Worms are eaten by ants, and ants are eaten by worms.
+# Both worms and ants directly provide nutrients for plants.
+#
+# PLANT -5-> WORM -5-> ANT
+# PLANT <-3- WORM <-3- ANT
+# ^                     |
+# \_________2__________|
+
 fwnames <- c("PLANT", "WORM", "ANT")
 FM <- matrix(c(0, 3, 2, 5, 0, 3, 0, 5, 0), nrow = 3, ncol = 3)
 rownames(FM) <- fwnames ; colnames(FM) <- fwnames

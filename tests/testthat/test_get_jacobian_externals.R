@@ -1,7 +1,17 @@
 context("Jacobian matrix creation with externals")
-### Externals
+# Model including externals
+# Plants take up CO2.
+# Plants are eaten by worms.
+# Worms are eaten by ants, and ants are eaten by worms.
+# Ants respire to CO2.
+# Both ants and worms directly provide nutrients for plants.
+#
+#             /-----------2------
+#            v                   \
+# CO2 -1-> PLANT -6-> WORM -6-> ANT
+#  ^      PLANT <-3- WORM <-3- ANT
+#  \________________1___________/
 
-# Proper data format
 fwnames <- c("PLANT", "WORM", "ANT", "CO2")
 FM <- matrix(c(0, 3, 2, 1, 5, 0, 3, 0, 0, 5, 0, 0, 0, 0, 1, 0), nrow = 4, ncol = 4)
 rownames(FM) <- fwnames

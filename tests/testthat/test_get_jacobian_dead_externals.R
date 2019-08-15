@@ -1,7 +1,17 @@
 context("Jacobian matrix creation with dead and external compartments")
 ### Both dead compartments and externals.
+# Detritus takes up CO2.
+# Plants and animals take up detritus.
+# Plants are eaten by animals.
+# Animals and plants both deposit material into detritus compartment.
+# Animals respire into the external CO2 compartment.
+#
+#                 V---3---\
+# CO2 -1-> DETRITUS -7-> PLANT
+#  ^            ^ \ 4     | 4
+#  \ 1        8 \ v       v
+#   -----------  #  ANIMAL  #
 
-# Proper data format
 fwnames <- c("DETRITUS", "PLANT", "ANIMAL", "CO2")
 FM <- matrix(c(0, 3, 8, 1, 7, 0, 0, 0, 4, 4, 0, 0, 0, 0, 1, 0), nrow = 4, ncol = 4)
 rownames(FM) <- fwnames
@@ -27,13 +37,4 @@ test_that("the function works correctly with both dead and external arguments", 
   expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
                            dead = dead, externals = "CO2"),
                JM)
-})
-
-test_that("the function only executes when the dead and external compartments have an existing name", {
-  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
-                           dead = "CARCASS", externals = "CO2"),
-               "the names of the dead compartments are unknown")
-  expect_error(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
-                           dead = dead, externals = "CARCASS"),
-               "the names of the external compartments are unknown")
 })
