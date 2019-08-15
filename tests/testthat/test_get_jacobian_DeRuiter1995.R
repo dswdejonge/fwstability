@@ -1,6 +1,15 @@
-context("Jacobian matrix creation with literature data")
+context("Jacobian matrix creation with data from De Ruiter et al. 1995")
 
 # Proper data format, from De Ruiter et al. 1995
+# Bacteria, Fungi and Enchytraeids take up detritus.
+# Enchytraeids also feed on Fungi and Bacteria.
+#
+#     FUN
+#    /   \
+# DET -- ENCH
+#    \   /
+#     BAC
+
 fwnames <- c("DET", "BAC", "FUN", "ENCH")
 FM <- matrix(c(
   0, 1606, 40.8, 11.1,
