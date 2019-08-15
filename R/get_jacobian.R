@@ -81,7 +81,7 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
 #' @export
-effectOnConsumer <- function(FM, BM, AE, GE){
+effectOnConsumer <- function(FM, BM, AE, GE) {
   # Conversion efficiencies of the predators must be included, which are in the
   # columns. So, transposition is needed before multiplying for AE and GE.
   # Finally, the matrix is transposed back to its original form.
@@ -89,6 +89,36 @@ effectOnConsumer <- function(FM, BM, AE, GE){
   return(result)
 }
 
+removeExternals <- function(externals, FM) {
+  if(!is.null(externals)) {
+    if((FALSE %in% (externals %in% rownames(FM))) |
+       (FALSE %in% (externals %in% colnames(FM)))) {
+      stop("the names of the external compartments are unknown")
+    } else {
+      # Remove external compartments, keep internals
+      internals <- !(rownames(FM) %in% externals)
+      FM <- FM[internals, internals]
+    }
+  }
+  return(FM)
+}
+
+adjustDeadInput <- function() {
+  # Adjust dead input
+  if(!is.null(dead)) {
+    names <- c("names", "def", "frac")
+    if(length(dead) < 3) {
+      dead <- c(dead, vector(mode = "list", length = 3 - length(dead)))
+    } else if (length(dead) > 3) {
+      stop("the list \"dead\" should have three elements at most")
+    }
+    if(is.numeric(dead[[2]])) {
+      names(dead) <- names[c(1,3,2)]
+    } else {
+      names(dead) <- names
+    }
+  }
+}
 
 #' Jacobian matrix with interaction strengths
 #'
@@ -149,16 +179,7 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
                         dead = NULL, externals = NULL, MR = NULL) {
 
   # Remove externals
-  if(!is.null(externals)) {
-    if((FALSE %in% (externals %in% rownames(FM))) |
-       (FALSE %in% (externals %in% colnames(FM)))) {
-      stop("the names of the external compartments are unknown")
-    } else {
-      # Remove external compartments, keep internals
-      internals <- !(rownames(FM) %in% externals)
-      FM <- FM[internals, internals]
-    }
-  }
+  FM <- removeExternals(externals, FM)
 
   # Do checks for required data formats: throws errors
   if(dim(FM)[1] != dim(FM)[2]) {
