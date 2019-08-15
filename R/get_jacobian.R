@@ -45,7 +45,7 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
       result[consumer, resource] <-
         (FM[consumer, resource] - # what is deposited into the dead compartment
         FM[resource,consumer] + # minus what is taken up from the dead compartment
-        sum(FM[consumer,-dead]*(1-AE[-dead])) ) / # plus all the deposition into the dead compartment by consumers of the consumer
+        sum(FM[consumer,-dead]*(1-AE[-dead]), na.rm = T) ) / # plus all the deposition into the dead compartment by consumers of the consumer
         BM[consumer] # divided by the biomass of the consumer
 
       # Consumer of detritus is not a resource if it deposits detritus.
