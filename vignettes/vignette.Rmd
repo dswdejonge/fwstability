@@ -74,7 +74,7 @@ Some notes:
 # 2. Stability analysis
 The stability of this Jacobian matrix is calculated as the maximum real value of the eigenvalues. A negative value indicates the food web is stable. 
 ```{r}
-#getStability(JM)
+getStability(JM)
 ```
 
 # 3. Analysize food web for (de)stabilizing characteristics
@@ -285,7 +285,6 @@ getStability(JM, method = "scalar",
 Both methods are valid, altough it is clear that the actual values differ. Therefore, it is important to know what method has been chosen to find stability and to interpret it correctly.
 
 It is also possible to calculate values for the diagonal instead of setting them to zero.
-FIX! NA on diagonal.
 ```{r}
 JM <- getJacobian(
   FM = FM,
@@ -296,5 +295,8 @@ JM <- getJacobian(
   dead = "Detritus",
   MR = foodweb_data$MR
 )
+
+getStability(JM)
 ```
+
 
