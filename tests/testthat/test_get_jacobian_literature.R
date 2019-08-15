@@ -12,6 +12,7 @@ rownames(FM) <- fwnames ; colnames(FM) <- fwnames
 BM <- c(2500, 227.5, 2.13, 0.43) ; names(BM) <- fwnames
 AE <- c(NA, 1.0, 1.0, 0.25) ; names(AE) <- fwnames
 GE <- c(NA, 0.30, 0.30, 0.40) ; names(GE) <- fwnames
+dead <- list("DET", "NoDef")
 JM <- matrix(c(0,
                - FM[1,2] / BM[2],
                - FM[1,3] / BM[3],
@@ -35,6 +36,6 @@ JM <- matrix(c(0,
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 
 test_that("the function works with data from literature", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = "DET"),
+  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = dead),
                JM)
 })
