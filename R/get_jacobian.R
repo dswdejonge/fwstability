@@ -22,8 +22,16 @@
 #' must be in the same order as the flow matrix. (required)
 #' @param AE Numeric vector with assimilation efficiencies of all
 #' compartments, must be in the same order as the flow matrix. (required)
-#' @param dead Integer vector with indices of all detritus and nutrient
-#' compartments (everything that is not fauna). (optional)
+#' @param dead List with three named elements containing information on all dead
+#' compartments (like detritus and nutrients). The elements "names" is required and contains a
+#' character vector with all names of dead compartments. The other two elements of the list
+#' are optional. The element "def" can contain a character vector specifying for each dead
+#' compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
+#' element is NULL it is assumed no defecation occurs into all compartments. The
+#' element "frac" can contain a numeric vector with fractions denoting the distribution of defecation
+#' into multiple dead compartments. If this element is NULL the Flowmatrix is used to
+#' calculate the relative distribution of matter from the compartment into all specified dead
+#' compartments. (optional)
 #' @return This function returns a matrix containing interaction strengths - measured as the
 #' effect of the consumer (rows) on the resource (columns) - for all
 #' interactions in the food web.
@@ -35,18 +43,38 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
   # As a matrix is by default divided by row (which now contain the sources,
   # but we want to divide by consumer), the matrix must be transposed first.
   result <- -(t(FM) / BM)
-  # eq. 12
+
   if(!is.null(dead)){
-    dead_interactions <- expand.grid(rownames(FM)[-dead], rownames(FM)[dead])
+    dead_i <- which(rownames(FM) %in% dead$names)
+    dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
     for(i in 1:dim(dead_interactions)[1]){
       consumer <- as.character(dead_interactions[i,1])
       resource <- as.character(dead_interactions[i,2])
+      if(is.null(dead$def)) {
+        is_defecation_compartment <- FALSE
+      } else {
+        is_defecation_compartment <- dead$def[which(dead$names == resource)] == "Def"
+      }
 
-      result[consumer, resource] <-
-        (FM[consumer, resource] - # what is deposited into the dead compartment
-        FM[resource,consumer] + # minus what is taken up from the dead compartment
-        sum(FM[consumer,-dead]*(1-AE[-dead]), na.rm = T) ) / # plus all the deposition into the dead compartment by consumers of the consumer
-        BM[consumer] # divided by the biomass of the consumer
+      a <- FM[consumer, resource]
+      b <- FM[resource,consumer]
+      if(is_defecation_compartment) {
+        c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
+      } else {
+        c <- 0
+      }
+      if(length(which(dead$def == "Def")) > 1 & is.null(dead$frac)) {
+        defecation_compartments <- dead$names[which(dead$def == "Def")]
+        predators <- which(FM[consumer,] > 0)[-dead_i]
+        d <- sum(FM[predators,resource], na.rm = T) / sum(FM[predators,defecation_compartments],  na.rm = T)
+        if(is.na(d)) {
+          d <- 1
+        }
+      } else {
+        d <- 1
+      }
+
+      result[consumer, resource] <- (a - b + c * d) / BM[consumer]
 
       # Consumer of detritus is not a resource if it deposits detritus.
       result[resource, consumer] <- NA
@@ -81,7 +109,7 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
 #' @export
-effectOnConsumer <- function(FM, BM, AE, GE){
+effectOnConsumer <- function(FM, BM, AE, GE) {
   # Conversion efficiencies of the predators must be included, which are in the
   # columns. So, transposition is needed before multiplying for AE and GE.
   # Finally, the matrix is transposed back to its original form.
@@ -89,6 +117,42 @@ effectOnConsumer <- function(FM, BM, AE, GE){
   return(result)
 }
 
+removeExternals <- function(externals, FM) {
+  if(!is.null(externals)) {
+    if((FALSE %in% (externals %in% rownames(FM))) |
+       (FALSE %in% (externals %in% colnames(FM)))) {
+      stop("the names of the external compartments are unknown")
+    } else {
+      # Remove external compartments, keep internals
+      internals <- !(rownames(FM) %in% externals)
+      FM <- FM[internals, internals]
+    }
+  }
+  return(FM)
+}
+
+adjustDeadInput <- function(dead) {
+  if(!is.null(dead)) {
+    if(!is.list(dead)) {
+      dead <- list(dead)
+    }
+    names <- c("names", "def")
+    if(length(dead) < length(names)) {
+      dead <- c(dead, vector(
+        mode = "list", length = length(names) - length(dead)))
+    } else if(length(dead) > length(names)) {
+      stop(paste("the list \"dead\" should have",length(names),"elements at most"))
+    }
+    names(dead) <- names
+    if(!is.null(dead$def) &&
+       length(dead$names) !=
+              length(which(dead$def == "Def" | dead$def == "noDef"))) {
+      stop("the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
+    }
+
+  }
+  return(dead)
+}
 
 #' Jacobian matrix with interaction strengths
 #'
@@ -121,8 +185,15 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' user-specified diagonal. The string "model" calculates the diagonal values from flux
 #' values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
 #' (required)
-#' @param dead Character vector with all names of detritus and nutrient
-#' compartments (everything that is not fauna). (optional)
+#' @param dead List with one or two elements containing information on all dead
+#' compartments (like detritus and nutrients). The first element is required and contains a
+#' character vector with all names of dead compartments. The second element of the list
+#' is optional and can contain a character vector specifying for each dead
+#' compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
+#' information is omitted it is assumed no defecation occurs into all dead compartments.
+#' If there are multiple defecation compartments, the Flowmatrix is used to
+#' calculate the relative distribution of matter into the specified defecation
+#' compartments. (optional)
 #' @param externals Character vector with all names of external
 #' compartments, i.e. which have no biomass, that have to be removed from
 #' the flow matrix. (optional)
@@ -140,17 +211,8 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
                         dead = NULL, externals = NULL, MR = NULL) {
 
-  # Remove externals
-  if(!is.null(externals)) {
-    if((FALSE %in% (externals %in% rownames(FM))) |
-       (FALSE %in% (externals %in% colnames(FM)))) {
-      stop("the names of the external compartments are unknown")
-    } else {
-      # Remove external compartments, keep internals
-      internals <- !(rownames(FM) %in% externals)
-      FM <- FM[internals, internals]
-    }
-  }
+  FM <- removeExternals(externals, FM)
+  dead <- adjustDeadInput(dead)
 
   # Do checks for required data formats: throws errors
   if(dim(FM)[1] != dim(FM)[2]) {
@@ -165,31 +227,24 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
   } else if(!all(names(BM) == rownames(FM)) | !all(names(BM) == colnames(FM)) |
             !all(names(BM) == names(AE))    | !all(names(BM) == names(GE))) {
     stop("the names and their order must be equal in all named vectors and matrices")
-  } else if(FALSE %in% (dead %in% names(BM))) {
+  } else if(FALSE %in% (dead$names %in% names(BM))) {
     stop("the names of the dead compartments are unknown")
   } else if(!is.numeric(diagonal) & all(diagonal != "model")) {
     stop("given diagonal not numeric or set to \"model\"")
   } else if(length(diagonal) != 1 & length(diagonal) != length(BM)) {
     stop("given diagonal has incorrect length")
   } else if(!is.null(dead)) {
-    if(!all(is.na(AE[which(names(AE) == dead)])) |
-       !all(is.na(GE[which(names(GE) == dead)]))) {
-      AE[which(names(AE) == dead)] <- NA
-      GE[which(names(GE) == dead)] <- NA
+    if(!all(is.na(AE[which(names(AE) == dead$names)])) |
+       !all(is.na(GE[which(names(GE) == dead$names)]))) {
+      AE[which(names(AE) == dead$names)] <- NA
+      GE[which(names(GE) == dead$names)] <- NA
       warning("physiological values set to NA for dead compartments")
     }
   }
 
-  # Get indices of dead compartments
-  if(is.null(dead)) {
-    dead_i <- NULL
-  } else {
-    dead_i <- which(rownames(FM) %in% dead)
-  }
-
   # Get interaction strengths
   eff.on.consumer <- effectOnConsumer(FM, BM, AE, GE)
-  eff.on.resource <- effectOnResource(FM, BM, AE, dead_i)
+  eff.on.resource <- effectOnResource(FM, BM, AE, dead)
 
   # Set interaction strength to 0 if NA
   a <- which(is.na(eff.on.consumer))
@@ -208,11 +263,10 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
       diagonal <- getDiagonal(MR = MR, BM = BM)
     } else {
       diagonal <- getDiagonal(MR = MR, BM = BM,
-                              dead = dead, FM = FM, AE = AE)
+                              dead = dead$names, FM = FM, AE = AE)
     }
   }
   diag(JM) <- diagonal
-
 
   return(JM)
 }

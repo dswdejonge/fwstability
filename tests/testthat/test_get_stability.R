@@ -59,6 +59,7 @@ test_that("the eigenvalue method doesn't execute with diagonal NAs", {
 
 # Warning: mortalities and/or dead compartments are given, which is irrelevant for the
 # eigenvalue method
+mortalities <- c(1, 1, 1) ; names(mortalities) <- c("DETRITUS", "PLANT", "ANIMAL")
 test_that("a warning is produced when data irrelevant to the method is given", {
   expect_warning(getStability(JM, method = "eigenvalue", mortalities),
                 "given mortality values or dead compartments are irrelevant for the eigenvalue method")

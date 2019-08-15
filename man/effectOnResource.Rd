@@ -16,8 +16,16 @@ must be in the same order as the flow matrix. (required)}
 \item{AE}{Numeric vector with assimilation efficiencies of all
 compartments, must be in the same order as the flow matrix. (required)}
 
-\item{dead}{Integer vector with indices of all detritus and nutrient
-compartments (everything that is not fauna). (optional)}
+\item{dead}{List with three named elements containing information on all dead
+compartments (like detritus and nutrients). The elements "names" is required and contains a
+character vector with all names of dead compartments. The other two elements of the list
+are optional. The element "def" can contain a character vector specifying for each dead
+compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
+element is NULL it is assumed no defecation occurs into all compartments. The
+element "frac" can contain a numeric vector with fractions denoting the distribution of defecation
+into multiple dead compartments. If this element is NULL the Flowmatrix is used to
+calculate the relative distribution of matter from the compartment into all specified dead
+compartments. (optional)}
 }
 \value{
 This function returns a matrix containing interaction strengths - measured as the
