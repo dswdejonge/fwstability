@@ -24,19 +24,53 @@ First, we load the package.
 library(fwstability)
 ```
 
-
 # 1. Preparing a food web model for stability analysis
-A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). The food web model used in this vignette is the same food web model as used in the LIM vignette, please refer to this document to understand the concept and set-up of a LIM.
-
-A linear inverse model is set-up, solved with the least-distance solution (function Ldei) and written as a flow matrix (flow from row compartment to column compartment).
+A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). This example food web model is the same food web model as in the LIM vignette, so please refer to this document to understand the concept and set-up of a LIM.
 ```{r LIM}
 library(LIM)
 lim <- Setup(system.file("extdata", "foodweb.lim", package = "fwstability"))
+FM <- Flowmatrix(lim)
+
+print(lim$Components)
+print(lim$Externals)
+print(FM)
 ```
 
-The flows between compartments can be used to calculate interaction strengths, which form the entries for a Jacobian matrix.
+This food web model consists of three compartments of which the biomass is measured; Plants, Animals, and Detritus, and two external compartments with infinite biomass; CO2 and export. The unit of biomass is g C m-2 and the unit of flow flux is g C m-2 d-1. Plants take up CO2 and are consumed by Animals. Animals also consume Detritus. Both Plants and Animals deposit carbon into the Detritus compartment through natural mortality and defecation. Animals respire into the CO2 compartment and export carbon from the system, for example when they are predated upon by external animals. Detritus decomposes and thereby releases carbon into the CO2 pool. 
 
-The effect of a predator on its prey ($\alpha_{ij}$) is calculated as:
+Some of these flows are constrained by measured values. Therefore, linear programming can be used to find the parsimonious solution of all the flows (see LIM vignette). The quantified flows are stored in FM. 
+
+Based on the final flow values and the constraints defined in the model it is possible to calculate the assimilation and growth efficiencies of animals and plants. Assimilation efficiency is 1 - (defecation / ingestion) and assumed 1 for Plants. Growth efficiency is defined in model for Animals and assumed 1 for Plants. The vectors containing biomass, assimilation and growth efficiencies must be named for usage in the getJacobian function. If assimilation and growth efficiencies are not specified in the model, or cannot be calculated from the model, you can estimate a value or try to find a value from literature.
+
+```{r}
+# Order Plant, Animal, Detritus. Just like the FM.
+AE <- c(1, 1 - (FM[2,3] / sum(FM[,2])), NA)
+GE <- c(1, 0.3, NA)
+BM <- lim$Components$val
+names(AE) <- rownames(FM)[1:3]
+names(GE) <- rownames(FM)[1:3]
+names(BM) <- rownames(FM)[1:3]
+```
+
+The food web data and calculated flows can be used to calculate a Jacobian matrix with the function getJacobian(). It is important to tell the function which compartments to regard as dead compartments (in this case detritus) and which compartments are external.
+```{r getJacobian}
+JM <- getJacobian(
+  FM = FM,
+  BM = BM,
+  AE = AE,
+  GE = GE,
+  dead = c("DET"),
+  externals = c("CO2", "EXP")
+)
+
+print(JM)
+```
+
+The interaction strengths have the unit per time. In our food web model the flows were g C m-2 d-1 and biomass g C m-2, so the interaction strengths have the unit d-1.
+
+From the interaction strengths in the Jacobian matrix we observe that Animals have a negative effect on the growth of Plants, and Plants have a positive effect on Animals, which makes sense because Plants are eaten by Animals. Detritus for this same reason has a positive effect on Animals. Both Plants and Animals have a positive effect on detritus, despite the fact that Detritus is consumed by Animals. This is caused by the fact that Animals overall deposit more Detritus than they take up. This highlights the importance of including Detritus as a dead compartment in the function. If we would leave out this argument the Detritus compartment would be viewed as a living compartment which can actively consume other compartments. In that case the deposition of feces would be regarded as predation on the animals by detritus, which makes no sense.  
+
+In the getJacobian function, the effect of a predator on its prey ($\alpha_{ij}$) is calculated as:
 
 $$\alpha_{ij}=-\frac{F_{ij}}{x{j}}$$
 and the effect of a prey on its predator($\alpha_{ji}$) is calculated as:
@@ -47,35 +81,64 @@ where $F_{ij}$ is the flux between resource population $i$ and consumer populati
 The effect of a population $j$ on detritus ($\alpha_{dj}$) is calculated as:
 
 $$\alpha_{dj}=\frac{1}{x_j}(F_{jd} - F_{dj} + \sum_{k=1}^n (1-a_k)F_{jk})$$
-where $n$ is the total number of compartments in the food web. The equation is derived from the equation in Neutel & Thorne (2014):
+where $n$ is the total number of compartments in the food web (Neutel & Thorne, 2014).
 
-$$\alpha_{dj}=\frac{1}{x_j}(\sum_{i=1}^n a_j p_j F_{ij} - \sum_{i=1}^n F_{ji} + \sum_{i=1}^n (1-a_j)F_{ij} + \sum_{i=1}^n (1-a_i)F_{ji}-F_{dj})$$
-
-The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is to set it all to zero. Neutel & Thorne (2014) show that an all-zero diagonal (with exception of detritus flows) has the biological meaning of a tipping point where any loss of self-dampening effect or intraspecific competition will cause the system to collapse. Diagonal values can also be caluclated from the energy-flux model. Diagonal values (Neutel & Thorne, 2014) for fauna are found as their non-predatory mortality:
+The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is to set all values to zero. Neutel & Thorne (2014) show that an all-zero diagonal (with exception of detritus flows) has the biological meaning of a tipping point where any loss of self-dampening effect or intraspecific competition will cause the system to collapse. Diagonal values can also be calculated from the energy-flux model. Diagonal values for fauna are found as their non-predatory mortality (Neutel & Thorne, 2014):
 $$\alpha_{ii}=-\frac{\sum_{j=1}^n a_i p_i F_{ji}-\sum_{j=1}^n F_{ij}}{x_i}$$
 and for detritus as:
 $$\alpha_{dd}=-\frac{1}{x_d} \sum_{j=1}^n (a_j F_{dj})$$
-We can calculate the Jacobian matrix of the example linear inverse food web like this:
-```{r getJacobian}
-JM <- getJacobian(
-  FM = Flowmatrix(lim),
-  BM = lim$Components$val,
-  AE = c(0.9, 0.6, NA),
-  GE = c(0.8, 0.7, NA),
+
+The Jacobian matrix we calculated earlier had the default all-zero diagonal. You can also decide to calculate diagonal values from the flux values as described by the equations above. In order to do this, natural mortality rates (biomass per unit time) are needed. There are several ways to obtain these values:  
+
+1) Sometimes your food web model will specifically include a natural mortality flow. You can simply extract this information from your model into a named vector and use it as input.  
+2) You can multiple the biomass by the inverse of the lifespan. The inverse of the lifespan represents the fraction of biomass that will disappear due to natural mortality on a certain time scale. For example, the biomass of animals in the example food web model is 50 g C m-2 and the natural lifespan of these animals is assumed to be 30 days. Then the natural mortality rate is 50 * 1/30 = 1.67 g C m-2 d-1. This lifespan should NOT include mortality due to predation, and be a good representative for the whole compartment.  
+
+To calculate diagonal values based on the model we include the argument "diagonal" and set the value to the string "model". In our model natural mortality flows are already specified, so we can extract this information and use it as input for the mortality rates argument "MR". The mortality rate for Detritus is set to NA.
+
+```{r getJacobian_diagonal}
+MR <- c(FM["PL","DET"], FM["AN", "EXP"], NA)
+names(MR) <- rownames(FM)[1:3]
+
+JM2 <- getJacobian(
+  FM = FM,
+  BM = BM,
+  AE = AE,
+  GE = GE,
   dead = c("DET"),
-  externals = c("CO2", "EXP")
+  externals = c("CO2", "EXP"),
+  diagonal = "model",
+  MR = MR
 )
+
+print(JM2)
 ```
 
 Some notes:
-- all internal compartments must have quantified biomasses. If there are compartments that do not have biomasses, they must either be quantified anyway or excluded by adding them to the functions as 'externals'. External compartments are often not quantified in biomass.
-- Assimilation efficiency can be found from literature or calculated by dividing the assimilated amount by the total ingested amount.
+- The inclusion of biomasses in the LIM is not required to be able to solve the model. However, it is required that all internal compartments have quantified biomasses to calculate the Jacobian matrix. If there are compartments that do not have biomasses in the LIM, they must either be quantified anyway or excluded from the getJacobian() function by including them as 'externals'.
+- The diagonal values calculated from the model for non-dead compartments represent the UPPER bound (in absolute value). This means we assume maximum self-dampening effects of populations. Jacobian matrixes with model-based diagonals are therefore often stable. If you want to compare stability between two food web models that are initially both stable, you can redefine stability as the minimum fraction of natural mortality needed to stabilize the matrix (see below 2. Stability analysis).
 
 # 2. Stability analysis
-The stability of this Jacobian matrix is calculated as the maximum real value of the eigenvalues. A negative value indicates the food web is stable. 
+A Jacobian matrix is only stable if all real parts of the eigenvalues are negative. Therefore, the stability of a Jacobian matrix can be measured as the maximum real value of the eigenvalues. A negative value indicates a stable matrix, a positive value indicates an unstable matrix.
 ```{r}
+# Using the default 'eigenvalue' method.
+# Jacobian matrix with all-zero diagonal
 getStability(JM)
+# Jacobian matrix with calculated values on the diagonal
+getStability(JM2)
 ```
+
+The first Jacobian matrix with an all-zero diagonal is an unstable matrix, whereas the second Jacobian matrix with a diagonal calculated from the model is indeed stable. This highlights the importance of thinking about how you want to quantify your diagonal. 
+If you use different methods to quantify the diagonal the stability of different models are are not comparable.
+
+There is a second stability measurement that is commonly used, that allows comparison of food web models that are initially stable. In this case the minimum fraction of self-dampening needed to stabilize the Jacobian matrix is used as measure. For example, two Jacobian matrices with a diagonal calculated from the model are stable i.e. the maximum real part of the eigenvalues is negative. The diagonal of both Jacobian matrices contain the upper bound values representing the maximum possible self-dampening effect possible. If you start reducing the self-dampening effect, at some point the Jacobian matrix will become unstable. If the first matrix becomes unstable with 75% of its original self-dampening and the second becomes unstable at 50% of its original self-dampening, we can conclude that the second matrix is more stable than the first one. The second matrix requires a lot less intra-specific feedback to dampen the destabilizing effects of interspecific interactions.
+
+This concept is implemented in the getStability() function using the 'scalar' method. For this method the additional argument mortalities is required, and 'dead' is required only if there are indeed dead compartments.
+```{r}
+getStability(JM2, method = "scalar", 
+             mortalities = MR/BM, dead = "DET")
+```
+
+In this case, the diagonal value for detritus is calculated from the model (see 1. Preparing a food web model for stability analysis). If we then scale the natural mortality rates of non-dead compartments we see that the minimum fraction natural mortality needed to stabilize the matrix is 0.45. This means that at least 45% of the maximum self-dampening effect of populations is needed in order to buffer pertubations to the whole system.
 
 # 3. Analysize food web for (de)stabilizing characteristics
 
