@@ -181,8 +181,8 @@ adjustDeadInput <- function(dead) {
 getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
                         dead = NULL, externals = NULL, MR = NULL) {
 
-  # Remove externals
   FM <- removeExternals(externals, FM)
+  dead <- adjustDeadInput(dead)
 
   # Do checks for required data formats: throws errors
   if(dim(FM)[1] != dim(FM)[2]) {
@@ -197,17 +197,17 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
   } else if(!all(names(BM) == rownames(FM)) | !all(names(BM) == colnames(FM)) |
             !all(names(BM) == names(AE))    | !all(names(BM) == names(GE))) {
     stop("the names and their order must be equal in all named vectors and matrices")
-  } else if(FALSE %in% (dead %in% names(BM))) {
+  } else if(FALSE %in% (dead$names %in% names(BM))) {
     stop("the names of the dead compartments are unknown")
   } else if(!is.numeric(diagonal) & all(diagonal != "model")) {
     stop("given diagonal not numeric or set to \"model\"")
   } else if(length(diagonal) != 1 & length(diagonal) != length(BM)) {
     stop("given diagonal has incorrect length")
   } else if(!is.null(dead)) {
-    if(!all(is.na(AE[which(names(AE) == dead)])) |
-       !all(is.na(GE[which(names(GE) == dead)]))) {
-      AE[which(names(AE) == dead)] <- NA
-      GE[which(names(GE) == dead)] <- NA
+    if(!all(is.na(AE[which(names(AE) == dead$names)])) |
+       !all(is.na(GE[which(names(GE) == dead$names)]))) {
+      AE[which(names(AE) == dead$names)] <- NA
+      GE[which(names(GE) == dead$names)] <- NA
       warning("physiological values set to NA for dead compartments")
     }
   }
@@ -216,7 +216,7 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
   if(is.null(dead)) {
     dead_i <- NULL
   } else {
-    dead_i <- which(rownames(FM) %in% dead)
+    dead_i <- which(rownames(FM) %in% dead$names)
   }
 
   # Get interaction strengths
@@ -240,7 +240,7 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
       diagonal <- getDiagonal(MR = MR, BM = BM)
     } else {
       diagonal <- getDiagonal(MR = MR, BM = BM,
-                              dead = dead, FM = FM, AE = AE)
+                              dead = dead$names, FM = FM, AE = AE)
     }
   }
   diag(JM) <- diagonal
