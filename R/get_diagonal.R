@@ -60,7 +60,7 @@ getDiagonalSpecies <- function(MR, BM) {
 getDiagonalDetritus <- function(FM, BM, AE, dead){
   dead_i <- which(rownames(FM) %in% dead)
   if(length(dead) == 1) {
-    det_assimilation <- sum(t(FM[dead_i, -dead_i] * AE[-dead_i]))
+    det_assimilation <- sum(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = T)
   } else {
     det_assimilation <- colSums(t(FM[dead_i, -dead_i] * AE[-dead_i]))
   }
