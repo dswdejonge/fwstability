@@ -50,9 +50,20 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
     for(i in 1:dim(dead_interactions)[1]){
       consumer <- as.character(dead_interactions[i,1])
       resource <- as.character(dead_interactions[i,2])
+      if(is.null(dead$def)) {
+        defecation_compartment <- FALSE
+      } else {
+        defecation_compartment <- dead$def[which(dead$names == resource)] == "Def"
+      }
+
       a <- FM[consumer, resource]
       b <- FM[resource,consumer]
-      c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
+      if(defecation_compartment) {
+        c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
+      } else {
+        c <- 0
+      }
+
       result[consumer, resource] <- (a - b + c) / BM[consumer]
 
       # Consumer of detritus is not a resource if it deposits detritus.
