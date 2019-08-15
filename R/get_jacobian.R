@@ -103,9 +103,11 @@ removeExternals <- function(externals, FM) {
   return(FM)
 }
 
-adjustDeadInput <- function() {
-  # Adjust dead input
+adjustDeadInput <- function(dead) {
   if(!is.null(dead)) {
+    if(!is.list(dead)) {
+      dead <- list(dead)
+    }
     names <- c("names", "def", "frac")
     if(length(dead) < 3) {
       dead <- c(dead, vector(mode = "list", length = 3 - length(dead)))
@@ -118,6 +120,7 @@ adjustDeadInput <- function() {
       names(dead) <- names
     }
   }
+  return(dead)
 }
 
 #' Jacobian matrix with interaction strengths
