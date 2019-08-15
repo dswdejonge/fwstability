@@ -21,7 +21,7 @@ rownames(FM) <- fwnames ; colnames(FM) <- fwnames
 BM <- c(2500, 227.5, 2.13, 0.43) ; names(BM) <- fwnames
 AE <- c(NA, 1.0, 1.0, 0.25) ; names(AE) <- fwnames
 GE <- c(NA, 0.30, 0.30, 0.40) ; names(GE) <- fwnames
-dead <- list("DET", "NoDef")
+dead <- list("DET", "noDef")
 JM <- matrix(c(0,
                - FM[1,2] / BM[2],
                - FM[1,3] / BM[3],

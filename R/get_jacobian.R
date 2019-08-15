@@ -136,17 +136,20 @@ adjustDeadInput <- function(dead) {
     if(!is.list(dead)) {
       dead <- list(dead)
     }
-    names <- c("names", "def", "frac")
-    if(length(dead) < 3) {
-      dead <- c(dead, vector(mode = "list", length = 3 - length(dead)))
-    } else if (length(dead) > 3) {
-      stop("the list \"dead\" should have three elements at most")
+    names <- c("names", "def")
+    if(length(dead) < length(names)) {
+      dead <- c(dead, vector(
+        mode = "list", length = length(names) - length(dead)))
+    } else if(length(dead) > length(names)) {
+      stop(paste("the list \"dead\" should have",length(names),"elements at most"))
     }
-    if(is.numeric(dead[[2]])) {
-      names(dead) <- names[c(1,3,2)]
-    } else {
-      names(dead) <- names
+    names(dead) <- names
+    if(!is.null(dead$def) &&
+       length(dead$names) !=
+              length(which(dead$def == "Def" | dead$def == "noDef"))) {
+      stop("the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
     }
+
   }
   return(dead)
 }
@@ -182,15 +185,14 @@ adjustDeadInput <- function(dead) {
 #' user-specified diagonal. The string "model" calculates the diagonal values from flux
 #' values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
 #' (required)
-#' @param dead List with one to three elements containing information on all dead
+#' @param dead List with one or two elements containing information on all dead
 #' compartments (like detritus and nutrients). The first element is required and contains a
-#' character vector with all names of dead compartments. The second and third elements of the list
-#' are optional. The second element can contain a character vector specifying for each dead
+#' character vector with all names of dead compartments. The second element of the list
+#' is optional and can contain a character vector specifying for each dead
 #' compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
-#' information is omitted it is assumed no defecation occurs into all compartments. The third
-#' element can contain a numeric vector with fractions denoting the distribution of defecation
-#' into multiple dead compartments. If this information is omitted the Flowmatrix is used to
-#' calculate the relative distribution of matter from the compartment into all specified dead
+#' information is omitted it is assumed no defecation occurs into all dead compartments.
+#' If there are multiple defecation compartments, the Flowmatrix is used to
+#' calculate the relative distribution of matter into the specified defecation
 #' compartments. (optional)
 #' @param externals Character vector with all names of external
 #' compartments, i.e. which have no biomass, that have to be removed from
