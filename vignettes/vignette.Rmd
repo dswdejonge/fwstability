@@ -36,18 +36,20 @@ lim <- Setup(system.file("extdata", "foodweb.lim", package = "fwstability"))
 
 The flows between compartments can be used to calculate interaction strengths, which form the entries for a Jacobian matrix.
 
-The effect of a predator on its prey ($\alpha_{ij}$):
+The effect of a predator on its prey ($\alpha_{ij}$) is calculated as:
 
 $$\alpha_{ij}=-\frac{F_{ij}}{x{j}}$$
-and the effect of a prey on its predator($\alpha_{ji}$):
+and the effect of a prey on its predator($\alpha_{ji}$) is calculated as:
 
 $$\alpha_{ji}=\frac{a_jp_jF_{ij}}{x{i}}$$
 where $F_{ij}$ is the flux between resource population $i$ and consumer population $j$, $a_j$ is the assimilation efficiency of the consumer, $p_j$ is the production efficiency of the consumer, and $x_{i,j}$ is the biomass of the respective population (de Ruiter et al., 1995; Neutel et al., 2002).
 
-The effect of a population $j$ on detritus is ($\alpha_{dj}$):
+The effect of a population $j$ on detritus ($\alpha_{dj}$) is calculated as:
+
+$$\alpha_{dj}=\frac{1}{x_j}(F_{jd} - F_{dj} + \sum_{k=1}^n (1-a_k)F_{jk})$$
+where $n$ is the total number of compartments in the food web. The equation is derived from the equation in Neutel & Thorne (2014):
 
 $$\alpha_{dj}=\frac{1}{x_j}(\sum_{i=1}^n a_j p_j F_{ij} - \sum_{i=1}^n F_{ji} + \sum_{i=1}^n (1-a_j)F_{ij} + \sum_{i=1}^n (1-a_i)F_{ji}-F_{dj})$$
-where $n$ is the total number of compartments in the food web (Neutel & Thorne, 2014).
 
 The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is to set it all to zero. Neutel & Thorne (2014) show that an all-zero diagonal (with exception of detritus flows) has the biological meaning of a tipping point where any loss of self-dampening effect or intraspecific competition will cause the system to collapse. Diagonal values can also be caluclated from the energy-flux model. Diagonal values (Neutel & Thorne, 2014) for fauna are found as their non-predatory mortality:
 $$\alpha_{ii}=-\frac{\sum_{j=1}^n a_i p_i F_{ji}-\sum_{j=1}^n F_{ij}}{x_i}$$
@@ -83,7 +85,7 @@ The stability of this Jacobian matrix is calculated as the maximum real value of
 
 In the Science paper by de Ruiter et al. (1995) the stability of seven food webs is assessed. The soil food web of the Lovinkhoeve Experimental Farm is singled out and a energy-flux model is provided including biomasses (kg ha-1), specific death rates (yr-1), assimilation efficiencies, and growth efficiencies for all compartments. 
 
-```{r}
+```{r model_data}
 # Get food web data on the compartments
 foodweb_data <- list(
   # Compartment names
@@ -269,4 +271,30 @@ JM <- getJacobian(
 )
 ```
 
+The stability of the food web can now be found by finding the maximum real part of the eigenvalues. Remember our Jacobian matrix has an all-zero diagonal.
+```{r}
+getStability(JM)
+```
+
+It is also possible to find stability as the scalar of the natural mortality rates needed to produce a stable matrix.
+```{r}
+getStability(JM, method = "scalar", 
+             mortalities = foodweb_data$MR, dead = "Detritus")
+```
+
+Both methods are valid, altough it is clear that the actual values differ. Therefore, it is important to know what method has been chosen to find stability and to interpret it correctly.
+
+It is also possible to calculate values for the diagonal instead of setting them to zero.
+FIX! NA on diagonal.
+```{r}
+JM <- getJacobian(
+  FM = FM,
+  BM = foodweb_data$BM,
+  AE = foodweb_data$AE,
+  GE = foodweb_data$GE,
+  diagonal = "model",
+  dead = "Detritus",
+  MR = foodweb_data$MR
+)
+```
 
