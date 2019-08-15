@@ -16,13 +16,16 @@ knitr::opts_chunk$set(
 )
 ```
 
+# Quick start
+This vignette explains how you can use the fwstability package to assess food web stability. There are basically four sections: 1) how to prepare your food web model for stability analysis, 2) how to conduct stability analysis, 3) how to assess your food web for characteristics related to stability, and 4) examples with food webs from literature. These sections contain details about all the features of the package and the scientific background. It is highly recommended for reading so that you can interpret your results correctly. If you cannot wait that long, this quick start section will give you a general idea about the usage of the package.
+
+First, we load the package.
 ```{r setup}
 library(fwstability)
 ```
 
-This vignette explains how you can use the fwstability package to assess food web stability. There are basically three sections: 1) how to prepare your food web model for stability analysis, 2) how to conduct stability analysis, and 3) how to assess your food web for characteristics related to stability.
 
-# 1. Prepare a food web model for stability analysis
+# 1. Preparing a food web model for stability analysis
 A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). The food web model used in this vignette is the same food web model as used in the LIM vignette, please refer to this document to understand the concept and set-up of a LIM.
 
 A linear inverse model is set-up, solved with the least-distance solution (function Ldei) and written as a flow matrix (flow from row compartment to column compartment).
@@ -33,18 +36,20 @@ lim <- Setup(system.file("extdata", "foodweb.lim", package = "fwstability"))
 
 The flows between compartments can be used to calculate interaction strengths, which form the entries for a Jacobian matrix.
 
-The effect of a predator on its prey ($\alpha_{ij}$):
+The effect of a predator on its prey ($\alpha_{ij}$) is calculated as:
 
 $$\alpha_{ij}=-\frac{F_{ij}}{x{j}}$$
-and the effect of a prey on its predator($\alpha_{ji}$):
+and the effect of a prey on its predator($\alpha_{ji}$) is calculated as:
 
 $$\alpha_{ji}=\frac{a_jp_jF_{ij}}{x{i}}$$
 where $F_{ij}$ is the flux between resource population $i$ and consumer population $j$, $a_j$ is the assimilation efficiency of the consumer, $p_j$ is the production efficiency of the consumer, and $x_{i,j}$ is the biomass of the respective population (de Ruiter et al., 1995; Neutel et al., 2002).
 
-The effect of a population $j$ on detritus is ($\alpha_{dj}$):
+The effect of a population $j$ on detritus ($\alpha_{dj}$) is calculated as:
+
+$$\alpha_{dj}=\frac{1}{x_j}(F_{jd} - F_{dj} + \sum_{k=1}^n (1-a_k)F_{jk})$$
+where $n$ is the total number of compartments in the food web. The equation is derived from the equation in Neutel & Thorne (2014):
 
 $$\alpha_{dj}=\frac{1}{x_j}(\sum_{i=1}^n a_j p_j F_{ij} - \sum_{i=1}^n F_{ji} + \sum_{i=1}^n (1-a_j)F_{ij} + \sum_{i=1}^n (1-a_i)F_{ji}-F_{dj})$$
-where $n$ is the total number of compartments in the food web (Neutel & Thorne, 2014).
 
 The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is to set it all to zero. Neutel & Thorne (2014) show that an all-zero diagonal (with exception of detritus flows) has the biological meaning of a tipping point where any loss of self-dampening effect or intraspecific competition will cause the system to collapse. Diagonal values can also be caluclated from the energy-flux model. Diagonal values (Neutel & Thorne, 2014) for fauna are found as their non-predatory mortality:
 $$\alpha_{ii}=-\frac{\sum_{j=1}^n a_i p_i F_{ji}-\sum_{j=1}^n F_{ij}}{x_i}$$
@@ -69,7 +74,229 @@ Some notes:
 # 2. Stability analysis
 The stability of this Jacobian matrix is calculated as the maximum real value of the eigenvalues. A negative value indicates the food web is stable. 
 ```{r}
-#getStability(JM)
+getStability(JM)
 ```
 
 # 3. Analysize food web for (de)stabilizing characteristics
+
+# 4. Examples from literature
+
+## de Ruiter et al. (1995) Energetics, Patterns of Interaction Strenghts, and Stability in Real Ecosystems. Science, 269 (5228), 1257 - 1260
+
+In the Science paper by de Ruiter et al. (1995) the stability of seven food webs is assessed. The soil food web of the Lovinkhoeve Experimental Farm is singled out and a energy-flux model is provided including biomasses (kg ha-1), specific death rates (yr-1), assimilation efficiencies, and growth efficiencies for all compartments. 
+
+```{r model_data}
+# Get food web data on the compartments
+foodweb_data <- list(
+  # Compartment names
+  compartment = c(
+    "Detritus", 
+    "Roots", 
+    "Fungi",
+    "Bacteria", 
+    "Phytophagous_nematodes", 
+    "Collembola", 
+    "Cryptostigmatic_mites",
+    "Noncryptostigmatic_mites",
+    "Fungivorous_nematodes",
+    "Enchytraeids",
+    "Bacteriophagous_nematodes",
+    "Flagellates",
+    "Bacteriophagous_mites",
+    "Amoebae",
+    "Predatory_nematodes",
+    "Nematophagous_mites",
+    "Predatory_collembola",
+    "Predatory_mites"
+  ),
+  # Biomasses(kg ha-1)
+  BM = c(
+    2500,
+    300,
+    2.13,
+    227.5,
+    0.19,
+    0.47,
+    0.01,
+    0.02,
+    0.08,
+    0.43,
+    0.30,
+    0.53,
+    0.001,
+    11.53,
+    0.06,
+    0.004,
+    0.03,
+    0.0635
+  ),
+  MR = c(
+    NA,
+    1.00,
+    1.20,
+    1.20,
+    1.08,
+    1.84,
+    1.20,
+    1.84,
+    1.92,
+    5.00,
+    2.68,
+    6.00,
+    1.84,
+    6.00,
+    3.00,
+    1.84,
+    1.84,
+    1.84
+  ),
+  AE = c(
+    NA,
+    NA,
+    1.00,
+    1.00,
+    0.25,
+    0.50,
+    0.50,
+    0.50,
+    0.38,
+    0.25,
+    0.60,
+    0.95,
+    0.50,
+    0.95,
+    0.50,
+    0.90,
+    0.50,
+    0.60
+  ),
+  GE = c(
+    NA,
+    NA,
+    0.30,
+    0.30,
+    0.37,
+    0.35,
+    0.35,
+    0.35,
+    0.37,
+    0.40,
+    0.37,
+    0.40,
+    0.35,
+    0.40,
+    0.37,
+    0.35,
+    0.35,
+    0.35
+  )
+)
+names(foodweb_data$BM) <- foodweb_data$compartment
+names(foodweb_data$MR) <- foodweb_data$compartment
+names(foodweb_data$AE) <- foodweb_data$compartment
+names(foodweb_data$GE) <- foodweb_data$compartment
+
+FM <- matrix(
+  0,
+  nrow = length(foodweb_data$compartment), 
+  ncol = length(foodweb_data$compartment),
+  byrow = T
+)
+if(T){
+  FM[1,3] <- 40.8
+  FM[1,4] <- 1606
+  FM[2,5] <- 7.44
+  FM[3,6] <- 6.65
+  FM[3,7] <- 0.08
+  FM[3,8] <- 0.34
+  FM[3,9] <- 2.51
+  FM[3,10] <- 0.09
+  FM[1,10] <- 11.1
+  FM[4,10] <- 10.1
+  FM[4,11] <- 6.89
+  FM[4,12] <- 9.46
+  FM[4,13] <- 0.01
+  FM[4,14] <- 182
+  FM[11,15] <- 0.42
+  FM[4,15] <- 0.33
+  FM[12,15] <- 0.008
+  FM[12,14] <- 0.42
+  FM[14,15] <- 0.17
+  FM[5,18] <- 0.06
+  FM[5,17] <- 0.13
+  FM[5,16] <- 0.01
+  FM[5,15] <- 0.28
+  FM[6,18] <- 0.31
+  FM[7,18] <- 0.005
+  FM[8,18] <- 0.015
+  FM[9,18] <- 0.03
+  FM[9,17] <- 0.05
+  FM[9,16] <- 0.004
+  FM[9,15] <- 0.11
+  FM[13,18] <- 0.003
+  FM[11,18] <- 0.10
+  FM[11,17] <- 0.20
+  FM[11,16] <- 0.014
+  FM[15,18] <- 0.02
+  FM[15,17] <- 0.04
+  FM[15,16] <- 0.003
+  FM[16,18] <- 0.002
+  FM[17,18] <- 0.02
+}
+
+rownames(FM) <- foodweb_data$compartment
+colnames(FM) <- foodweb_data$compartment
+```
+
+Now we use this data to calculate interaction strength values to get a Jacobian matrix. The authors state that intragroup interferences i.e. the values for the diagonal of the Jacobian matrix, could not be established empirically. Therefore, the diagonal is set to zero for now. In the original paper the interaction strengths related to the detritus compartment were not calculated with a function specific for detritus. Therefore, the results from the paper can be duplicated by NOT defining  detritus as a dead compartment.
+
+```{r}
+JM <- getJacobian(
+  FM = FM,
+  BM = foodweb_data$BM,
+  AE = foodweb_data$AE,
+  GE = foodweb_data$GE
+)
+```
+
+Taking into account new insights from Neutel & Thorne (2014) the effects of trophic groups on detritical compartments can be calculated with an altered equation. To calculate the interaction strengths based on this other equation we have to include detritus as a dead compartment.
+
+```{r}
+JM <- getJacobian(
+  FM = FM,
+  BM = foodweb_data$BM,
+  AE = foodweb_data$AE,
+  GE = foodweb_data$GE,
+  dead = "Detritus"
+)
+```
+
+The stability of the food web can now be found by finding the maximum real part of the eigenvalues. Remember our Jacobian matrix has an all-zero diagonal.
+```{r}
+getStability(JM)
+```
+
+It is also possible to find stability as the scalar of the natural mortality rates needed to produce a stable matrix.
+```{r}
+getStability(JM, method = "scalar", 
+             mortalities = foodweb_data$MR, dead = "Detritus")
+```
+
+Both methods are valid, altough it is clear that the actual values differ. Therefore, it is important to know what method has been chosen to find stability and to interpret it correctly.
+
+It is also possible to calculate values for the diagonal instead of setting them to zero.
+```{r}
+JM <- getJacobian(
+  FM = FM,
+  BM = foodweb_data$BM,
+  AE = foodweb_data$AE,
+  GE = foodweb_data$GE,
+  diagonal = "model",
+  dead = "Detritus",
+  MR = foodweb_data$MR
+)
+
+getStability(JM)
+```
+
+
