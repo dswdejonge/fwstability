@@ -121,8 +121,16 @@ effectOnConsumer <- function(FM, BM, AE, GE){
 #' user-specified diagonal. The string "model" calculates the diagonal values from flux
 #' values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
 #' (required)
-#' @param dead Character vector with all names of detritus and nutrient
-#' compartments (everything that is not fauna). (optional)
+#' @param dead List with one to three elements containing information on all dead
+#' compartments (like detritus and nutrients). The first element is required and contains a
+#' character vector with all names of dead compartments. The second and third elements of the list
+#' are optional. The second element can contain a character vector specifying for each dead
+#' compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
+#' information is omitted it is assumed no defecation occurs into all compartments. The third
+#' element can contain a numeric vector with fractions denoting the distribution of defecation
+#' into multiple dead compartments. If this information is omitted the Flowmatrix is used to
+#' calculate the relative distribution of matter from the compartment into all specified dead
+#' compartments. (optional)
 #' @param externals Character vector with all names of external
 #' compartments, i.e. which have no biomass, that have to be removed from
 #' the flow matrix. (optional)
