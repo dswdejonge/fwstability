@@ -22,8 +22,16 @@
 #' must be in the same order as the flow matrix. (required)
 #' @param AE Numeric vector with assimilation efficiencies of all
 #' compartments, must be in the same order as the flow matrix. (required)
-#' @param dead Integer vector with indices of all detritus and nutrient
-#' compartments (everything that is not fauna). (optional)
+#' @param dead List with three named elements containing information on all dead
+#' compartments (like detritus and nutrients). The elements "names" is required and contains a
+#' character vector with all names of dead compartments. The other two elements of the list
+#' are optional. The element "def" can contain a character vector specifying for each dead
+#' compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
+#' element is NULL it is assumed no defecation occurs into all compartments. The
+#' element "frac" can contain a numeric vector with fractions denoting the distribution of defecation
+#' into multiple dead compartments. If this element is NULL the Flowmatrix is used to
+#' calculate the relative distribution of matter from the compartment into all specified dead
+#' compartments. (optional)
 #' @return This function returns a matrix containing interaction strengths - measured as the
 #' effect of the consumer (rows) on the resource (columns) - for all
 #' interactions in the food web.
@@ -35,9 +43,10 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
   # As a matrix is by default divided by row (which now contain the sources,
   # but we want to divide by consumer), the matrix must be transposed first.
   result <- -(t(FM) / BM)
-  # eq. 12
+
   if(!is.null(dead)){
-    dead_interactions <- expand.grid(rownames(FM)[-dead], rownames(FM)[dead])
+    dead_i <- which(rownames(FM) %in% dead$names)
+    dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
     for(i in 1:dim(dead_interactions)[1]){
       consumer <- as.character(dead_interactions[i,1])
       resource <- as.character(dead_interactions[i,2])
@@ -45,7 +54,7 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
       result[consumer, resource] <-
         (FM[consumer, resource] - # what is deposited into the dead compartment
         FM[resource,consumer] + # minus what is taken up from the dead compartment
-        sum(FM[consumer,-dead]*(1-AE[-dead]), na.rm = T) ) / # plus all the deposition into the dead compartment by consumers of the consumer
+        sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T) ) / # plus all the deposition into the dead compartment by consumers of the consumer
         BM[consumer] # divided by the biomass of the consumer
 
       # Consumer of detritus is not a resource if it deposits detritus.
@@ -212,16 +221,9 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     }
   }
 
-  # Get indices of dead compartments
-  if(is.null(dead)) {
-    dead_i <- NULL
-  } else {
-    dead_i <- which(rownames(FM) %in% dead$names)
-  }
-
   # Get interaction strengths
   eff.on.consumer <- effectOnConsumer(FM, BM, AE, GE)
-  eff.on.resource <- effectOnResource(FM, BM, AE, dead_i)
+  eff.on.resource <- effectOnResource(FM, BM, AE, dead)
 
   # Set interaction strength to 0 if NA
   a <- which(is.na(eff.on.consumer))
@@ -244,7 +246,6 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
     }
   }
   diag(JM) <- diagonal
-
 
   return(JM)
 }
