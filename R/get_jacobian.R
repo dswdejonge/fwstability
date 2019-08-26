@@ -23,15 +23,15 @@
 #' @param AE Numeric vector with assimilation efficiencies of all
 #' compartments, must be in the same order as the flow matrix. (required)
 #' @param dead List with three named elements containing information on all dead
-#' compartments (like detritus and nutrients). The elements "names" is required and contains a
+#' compartments (like detritus and nutrients). The element "names" is required and contains a
 #' character vector with all names of dead compartments. The other two elements of the list
 #' are optional. The element "def" can contain a character vector specifying for each dead
 #' compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
 #' element is NULL it is assumed no defecation occurs into all compartments. The
-#' element "frac" can contain a numeric vector with fractions denoting the distribution of defecation
-#' into multiple dead compartments. If this element is NULL the Flowmatrix is used to
-#' calculate the relative distribution of matter from the compartment into all specified dead
-#' compartments. (optional)
+#' element "frac" can contain a matrix the same size and order as the FM matrix
+#' with the fraction of total flow that is defecation. This information is only
+#' needed if there are multiple parallel flows between two compartments of which
+#' only one reflects actual defecation, and the rest is for example mortality. (optional)
 #' @return This function returns a matrix containing interaction strengths - measured as the
 #' effect of the consumer (rows) on the resource (columns) - for all
 #' interactions in the food web.
@@ -63,10 +63,16 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
       } else {
         c <- 0
       }
-      if(length(which(dead$def == "Def")) > 1 & is.null(dead$frac)) {
+      if(!is.null(dead$frac)) {
+        DFM <- FM * dead$frac
+      }else {
+        DFM <- FM
+      }
+      if(length(which(dead$def == "Def")) > 1) {
         defecation_compartments <- dead$names[which(dead$def == "Def")]
         predators <- which(FM[consumer,] > 0)[-dead_i]
-        d <- sum(FM[predators,resource], na.rm = T) / sum(FM[predators,defecation_compartments],  na.rm = T)
+        d <- sum(DFM[predators,resource], na.rm = T) /
+             sum(DFM[predators,defecation_compartments],  na.rm = T)
         if(is.na(d)) {
           d <- 1
         }
@@ -133,17 +139,22 @@ removeExternals <- function(externals, FM) {
 
 adjustDeadInput <- function(dead) {
   if(!is.null(dead)) {
-    if(!is.list(dead)) {
-      dead <- list(dead)
+    if(!is.list(dead) | is.null(names(dead))) {
+      stop("argument \"dead\" must be a named list")
     }
-    names <- c("names", "def")
+    if(is.null(dead$names)) {
+      stop("\"names\" element is required in the \"dead\" list")
+    }
+    names <- c("names", "def", "frac")
+    missing <- c(1:length(names))[-which(names %in% names(dead))]
     if(length(dead) < length(names)) {
+      newnames <- c(names(dead), names[missing])
       dead <- c(dead, vector(
         mode = "list", length = length(names) - length(dead)))
+      names(dead) <- newnames
     } else if(length(dead) > length(names)) {
       stop(paste("the list \"dead\" should have",length(names),"elements at most"))
     }
-    names(dead) <- names
     if(!is.null(dead$def) &&
        length(dead$names) !=
               length(which(dead$def == "Def" | dead$def == "noDef"))) {
@@ -185,12 +196,17 @@ adjustDeadInput <- function(dead) {
 #' user-specified diagonal. The string "model" calculates the diagonal values from flux
 #' values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
 #' (required)
-#' @param dead List with one or two elements containing information on all dead
-#' compartments (like detritus and nutrients). The first element is required and contains a
-#' character vector with all names of dead compartments. The second element of the list
-#' is optional and can contain a character vector specifying for each dead
-#' compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
-#' information is omitted it is assumed no defecation occurs into all dead compartments.
+#' @param dead List with at most three elements named "names", "def", and "frac"
+#' containing information on all dead compartments (like detritus and nutrients).
+#' The element "names" is required and contains a character vector with all names of dead
+#' compartments.
+#' The element "def" of the list is optional and can contain a character vector specifying for
+#' each dead compartment if defecation occurs into this compartment ("Def") or not ("noDef").
+#' If this element is omitted it is assumed no defecation occurs into all dead compartments.
+#' The element "frac" is optional and can contain a matrix the same size and order as the FM matrix
+#' with the fraction of total flow that is defecation. This information is only
+#' needed if there are multiple parallel flows between two compartments of which
+#' only one reflects actual defecation, and the rest is for example mortality.
 #' If there are multiple defecation compartments, the Flowmatrix is used to
 #' calculate the relative distribution of matter into the specified defecation
 #' compartments. (optional)
