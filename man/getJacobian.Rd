@@ -30,12 +30,17 @@ user-specified diagonal. The string "model" calculates the diagonal values from 
 values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
 (required)}
 
-\item{dead}{List with one or two elements containing information on all dead
-compartments (like detritus and nutrients). The first element is required and contains a
-character vector with all names of dead compartments. The second element of the list
-is optional and can contain a character vector specifying for each dead
-compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
-information is omitted it is assumed no defecation occurs into all dead compartments.
+\item{dead}{List with at most three elements named "names", "def", and "frac"
+containing information on all dead compartments (like detritus and nutrients).
+The element "names" is required and contains a character vector with all names of dead
+compartments.
+The element "def" of the list is optional and can contain a character vector specifying for
+each dead compartment if defecation occurs into this compartment ("Def") or not ("noDef").
+If this element is omitted it is assumed no defecation occurs into all dead compartments.
+The element "frac" is optional and can contain a matrix the same size and order as the FM matrix
+with the fraction of total flow that is defecation. This information is only
+needed if there are multiple parallel flows between two compartments of which
+only one reflects actual defecation, and the rest is for example mortality.
 If there are multiple defecation compartments, the Flowmatrix is used to
 calculate the relative distribution of matter into the specified defecation
 compartments. (optional)}
