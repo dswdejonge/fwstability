@@ -124,7 +124,7 @@ Some notes:
 - The diagonal values calculated from the model for non-dead compartments represent the UPPER bound (in absolute value). This means we assume maximum self-dampening effects of populations. Jacobian matrixes with model-based diagonals are therefore often stable. If you want to compare stability between two food web models that are initially both stable, you can redefine stability as the minimum fraction of natural mortality needed to stabilize the matrix (see below 2. Stability analysis).
 
 ## A dynamic model
-A dynamic food web model is a set of differential equations that describe the change in biomass of each food web compartment based on the biomass of other compartments and potentially other factors. It is common to use a set of (generalized) Lotka-Volterra equations for your food web model. The form of a generalized Lotka-Volteraa equation is:
+A dynamic food web model is a set of differential equations that describe the change in biomass of each food web compartment based on the biomass of other compartments and potentially other factors. It is common to use a set of (generalized) Lotka-Volterra equations for your food web model. The form of a generalized Lotka-Volterra equation is:
 $$\frac{dx_i}{dt} = x_i (r_i + \sum_{j=1}^n c_{ij}x_j) $$
 where $r_i$ is the natural per capita growth rate and $c_ij$ is the coefficient of the interaction i.e. the effect of population $j$ on population $i$. 
 
@@ -178,7 +178,7 @@ rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 print(JM)
 ```
 
-This Jacobian matrix already contains diagonal values. The stability can be found with this complete Jacobian matrix.
+This Jacobian matrix already contains diagonal values. The stability can be found from this complete Jacobian matrix.
 ```{r}
 getStability(JM)
 ```
