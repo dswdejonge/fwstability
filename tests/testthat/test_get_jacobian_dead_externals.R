@@ -19,7 +19,7 @@ colnames(FM) <- fwnames
 BM <- c(30, 20, 10) ; names(BM) <- fwnames[1:3]
 AE <- c(NA, 0.2, 0.3) ; names(AE) <- fwnames[1:3]
 GE <- c(NA, 0.2, 0.3) ; names(GE) <- fwnames[1:3]
-dead <- list("DETRITUS", "Def")
+dead <- list(names = "DETRITUS", def = "Def")
 JM <- matrix(c(0,
                (FM[2,1] - FM[1,2] + FM[2,3]*(1-AE[3])) / BM[2],
                (FM[3,1] - FM[1,3]) / BM[3],

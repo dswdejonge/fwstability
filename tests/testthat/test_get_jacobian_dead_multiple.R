@@ -22,7 +22,7 @@ colnames(FM) <- fwnames
 BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames
 AE <- c(NA, NA, 0.3, 0.3) ; names(AE) <- fwnames
 GE <- c(NA, NA, 0.3, 0.3) ; names(GE) <- fwnames
-dead <- list(c("LABILE", "REFRAC"), c("noDef", "Def"))
+dead <- list(names = c("LABILE", "REFRAC"), def = c("noDef", "Def"))
 JM <- matrix(c(0,
                0,
                (FM[3,1] - FM[1,3]) / BM[3],
@@ -72,7 +72,7 @@ colnames(FM) <- fwnames
 BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames
 AE <- c(NA, NA, 0.3, 0.3) ; names(AE) <- fwnames
 GE <- c(NA, NA, 0.3, 0.3) ; names(GE) <- fwnames
-dead <- list(c("LABILE", "REFRAC"), c("Def", "Def"))
+dead <- list(names = c("LABILE", "REFRAC"), def = c("Def", "Def"))
 JM <- matrix(c(0,
                0,
                (FM[3,1] - FM[1,3] + FM[3,4]*(1-AE[4])*(FM[4,1]/(FM[4,1]+FM[4,2]))) / BM[3],
@@ -116,7 +116,7 @@ FM <- matrix(c(
   0, 0, 7, 0,
   0, 0, 0, 0,
   3, 4, 0, 4,
-  1, 3, 0, 0),
+  2, 2, 0, 0),
   nrow = 4, ncol = 4, byrow = T)
 rownames(FM) <- fwnames
 colnames(FM) <- fwnames
@@ -129,7 +129,7 @@ colnames(DM) <- fwnames
 DM["MEIO", "LABILE"] <- 2/3
 DM["MACRO", "LABILE"] <- 1/2
 FDM <- FM * DM
-dead <- list(c("LABILE", "REFRAC"), c("Def", "Def"), DM)
+dead <- list(names = c("LABILE", "REFRAC"), def = c("Def", "Def"), frac = DM)
 JM <- matrix(c(0,
                0,
                (FM[3,1] - FM[1,3] + FM[3,4]*(1-AE[4])*(FDM[4,1]/(FDM[4,1]+FDM[4,2]))) / BM[3],
