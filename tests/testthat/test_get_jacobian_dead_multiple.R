@@ -23,6 +23,10 @@ BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames
 AE <- c(NA, NA, 0.3, 0.3) ; names(AE) <- fwnames
 GE <- c(NA, NA, 0.3, 0.3) ; names(GE) <- fwnames
 dead <- list(names = c("LABILE", "REFRAC"), def = c("noDef", "Def"))
+model <- list(
+  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, dead = dead
+)
+# Expected answer
 JM <- matrix(c(0,
                0,
                (FM[3,1] - FM[1,3]) / BM[3],
@@ -46,7 +50,7 @@ JM <- matrix(c(0,
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 
 test_that("the function works with multiple dead compartments but one defecation", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = dead),
+  expect_equal(getJacobian(model),
                JM)
 })
 
@@ -73,6 +77,10 @@ BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames
 AE <- c(NA, NA, 0.3, 0.3) ; names(AE) <- fwnames
 GE <- c(NA, NA, 0.3, 0.3) ; names(GE) <- fwnames
 dead <- list(names = c("LABILE", "REFRAC"), def = c("Def", "Def"))
+model <- list(
+  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, dead = dead
+)
+# Expected answer
 JM <- matrix(c(0,
                0,
                (FM[3,1] - FM[1,3] + FM[3,4]*(1-AE[4])*(FM[4,1]/(FM[4,1]+FM[4,2]))) / BM[3],
@@ -96,7 +104,7 @@ JM <- matrix(c(0,
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 
 test_that("the function works with multiple dead and defecation compartments", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = dead),
+  expect_equal(getJacobian(model),
                JM)
 })
 
@@ -130,6 +138,10 @@ DM["MEIO", "LABILE"] <- 2/3
 DM["MACRO", "LABILE"] <- 1/2
 FDM <- FM * DM
 dead <- list(names = c("LABILE", "REFRAC"), def = c("Def", "Def"), frac = DM)
+model <- list(
+  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, dead = dead
+)
+# Expected answer
 JM <- matrix(c(0,
                0,
                (FM[3,1] - FM[1,3] + FM[3,4]*(1-AE[4])*(FDM[4,1]/(FDM[4,1]+FDM[4,2]))) / BM[3],
@@ -153,6 +165,6 @@ JM <- matrix(c(0,
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 
 test_that("the function works with defecation and mortality into same compartment", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = dead),
+  expect_equal(getJacobian(model),
                JM)
 })

@@ -224,11 +224,12 @@ adjustDeadInput <- function(dead) {
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
 #' @export
-getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
+getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
                         dead = NULL, externals = NULL, MR = NULL) {
 
   FM <- removeExternals(externals, FM)
   dead <- adjustDeadInput(dead)
+  if(is.null(diagonal)) {diagonal <- 0}
 
   # Do checks for required data formats: throws errors
   if(dim(FM)[1] != dim(FM)[2]) {
@@ -284,5 +285,94 @@ getJacobian <- function(FM, BM, AE, GE, diagonal = 0,
   }
   diag(JM) <- diagonal
 
+  return(JM)
+}
+
+getJacobianDynamic <- function(y, func, parms) {
+  JM <- rootSolve::jacobian.full(y = y, func = func, parms = parms)
+  rownames(JM) <- colnames(JM)
+  return(JM)
+}
+
+# model input:
+#model <- list(
+#type = "ODE",
+#func = LotVmod,
+#y = State,
+#parms = Pars
+#)
+
+#' Jacobian matrix from input food web model
+#'
+#' This is a wrapper function reviewing the input food web model and redirecting
+#' the model to the correct function to obtain interaction strengths in a Jacobian matrix.
+#' @param model (required) A named list containing elements with the food web model data.
+#' One list element named "type" must exist and should either be "ODE" or "EF".
+#' "ODE" should be used if the model is dynamic and comprises a set of
+#' ordinary differential equations. Other list element required for "ODE" type models are
+#' "func", "y", and "parms"
+#' "EF" should be used in the model is a quantified energy flux model
+#' @param BM A named numeric vector with biomasses of all compartments, must be in the same
+#' order as the flow matrix after externals are excluded. (required)
+#' @param AE A named numeric vector with assimilation efficiencies of all
+#' compartments, must be in the same order as the flow matrix after externals
+#' are excluded. AE should be set to NA for dead/non-faunal compartments
+#' (see argument 'dead' below). (required)
+#' @param GE A named numeric vector with growth efficiencies of all compartments,
+#' must be in the same order as the flow matrix after externals are excluded.
+#' GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
+#' 'externals' below). (required)
+#' @param diagonal Either a single value, a numeric vector or the string "model". A single value will
+#' set all diagonal values to this number. A vector will set the diagonal to this
+#' user-specified diagonal. The string "model" calculates the diagonal values from flux
+#' values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
+#' (required)
+#' @param dead List with at most three elements named "names", "def", and "frac"
+#' containing information on all dead compartments (like detritus and nutrients).
+#' The element "names" is required and contains a character vector with all names of dead
+#' compartments.
+#' The element "def" of the list is optional and can contain a character vector specifying for
+#' each dead compartment if defecation occurs into this compartment ("Def") or not ("noDef").
+#' If this element is omitted it is assumed no defecation occurs into all dead compartments.
+#' The element "frac" is optional and can contain a matrix the same size and order as the FM matrix
+#' with the fraction of total flow that is defecation. This information is only
+#' needed if there are multiple parallel flows between two compartments of which
+#' only one reflects actual defecation, and the rest is for example mortality.
+#' If there are multiple defecation compartments, the Flowmatrix is used to
+#' calculate the relative distribution of matter into the specified defecation
+#' compartments. (optional)
+#' @param externals Character vector with all names of external
+#' compartments, i.e. which have no biomass, that have to be removed from
+#' the flow matrix. (optional)
+#' @param MR A named numeric vector with non-predatory mortality rates for all
+#' compartments (biomass per unit time or biomass per unit time per surface area).
+#' Sometimes this information can be extracted from the food web model, for example when
+#' natural death results in a flux from the faunal compartment to a carcass compartment.
+#' It can also be calculated as the inverse of the natural lifespan of the species
+#' (per unit time) multiplied by the biomass of the compartment.
+#' (required when diagonal is set to "model").
+#' @return This function returns a matrix containing interaction strengths, i.e. the
+#' effect of the resources (rows) on the consumers (columns) - for all
+#' interactions in the food web.
+#' @export
+getJacobian <- function(model = stop("Model input required")) {
+  if(model$type == "ODE") {
+    JM <- getJacobianDynamic(
+      y = model$y,
+      func = model$func,
+      parms = model$parms)
+  } else if(model$type == "EF") {
+    JM <- getJacobianEnergyFlux(
+      FM = model$FM,
+      BM = model$BM,
+      AE = model$AE,
+      GE = model$GE,
+      diagonal = model$diagonal,
+      dead = model$dead,
+      externals = model$externals,
+      MR = model$MR)
+  } else {
+    stop("Unknown model input")
+  }
   return(JM)
 }

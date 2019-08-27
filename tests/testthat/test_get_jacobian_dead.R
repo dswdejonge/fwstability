@@ -16,6 +16,10 @@ BM <- c(30, 20, 10) ; names(BM) <- fwnames
 AE <- c(NA, 0.2, 0.3) ; names(AE) <- fwnames
 GE <- c(NA, 0.2, 0.3) ; names(GE) <- fwnames
 dead <- list(names = "DETRITUS", def = "Def")
+model <- list(
+  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, dead = dead
+)
+# Expected answer
 JM <- matrix(c(0,
                (FM[2,1] - FM[1,2] + FM[2,3]*(1-AE[3])) / BM[2],
                (FM[3,1] - FM[1,3]) / BM[3],
@@ -29,28 +33,36 @@ JM <- matrix(c(0,
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 
 test_that("the function works with dead compartments", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, dead = dead),
+  expect_equal(getJacobian(model),
                JM)
 })
 
 # Proper data format, include vector diagonal
 DIAG <- c(-1,-2,-3)
+model <- list(
+  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE,
+  dead = dead, diagonal = DIAG
+)
+# Expected answer
 JM2 <- JM; JM2[c(1,5,9)] <- DIAG
 
 test_that("the function incorporates vector diagonal correctly", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
-                           dead = dead, diagonal = DIAG),
+  expect_equal(getJacobian(model),
                JM2)
 })
 
 # Proper data format, include vector calculated from model
 MR <- c(NA, 10, 5) ; names(MR) <- fwnames
+model <- list(
+  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE,
+  dead = dead, diagonal = "model", MR = MR
+)
+# Expected answer
 JM3 <- JM; JM3[c(1,5,9)] <- c(-1/BM[1] * (AE[2] * FM[1,2] + AE[3] * FM[1,3]),
                               -MR[2] / BM[2],
                               -MR[3] / BM[3]
 )
 test_that("the function calculates the diagonal from flux values", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE,
-                           dead = dead, diagonal = "model", MR = MR),
+  expect_equal(getJacobian(model),
                JM3)
 })
