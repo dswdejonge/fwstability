@@ -19,6 +19,11 @@ colnames(FM) <- fwnames
 BM <- c(30, 20, 10) ; names(BM) <- fwnames[1:3]
 AE <- c(0.1, 0.2, 0.3) ; names(AE) <- fwnames[1:3]
 GE <- c(0.1, 0.2, 0.3) ; names(GE) <- fwnames[1:3]
+model <- list(
+  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, externals = "CO2"
+
+)
+# Expected answer
 JM <- matrix(c(0,
                AE[1] * GE[1] * FM[2,1] / BM[2] + -FM[1,2] / BM[2],
                AE[1] * GE[1] * FM[3,1] / BM[3],
@@ -35,6 +40,6 @@ rownames(JM) <- fwnames[1:3]
 colnames(JM) <- fwnames[1:3]
 
 test_that("the function works with external compartments", {
-  expect_equal(getJacobian(FM = FM, BM = BM, AE = AE, GE = GE, externals = "CO2"),
+  expect_equal(getJacobian(model),
                JM)
 })

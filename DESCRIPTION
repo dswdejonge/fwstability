@@ -20,3 +20,5 @@ VignetteBuilder:
 	knitr,
 	LIM
 RoxygenNote: 6.1.1.9000
+Imports: 
+    rootSolve

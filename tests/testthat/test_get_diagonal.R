@@ -6,7 +6,6 @@ context("Diagonal value calculation")
 MR <- c(15,10,5) ; names(MR) <- c("PLANT", "WORM", "ANT")
 BM <- c(30, 20, 10) ; names(BM) <- c("PLANT", "WORM", "ANT")
 result <- -MR/BM ; names(result) <- c("PLANT", "WORM", "ANT")
-
 test_that("getDiagonalSpecies works with correct input data", {
   expect_equal(getDiagonalSpecies(MR = MR, BM = BM),
                result)
@@ -58,10 +57,11 @@ colnames(FM) <- c("DETRITUS", "PLANT", "ANIMAL")
 BM <- c(30, 20, 10) ; names(BM) <- c("DETRITUS", "PLANT", "ANIMAL")
 AE <- c(NA, 0.2, 0.3) ; names(AE) <- c("DETRITUS", "PLANT", "ANIMAL")
 GE <- c(NA, 0.2, 0.3) ; names(GE) <- c("DETRITUS", "PLANT", "ANIMAL")
+dead <- list(names = "DETRITUS")
 result <- -1/BM[1] * (AE[2] * FM[1,2] + AE[3] * FM[1,3])
 
 test_that("getDiagonalDetritus works with correct data input", {
-  expect_equal(getDiagonalDetritus(FM = FM, BM = BM, AE = AE, dead = "DETRITUS"),
+  expect_equal(getDiagonalDetritus(FM = FM, BM = BM, AE = AE, dead = dead),
                result)
 })
 
@@ -82,12 +82,12 @@ result <- c(-1/BM[1] * (AE[2] * FM[1,2] + AE[3] * FM[1,3]),
             )
 
 test_that("getDiagonal works with correct data input", {
-  expect_equal(getDiagonal(MR = MR, FM = FM, BM = BM, AE = AE, dead = "DETRITUS"),
+  expect_equal(getDiagonal(MR = MR, FM = FM, BM = BM, AE = AE, dead = dead),
                result)
 })
 
 # Error: optional dead compartment is present, but not all other required data.
 test_that("getDiagonal asks for all required data for dead compartments", {
-  expect_error(getDiagonal(MR = MR, BM = BM, dead = "DETRITUS"),
+  expect_error(getDiagonal(MR = MR, BM = BM, dead = dead),
                "please provide all required data to calculate dead diagonal values")
 })
