@@ -2,60 +2,22 @@
 % Please edit documentation in R/get_jacobian.R
 \name{getJacobian}
 \alias{getJacobian}
-\title{Jacobian matrix with interaction strengths}
+\title{Jacobian matrix from a food web model}
 \usage{
-getJacobian(FM, BM, AE, GE, diagonal = 0, dead = NULL,
-  externals = NULL, MR = NULL)
+getJacobian(model = stop("Model input required"))
 }
 \arguments{
-\item{FM}{A named square flowmatrix, source compartments as rows,
-sink compartments as columns. (required)}
-
-\item{BM}{A named numeric vector with biomasses of all compartments, must be in the same
-order as the flow matrix after externals are excluded. (required)}
-
-\item{AE}{A named numeric vector with assimilation efficiencies of all
-compartments, must be in the same order as the flow matrix after externals
-are excluded. AE should be set to NA for dead/non-faunal compartments
-(see argument 'dead' below). (required)}
-
-\item{GE}{A named numeric vector with growth efficiencies of all compartments,
-must be in the same order as the flow matrix after externals are excluded.
-GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
-'externals' below). (required)}
-
-\item{diagonal}{Either a single value, a numeric vector or the string "model". A single value will
-set all diagonal values to this number. A vector will set the diagonal to this
-user-specified diagonal. The string "model" calculates the diagonal values from flux
-values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
-(required)}
-
-\item{dead}{List with at most three elements named "names", "def", and "frac"
-containing information on all dead compartments (like detritus and nutrients).
-The element "names" is required and contains a character vector with all names of dead
-compartments.
-The element "def" of the list is optional and can contain a character vector specifying for
-each dead compartment if defecation occurs into this compartment ("Def") or not ("noDef").
-If this element is omitted it is assumed no defecation occurs into all dead compartments.
-The element "frac" is optional and can contain a matrix the same size and order as the FM matrix
-with the fraction of total flow that is defecation. This information is only
-needed if there are multiple parallel flows between two compartments of which
-only one reflects actual defecation, and the rest is for example mortality.
-If there are multiple defecation compartments, the Flowmatrix is used to
-calculate the relative distribution of matter into the specified defecation
-compartments. (optional)}
-
-\item{externals}{Character vector with all names of external
-compartments, i.e. which have no biomass, that have to be removed from
-the flow matrix. (optional)}
-
-\item{MR}{A named numeric vector with non-predatory mortality rates for all
-compartments (biomass per unit time or biomass per unit time per surface area).
-Sometimes this information can be extracted from the food web model, for example when
-natural death results in a flux from the faunal compartment to a carcass compartment.
-It can also be calculated as the inverse of the natural lifespan of the species
-(per unit time) multiplied by the biomass of the compartment.
-(required when diagonal is set to "model").}
+\item{model}{(required) A named list containing elements with food web model data.
+One list element named \emph{type} must exist and should either be the string "ODE" or "EF".
+\itemize{
+\item \bold{ODE} should be used if the model is dynamic and comprises a set of
+ordinary differential equations. Other list element required for ODE type models are
+\emph{func}, \emph{y}, and \emph{parms} to be used by the \code{\link{getJacobianODE}}
+function.
+\item \bold{EF} should be used if the model is a quantified energy flux model. Other list elements required
+for EF models are \emph{FM}, \emph{BM}, \emph{AE}, and \emph{GE} to be used by the
+\code{\link{getJacobianEnergyFlux}} function.
+}}
 }
 \value{
 This function returns a matrix containing interaction strengths, i.e. the
@@ -63,16 +25,9 @@ effect of the resources (rows) on the consumers (columns) - for all
 interactions in the food web.
 }
 \description{
-This functions calculates interaction strengths from a resolved energy-flux
-food web model and uses these values as entries for a Jacobian matrix.
-The diagonal can be all-zero (default) or user-defined. This function is an
-implementation of the equations from the following references: \cr
-de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
-Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
-1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
-Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
-Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326 \cr
-Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
-and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
-651–661. https://doi.org/10.1111/ele.12266
+This is a wrapper function that reviews the given food web model and redirects
+the input to the correct function for obtaining interaction strengths in a Jacobian matrix.
+}
+\seealso{
+\code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}}.
 }

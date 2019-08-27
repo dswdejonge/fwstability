@@ -6,39 +6,44 @@
 #' from prey to predator is divided by the biomass of the consumer.
 #' The flow from consumer to detritus, plus the defecation of predators of
 #' the consumer into the detritus pool, minus the uptake of detritus, is
-#' divided by the biomass of the consumer. \cr
-#' References: \cr
-#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+#' divided by the biomass of the consumer.
+#' @references
+#' \itemize{
+#' \item de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
 #' Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
-#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
-#' Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
-#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326 \cr
-#' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+#' \item Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326
+#' \item Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 #' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 #' 651–661. https://doi.org/10.1111/ele.12266
-#' @param FM A square flowmatrix, source compartments as rows,
-#' sink compartments as columns. (required)
-#' @param BM Numeric vector with biomasses of all compartments,
-#' must be in the same order as the flow matrix. (required)
-#' @param AE Numeric vector with assimilation efficiencies of all
-#' compartments, must be in the same order as the flow matrix. (required)
-#' @param dead List with three named elements containing information on all dead
-#' compartments (like detritus and nutrients). The element "names" is required and contains a
-#' character vector with all names of dead compartments. The other two elements of the list
-#' are optional. The element "def" can contain a character vector specifying for each dead
-#' compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
-#' element is NULL it is assumed no defecation occurs into all compartments. The
-#' element "frac" can contain a matrix the same size and order as the FM matrix
-#' with the fraction of total flow that is defecation. This information is only
-#' needed if there are multiple parallel flows between two compartments of which
-#' only one reflects actual defecation, and the rest is for example mortality. (optional)
-#' @return This function returns a matrix containing interaction strengths - measured as the
-#' effect of the consumer (rows) on the resource (columns) - for all
-#' interactions in the food web.
+#' }
+#' @param FM (required) A square flowmatrix, source compartments as rows,
+#' sink compartments as columns.
+#' @param BM (required) Numeric vector with biomasses of all compartments,
+#' must be in the same order as the flow matrix.
+#' @param AE (required) Numeric vector with assimilation efficiencies of all
+#' compartments, must be in the same order as the flow matrix.
+#' @param dead (optional) List with at most three elements named \emph{names}, \emph{def},
+#' and \emph{frac} containing information on all dead compartments (like detritus and nutrients).
+#' \itemize{
+#' \item The element \emph{names} is required and contains a character vector with all names of dead
+#' compartments.
+#' \item The element \emph{def} should be either NULL or contain a character vector
+#' specifying for each dead compartment if defecation occurs into this compartment
+#' (\bold{Def}) or not (\bold{noDef}).
+#' If this element is NULL it is assumed no defecation occurs into all dead compartments.
+#' If there are multiple defecation compartments, the Flowmatrix \code{FM} is used to
+#' calculate the relative distribution of matter into the specified defecation
+#' compartments.
+#' \item The element \emph{frac} should be either NULL or contain a matrix the same size and order
+#' as the \code{FM} matrix with the fraction of each flow that is defecation.
+#' This information is only needed if there are multiple parallel flows between two compartments of
+#' which only one reflects actual defecation, and the rest is for example mortality.
+#' }
+#' @return This function returns a matrix containing the effects of the consumers (rows) on the
+#' resources (columns).
 #' @export
-#' @examples
-#' effectOnResource(Flowmatrix(model), BM = c(10,20,30), AE = c(0.2, 0.6, 0.5),
-#' dead = "DETRITUS")
 effectOnResource <- function(FM, BM, AE, dead = NULL){
   # As a matrix is by default divided by row (which now contain the sources,
   # but we want to divide by consumer), the matrix must be transposed first.
@@ -96,24 +101,26 @@ effectOnResource <- function(FM, BM, AE, dead = NULL){
 #' of the consumer population. It uses functions from de Ruiter et al.
 #' (1995) and Neutel et al. (2002). The flow from resource to consumer is
 #' adjusted for conversion efficiency and divided by the biomass of the
-#' resource. \cr
-#' References: \cr
-#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+#' resource.
+#' @references
+#' \itemize{
+#' \item de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
 #' Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
-#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
-#' Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
-#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326 \cr
-#' @param FM A square flowmatrix, source compartments as rows,
-#' sink compartments as columns. (required)
-#' @param BM Numeric vector with biomasses of all compartments, must be in the same
-#' order as the flow matrix. (required)
-#' @param AE Numeric vector with assimilation efficiencies of all
-#' compartments, must be in the same order as the flow matrix. (required)
-#' @param GE Numeric vector with growth efficiencies of all compartments,
-#' must be in the same order as the flow matrix. (required)
-#' @return This function returns a matrix containing interaction strengths - measured as the
-#' effect of the resources (rows) on the consumers (columns) - for all
-#' interactions in the food web.
+#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+#' \item Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326
+#' }
+#' @param FM (required) A square flowmatrix, source compartments as rows,
+#' sink compartments as columns.
+#' @param BM (required) Numeric vector with biomasses of all compartments, must be in the same
+#' order as the flow matrix \code{FM}.
+#' @param AE (required) Numeric vector with assimilation efficiencies of all
+#' compartments, must be in the same order as the flow matrix \code{FM}.
+#' @param GE (required) Numeric vector with growth efficiencies of all compartments,
+#' must be in the same order as the flow matrix \code{FM}.
+#' @return This function returns a matrix containing the effects of resources (rows) on
+#' consumers (columns).
+#' @seealso \code{\link{effectOnResource}}, \code{\link{getJacobianEnergyFlux}}
 #' @export
 effectOnConsumer <- function(FM, BM, AE, GE) {
   # Conversion efficiencies of the predators must be included, which are in the
@@ -169,57 +176,66 @@ adjustDeadInput <- function(dead) {
 #'
 #' This functions calculates interaction strengths from a resolved energy-flux
 #' food web model and uses these values as entries for a Jacobian matrix.
-#' The diagonal can be all-zero (default) or user-defined. This function is an
-#' implementation of the equations from the following references: \cr
-#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+#' The diagonal can be all-zero (default), user-defined, or calculated from the model.
+#' This function is an implementation of the equations from the references listed below.
+#' @references
+#' \itemize{
+#' \item de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
 #' Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
-#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
-#' Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
-#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326 \cr
-#' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+#' 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+#' \item Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+#' Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326
+#' \item Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 #' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 #' 651–661. https://doi.org/10.1111/ele.12266
-#' @param FM A named square flowmatrix, source compartments as rows,
-#' sink compartments as columns. (required)
-#' @param BM A named numeric vector with biomasses of all compartments, must be in the same
-#' order as the flow matrix after externals are excluded. (required)
-#' @param AE A named numeric vector with assimilation efficiencies of all
-#' compartments, must be in the same order as the flow matrix after externals
-#' are excluded. AE should be set to NA for dead/non-faunal compartments
-#' (see argument 'dead' below). (required)
-#' @param GE A named numeric vector with growth efficiencies of all compartments,
-#' must be in the same order as the flow matrix after externals are excluded.
-#' GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
-#' 'externals' below). (required)
-#' @param diagonal Either a single value, a numeric vector or the string "model". A single value will
-#' set all diagonal values to this number. A vector will set the diagonal to this
-#' user-specified diagonal. The string "model" calculates the diagonal values from flux
-#' values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
-#' (required)
-#' @param dead List with at most three elements named "names", "def", and "frac"
-#' containing information on all dead compartments (like detritus and nutrients).
-#' The element "names" is required and contains a character vector with all names of dead
+#' }
+#' @param FM (required) A named square flowmatrix, source compartments as rows,
+#' sink compartments as columns.
+#' @param BM (required) A named numeric vector with biomasses of all compartments, must be in the same
+#' order as the flow matrix \code{FM} after externals are excluded (see \code{externals}).
+#' @param AE (required) A named numeric vector with assimilation efficiencies of all
+#' compartments, must be in the same order as the flow matrix \code{FM} after externals
+#' are excluded. \code{AE} should be set to NA for dead/non-faunal compartments
+#' (see \code{dead}).
+#' @param GE (required) A named numeric vector with growth efficiencies of all compartments,
+#' must be in the same order as the flow matrix \code{FM} after externals are excluded.
+#' \code{GE} should be set to NA for dead/non-faunal compartments (see \code{dead} and
+#' \code{externals}).
+#' @param diagonal (required) Either a single value, a numeric vector or the string "model".
+#' Default is an all-zero diagonal.
+#' \itemize{
+#' \item A single value will set all diagonal values to this number.
+#' \item A vector will set the diagonal to this user-specified diagonal.
+#' \item The string "model" calculates the diagonal values from flux values.
+#' This requires the argument \code{MR}.
+#' }
+#' @param dead (optional) List with at most three elements named \emph{names}, \emph{def},
+#' and \emph{frac} containing information on all dead compartments (like detritus and nutrients).
+#' \itemize{
+#' \item The element \emph{names} is required and contains a character vector with all names of dead
 #' compartments.
-#' The element "def" of the list is optional and can contain a character vector specifying for
-#' each dead compartment if defecation occurs into this compartment ("Def") or not ("noDef").
+#' \item The element \emph{def} of the list is optional and can contain a character vector
+#' specifying for each dead compartment if defecation occurs into this compartment
+#' (\bold{Def}) or not (\bold{noDef}).
 #' If this element is omitted it is assumed no defecation occurs into all dead compartments.
-#' The element "frac" is optional and can contain a matrix the same size and order as the FM matrix
-#' with the fraction of total flow that is defecation. This information is only
-#' needed if there are multiple parallel flows between two compartments of which
-#' only one reflects actual defecation, and the rest is for example mortality.
 #' If there are multiple defecation compartments, the Flowmatrix is used to
 #' calculate the relative distribution of matter into the specified defecation
-#' compartments. (optional)
-#' @param externals Character vector with all names of external
+#' compartments.
+#' \item The element \emph{frac} is optional and should contain a matrix the same size and order
+#' as the \code{FM} matrix with the fraction of each flow that is defecation.
+#' This information is only needed if there are multiple parallel flows between two compartments of
+#' which only one reflects actual defecation, and the rest is for example mortality.
+#' }
+#' @param externals (optional) Character vector with all names of external
 #' compartments, i.e. which have no biomass, that have to be removed from
-#' the flow matrix. (optional)
-#' @param MR A named numeric vector with non-predatory mortality rates for all
-#' compartments (biomass per unit time or biomass per unit time per surface area).
-#' Sometimes this information can be extracted from the food web model, for example when
+#' the flow matrix before calculations.
+#' @param MR (required when \code{diagonal} is set to \emph{model})
+#' A named numeric vector with non-predatory mortality rates for all
+#' compartments (same units as the flow matrix \code{FM}).
+#' @details \code{MR} can sometimes be extracted from the food web model, for example when
 #' natural death results in a flux from the faunal compartment to a carcass compartment.
 #' It can also be calculated as the inverse of the natural lifespan of the species
 #' (per unit time) multiplied by the biomass of the compartment.
-#' (required when diagonal is set to "model").
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
@@ -288,76 +304,41 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   return(JM)
 }
 
-getJacobianDynamic <- function(y, func, parms) {
+#' Jacobian matrix from a ODE model
+#'
+#' This function produces a Jacobian matrix from a model defined as a set of
+#' ordinary differential equations.
+#' @inheritParams rootSolve::jacobian.full
+#' @seealso The package rootSolve for full documentation on \code{\link[rootSolve]{jacobian.full}}.
+getJacobianODE <- function(y, func, parms) {
   JM <- rootSolve::jacobian.full(y = y, func = func, parms = parms)
   rownames(JM) <- colnames(JM)
   return(JM)
 }
 
-# model input:
-#model <- list(
-#type = "ODE",
-#func = LotVmod,
-#y = State,
-#parms = Pars
-#)
-
-#' Jacobian matrix from input food web model
+#' Jacobian matrix from a food web model
 #'
-#' This is a wrapper function reviewing the input food web model and redirecting
-#' the model to the correct function to obtain interaction strengths in a Jacobian matrix.
-#' @param model (required) A named list containing elements with the food web model data.
-#' One list element named "type" must exist and should either be "ODE" or "EF".
-#' "ODE" should be used if the model is dynamic and comprises a set of
-#' ordinary differential equations. Other list element required for "ODE" type models are
-#' "func", "y", and "parms"
-#' "EF" should be used in the model is a quantified energy flux model
-#' @param BM A named numeric vector with biomasses of all compartments, must be in the same
-#' order as the flow matrix after externals are excluded. (required)
-#' @param AE A named numeric vector with assimilation efficiencies of all
-#' compartments, must be in the same order as the flow matrix after externals
-#' are excluded. AE should be set to NA for dead/non-faunal compartments
-#' (see argument 'dead' below). (required)
-#' @param GE A named numeric vector with growth efficiencies of all compartments,
-#' must be in the same order as the flow matrix after externals are excluded.
-#' GE should be set to NA for dead/non-faunal compartments (see argument 'dead' and
-#' 'externals' below). (required)
-#' @param diagonal Either a single value, a numeric vector or the string "model". A single value will
-#' set all diagonal values to this number. A vector will set the diagonal to this
-#' user-specified diagonal. The string "model" calculates the diagonal values from flux
-#' values. For the latter the argument "MR" is required. Default is an all-zero diagonal.
-#' (required)
-#' @param dead List with at most three elements named "names", "def", and "frac"
-#' containing information on all dead compartments (like detritus and nutrients).
-#' The element "names" is required and contains a character vector with all names of dead
-#' compartments.
-#' The element "def" of the list is optional and can contain a character vector specifying for
-#' each dead compartment if defecation occurs into this compartment ("Def") or not ("noDef").
-#' If this element is omitted it is assumed no defecation occurs into all dead compartments.
-#' The element "frac" is optional and can contain a matrix the same size and order as the FM matrix
-#' with the fraction of total flow that is defecation. This information is only
-#' needed if there are multiple parallel flows between two compartments of which
-#' only one reflects actual defecation, and the rest is for example mortality.
-#' If there are multiple defecation compartments, the Flowmatrix is used to
-#' calculate the relative distribution of matter into the specified defecation
-#' compartments. (optional)
-#' @param externals Character vector with all names of external
-#' compartments, i.e. which have no biomass, that have to be removed from
-#' the flow matrix. (optional)
-#' @param MR A named numeric vector with non-predatory mortality rates for all
-#' compartments (biomass per unit time or biomass per unit time per surface area).
-#' Sometimes this information can be extracted from the food web model, for example when
-#' natural death results in a flux from the faunal compartment to a carcass compartment.
-#' It can also be calculated as the inverse of the natural lifespan of the species
-#' (per unit time) multiplied by the biomass of the compartment.
-#' (required when diagonal is set to "model").
+#' This is a wrapper function that reviews the given food web model and redirects
+#' the input to the correct function for obtaining interaction strengths in a Jacobian matrix.
+#' @param model (required) A named list containing elements with food web model data.
+#' One list element named \emph{type} must exist and should either be the string "ODE" or "EF".
+#' \itemize{
+#' \item \bold{ODE} should be used if the model is dynamic and comprises a set of
+#' ordinary differential equations. Other list element required for ODE type models are
+#' \emph{func}, \emph{y}, and \emph{parms} to be used by the \code{\link{getJacobianODE}}
+#' function.
+#' \item \bold{EF} should be used if the model is a quantified energy flux model. Other list elements required
+#' for EF models are \emph{FM}, \emph{BM}, \emph{AE}, and \emph{GE} to be used by the
+#' \code{\link{getJacobianEnergyFlux}} function.
+#' }
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
+#' @seealso \code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}}.
 #' @export
 getJacobian <- function(model = stop("Model input required")) {
   if(model$type == "ODE") {
-    JM <- getJacobianDynamic(
+    JM <- getJacobianODE(
       y = model$y,
       func = model$func,
       parms = model$parms)

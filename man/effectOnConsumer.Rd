@@ -7,33 +7,38 @@
 effectOnConsumer(FM, BM, AE, GE)
 }
 \arguments{
-\item{FM}{A square flowmatrix, source compartments as rows,
-sink compartments as columns. (required)}
+\item{FM}{(required) A square flowmatrix, source compartments as rows,
+sink compartments as columns.}
 
-\item{BM}{Numeric vector with biomasses of all compartments, must be in the same
-order as the flow matrix. (required)}
+\item{BM}{(required) Numeric vector with biomasses of all compartments, must be in the same
+order as the flow matrix \code{FM}.}
 
-\item{AE}{Numeric vector with assimilation efficiencies of all
-compartments, must be in the same order as the flow matrix. (required)}
+\item{AE}{(required) Numeric vector with assimilation efficiencies of all
+compartments, must be in the same order as the flow matrix \code{FM}.}
 
-\item{GE}{Numeric vector with growth efficiencies of all compartments,
-must be in the same order as the flow matrix. (required)}
+\item{GE}{(required) Numeric vector with growth efficiencies of all compartments,
+must be in the same order as the flow matrix \code{FM}.}
 }
 \value{
-This function returns a matrix containing interaction strengths - measured as the
-effect of the resources (rows) on the consumers (columns) - for all
-interactions in the food web.
+This function returns a matrix containing the effects of resources (rows) on
+consumers (columns).
 }
 \description{
 This function finds the per capita effect of a resource on the growth
 of the consumer population. It uses functions from de Ruiter et al.
 (1995) and Neutel et al. (2002). The flow from resource to consumer is
 adjusted for conversion efficiency and divided by the biomass of the
-resource. \cr
-References: \cr
-de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+resource.
+}
+\references{
+\itemize{
+\item de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
 Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
-1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
-Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
-Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326 \cr
+1257–1260. https://doi.org/10.1126/science.269.5228.1257
+\item Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326
+}
+}
+\seealso{
+\code{\link{effectOnResource}}, \code{\link{getJacobianEnergyFlux}}
 }

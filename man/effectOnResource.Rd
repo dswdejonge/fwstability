@@ -7,30 +7,36 @@
 effectOnResource(FM, BM, AE, dead = NULL)
 }
 \arguments{
-\item{FM}{A square flowmatrix, source compartments as rows,
-sink compartments as columns. (required)}
+\item{FM}{(required) A square flowmatrix, source compartments as rows,
+sink compartments as columns.}
 
-\item{BM}{Numeric vector with biomasses of all compartments,
-must be in the same order as the flow matrix. (required)}
+\item{BM}{(required) Numeric vector with biomasses of all compartments,
+must be in the same order as the flow matrix.}
 
-\item{AE}{Numeric vector with assimilation efficiencies of all
-compartments, must be in the same order as the flow matrix. (required)}
+\item{AE}{(required) Numeric vector with assimilation efficiencies of all
+compartments, must be in the same order as the flow matrix.}
 
-\item{dead}{List with three named elements containing information on all dead
-compartments (like detritus and nutrients). The element "names" is required and contains a
-character vector with all names of dead compartments. The other two elements of the list
-are optional. The element "def" can contain a character vector specifying for each dead
-compartment if defecation occurs into this compartment ("Def") or not ("noDef"). If this
-element is NULL it is assumed no defecation occurs into all compartments. The
-element "frac" can contain a matrix the same size and order as the FM matrix
-with the fraction of total flow that is defecation. This information is only
-needed if there are multiple parallel flows between two compartments of which
-only one reflects actual defecation, and the rest is for example mortality. (optional)}
+\item{dead}{(optional) List with at most three elements named \emph{names}, \emph{def},
+and \emph{frac} containing information on all dead compartments (like detritus and nutrients).
+\itemize{
+\item The element \emph{names} is required and contains a character vector with all names of dead
+compartments.
+\item The element \emph{def} should be either NULL or contain a character vector
+specifying for each dead compartment if defecation occurs into this compartment
+(\bold{Def}) or not (\bold{noDef}).
+If this element is NULL it is assumed no defecation occurs into all dead compartments.
+If there are multiple defecation compartments, the Flowmatrix \code{FM} is used to
+calculate the relative distribution of matter into the specified defecation
+compartments.
+\item The element \emph{frac} should be either NULL or contain a matrix the same size and order
+as the \code{FM} matrix with the fraction of each flow that is defecation.
+This information is only needed if there are multiple parallel flows between two compartments of
+which only one reflects actual defecation, and the rest is for example mortality.
+}}
 }
 \value{
-This function returns a matrix containing interaction strengths - measured as the
-effect of the consumer (rows) on the resource (columns) - for all
-interactions in the food web.
+This function returns a matrix containing the effects of the consumers (rows) on the
+resources (columns).
 }
 \description{
 This function finds the per capita effect of a consumer on the growth
@@ -39,18 +45,17 @@ of the resource population. It implements the functions from de Ruiter et al.
 from prey to predator is divided by the biomass of the consumer.
 The flow from consumer to detritus, plus the defecation of predators of
 the consumer into the detritus pool, minus the uptake of detritus, is
-divided by the biomass of the consumer. \cr
-References: \cr
-de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
+divided by the biomass of the consumer.
+}
+\references{
+\itemize{
+\item de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
 Interaction Strengths, and Stability in Real Ecosystems. Science. 269,
-1257–1260. https://doi.org/10.1126/science.269.5228.1257 \cr
-Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
-Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326 \cr
-Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+1257–1260. https://doi.org/10.1126/science.269.5228.1257
+\item Neutel, A.M., Heesterbeek, J.A.P., Ruiter, P.C. De, 2002. Stability in Real Food Webs:
+Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/science.1068326
+\item Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 651–661. https://doi.org/10.1111/ele.12266
 }
-\examples{
-effectOnResource(Flowmatrix(model), BM = c(10,20,30), AE = c(0.2, 0.6, 0.5),
-dead = "DETRITUS")
 }
