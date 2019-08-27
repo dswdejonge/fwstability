@@ -405,13 +405,13 @@ The stability of the food web can now be found by finding the maximum real part 
 getStability(JM)
 ```
 
-It is also possible to find stability as the scalar of the natural mortality rates needed to produce a stable matrix.
+It is also possible to find stability as the scalar of the natural mortality rates needed to produce a stable matrix (the method used in the original paper).
 ```{r}
 getStability(JM, method = "scalar", 
              mortalities = foodweb_data$MR, dead = "Detritus")
 ```
 
-Both methods are valid, altough it is clear that the actual values differ. Therefore, it is important to know what method has been chosen to find stability and to interpret it correctly.
+Both methods are valid, altough it is clear that the actual values differ. Therefore, it is important to know what stability method has been used in order to interpret the results correctly.
 
 It is also possible to calculate values for the diagonal instead of setting them to zero.
 ```{r}
@@ -421,7 +421,7 @@ JM <- getJacobian(
   AE = foodweb_data$AE,
   GE = foodweb_data$GE,
   diagonal = "model",
-  dead = "Detritus",
+  dead = list(names = "Detritus"),
   MR = foodweb_data$MR
 )
 
