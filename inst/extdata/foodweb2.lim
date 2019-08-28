@@ -1,54 +1,100 @@
 =====================================================
-file: foodweb.lim
-Solve the model in R using the R-package LIM with:
-require(LIM)
-lim <- Setup("foodweb.lim")
-Ldei(lim)
-Xranges(lim)
-Adjusted from the original vignette example:
-- added biomasses of food web compartments
+file: foodweb2.lim
+Meiofauna feeds on labile detritus.
+Meiofauna and macrofauna defecate into both labile and refractory detritus.
+Meiofauna and macrofauna both also deposit carbon due to mortality into the labile compartment.
+  IN          OUT       OUT
+  /            /         /
+ LABILE ----> MEIO --->  MACRO
+  ^_____________/ <________/  defecation + mortality
+ REFRAC <------/ <--------/   defecation
+  /
+  OUT
 =====================================================
 
 ## EXTERNAL
-CO2
-EXP ! export
+IN  ! import
+OUT ! export
 ## END EXTERNAL
 
 ## COMPONENT
-Pl = 700 {g C m-2} ! plant
-AN = 50 {g C m-2} ! Animal
-Det = 1000 {g C m-2} ! Detritus
+LABILE = 30 {g C m-2} ! Labile detritus
+REFRAC = 20 {g C m-2} ! Refractory detritus
+MEIO   = 10 {g C m-2} ! Meiofauna
+MACRO  = 5  {g C m-2} ! Macrofauna
 ## END COMPONENT
 
 ## FLOWS
-NPP : CO2 -> Pl
-Pgraz : Pl -> An
-Pmort : Pl -> Det
-Dgraz : Det -> An
-Aresp : An ->CO2
-Amort : An ->EXP
-Faeces: An ->Det
-Detmin: Det -> CO2
+import      : IN -> LABILE
+export      : REFRAC -> OUT
+
+!-- Meiofauna processes
+! in
+meioGrazDet : LABILE -> MEIO
+! out
+meioDefLab  : MEIO -> LABILE
+meioMort    : MEIO -> LABILE
+meioDefRefrac : MEIO -> REFRAC
+meioResp    : MEIO -> OUT
+
+!-- Macrofauna processes
+! in
+macroPredMeio : MEIO -> MACRO
+!out
+macroDefLab : MACRO -> LABILE
+macroMort   : MACRO -> LABILE
+macroDefRefrac : MACRO -> REFRAC
+macroResp    : MACRO -> OUT
 ## END FLOWS
 
 ## PARAMETERS
-minFaeces = 0.3
-maxFaeces = 0.6
-growthCost = 0.3
+! Measured data
+meiDefrate  = 6 {g C m-2}
+macDefrate  = 3 {g C m-2}
+
+! Data from literature (min max values)
+! AE constraints
+meiAEmin = 0.5 {fraction}
+meiAEmax = 0.9 {fraction}
+macAEmin = 0.4 {fraction}
+macAEmax = 0.8 {fraction}
+! GE constraints
+meiGEmin = 0.4 {fraction}
+meiGEmax = 0.8 {fraction}
+macGEmin = 0.3 {fraction}
+macGEmax = 0.7 {fraction}
 ## END PARAMETERS
 
 ## VARIABLES
-Ingestion = Pgraz + Dgraz
-Assimilation = Ingestion - Faeces
-GrowthResp = Assimilation*growthCost
+!-- Should only be addition or subtraction of flows and variables.
+!-- Declare variable before you use it for another variable.
+
+! Total defecation
+meiDef = meiDefLab + meiDefRefrac
+macDef = macDefLab + macDefRefrac
+
+! Assimilation
+meiAss = flowto(MEIO) - meiDef
+macAss = flowto(MACRO) - macDef
+
+! Secondary production (growth)
+meiGrowth = meiAss - meiResp
+macGrowth = macAss - macResp
 ## END VARIABLES
 
 ## Equalities
-Faeces = 30
-Det -> CO2 = 10
+! Flows or variables that can only have one value
+meiDef = meiDefRate
+macDef = macDefRate
 ## End equalities
 
 ## Inequalities
-growthcost : Aresp > GrowthResp
-defaecation: Faeces = [minFaeces,maxFaeces]*Ingestion
+! Flows or variables that can have a range of values
+! Assimilation
+meiAss = flowto(MEIO) * [meiAEmin, meiAEmax]
+macAss = flowto(MACRO) * [macAEmin, macAEmax]
+
+! Secondary production (growth)
+meiGrowth = meiAss * [meiGEmin, meiGEmax]
+macGrowth = macAss * [macGEmin, macGEmax]
 ## End inequalities
