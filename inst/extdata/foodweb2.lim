@@ -30,21 +30,21 @@ export      : REFRAC -> OUT
 
 !-- Meiofauna processes
 ! in
-meioGrazDet : LABILE -> MEIO
+meiGrazDet    : LABILE -> MEIO
 ! out
-meioDefLab  : MEIO -> LABILE
-meioMort    : MEIO -> LABILE
-meioDefRefrac : MEIO -> REFRAC
-meioResp    : MEIO -> OUT
+meiDefLab     : MEIO -> LABILE
+meiDefRefrac  : MEIO -> REFRAC
+meiResp       : MEIO -> OUT
+meiMort       : MEIO -> LABILE
 
 !-- Macrofauna processes
 ! in
-macroPredMeio : MEIO -> MACRO
+macPredMeio   : MEIO -> MACRO
 !out
-macroDefLab : MACRO -> LABILE
-macroMort   : MACRO -> LABILE
-macroDefRefrac : MACRO -> REFRAC
-macroResp    : MACRO -> OUT
+macDefLab     : MACRO -> LABILE
+macDefRefrac  : MACRO -> REFRAC
+macResp       : MACRO -> OUT
+macMort       : MACRO -> LABILE
 ## END FLOWS
 
 ## PARAMETERS
@@ -98,3 +98,5 @@ macAss = flowto(MACRO) * [macAEmin, macAEmax]
 meiGrowth = meiAss * [meiGEmin, meiGEmax]
 macGrowth = macAss * [macGEmin, macGEmax]
 ## End inequalities
+
+
