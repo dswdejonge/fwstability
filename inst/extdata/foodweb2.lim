@@ -1,0 +1,54 @@
+=====================================================
+file: foodweb.lim
+Solve the model in R using the R-package LIM with:
+require(LIM)
+lim <- Setup("foodweb.lim")
+Ldei(lim)
+Xranges(lim)
+Adjusted from the original vignette example:
+- added biomasses of food web compartments
+=====================================================
+
+## EXTERNAL
+CO2
+EXP ! export
+## END EXTERNAL
+
+## COMPONENT
+Pl = 700 {g C m-2} ! plant
+AN = 50 {g C m-2} ! Animal
+Det = 1000 {g C m-2} ! Detritus
+## END COMPONENT
+
+## FLOWS
+NPP : CO2 -> Pl
+Pgraz : Pl -> An
+Pmort : Pl -> Det
+Dgraz : Det -> An
+Aresp : An ->CO2
+Amort : An ->EXP
+Faeces: An ->Det
+Detmin: Det -> CO2
+## END FLOWS
+
+## PARAMETERS
+minFaeces = 0.3
+maxFaeces = 0.6
+growthCost = 0.3
+## END PARAMETERS
+
+## VARIABLES
+Ingestion = Pgraz + Dgraz
+Assimilation = Ingestion - Faeces
+GrowthResp = Assimilation*growthCost
+## END VARIABLES
+
+## Equalities
+Faeces = 30
+Det -> CO2 = 10
+## End equalities
+
+## Inequalities
+growthcost : Aresp > GrowthResp
+defaecation: Faeces = [minFaeces,maxFaeces]*Ingestion
+## End inequalities
