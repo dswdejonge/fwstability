@@ -40,17 +40,34 @@ variables <- c(lim_solved$X["meioDefLab"] + lim_solved$X["meioDefRefrac"],
                lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"] - lim_solved$X["macroResp"]
                )
 names(variables) <- lim$Variables
+AE <- c(NA, NA,
+        variables["meioAss"]/sum(FMe[,"MEIO"], na.rm = T),
+        variables["macroAss"]/sum(FMe[,"MACRO"], na.rm = T)
+        )
+GE <- c(NA, NA,
+        variables["meioGrowth"]/variables["meioAss"],
+        variables["macroGrowth"]/variables["macroAss"]
+        )
+names(AE) <- lim$Components$name ; names(GE) <- lim$Components$name
 
-# Test getFlowMatrix function
+# Tests
 test_that("the Flowmatrix function works with parallel flows", {
   #expect_equal(Flowmatrix(lim, web = lim_solved$X), FMe)
   expect_equal(getFlowMatrix(readLIM), FMe)
+  expect_equal(getFlowMatrix(readLIM, web = lim_solved$X), FMe)
 })
 
-# Test getVariables function
 test_that("the getVariables function gives right answer", {
   expect_equal(getVariables(readLIM, web = lim_solved$X), variables)
 })
+
+test_that("the right conversion efficiencies are extracted", {
+  expect_equal(getCE(FM = FMe, vars = variables, lim = lim, aTag = "ass", gTag = "growth")$AE,
+               AE)
+  expect_equal(getCE(FM = FMe, vars = variables, lim = lim, aTag = "ass", gTag = "growth")$GE,
+               GE)
+})
+
 
 
 
@@ -58,8 +75,6 @@ test_that("the getVariables function gives right answer", {
 
 
 #BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames
-#AE <- c(NA, NA, 0.3, 0.3) ; names(AE) <- fwnames
-#GE <- c(NA, NA, 0.3, 0.3) ; names(GE) <- fwnames
 #DM <- matrix(1, nrow = 4, ncol = 4)
 #rownames(DM) <- fwnames
 #colnames(DM) <- fwnames
