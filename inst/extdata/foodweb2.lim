@@ -30,39 +30,39 @@ export      : REFRAC -> OUT
 
 !-- Meiofauna processes
 ! in
-meiGrazDet    : LABILE -> MEIO
+meioGrazDet    : LABILE -> MEIO
 ! out
-meiDefLab     : MEIO -> LABILE
-meiDefRefrac  : MEIO -> REFRAC
-meiResp       : MEIO -> OUT
-meiMort       : MEIO -> LABILE
+meioDefLab     : MEIO -> LABILE
+meioDefRefrac  : MEIO -> REFRAC
+meioResp       : MEIO -> OUT
+meioMort       : MEIO -> LABILE
 
 !-- Macrofauna processes
 ! in
-macPredMeio   : MEIO -> MACRO
+macroPredMeio   : MEIO -> MACRO
 !out
-macDefLab     : MACRO -> LABILE
-macDefRefrac  : MACRO -> REFRAC
-macResp       : MACRO -> OUT
-macMort       : MACRO -> LABILE
+macroDefLab     : MACRO -> LABILE
+macroDefRefrac  : MACRO -> REFRAC
+macroResp       : MACRO -> OUT
+macroMort       : MACRO -> LABILE
 ## END FLOWS
 
 ## PARAMETERS
 ! Measured data
-meiDefrate  = 6 {g C m-2}
-macDefrate  = 3 {g C m-2}
+meioDefrate  = 6 {g C m-2}
+macroDefrate  = 3 {g C m-2}
 
 ! Data from literature (min max values)
 ! AE constraints
-meiAEmin = 0.5 {fraction}
-meiAEmax = 0.9 {fraction}
-macAEmin = 0.4 {fraction}
-macAEmax = 0.8 {fraction}
+meioAEmin = 0.5 {fraction}
+meioAEmax = 0.9 {fraction}
+macroAEmin = 0.4 {fraction}
+macroAEmax = 0.8 {fraction}
 ! GE constraints
-meiGEmin = 0.4 {fraction}
-meiGEmax = 0.8 {fraction}
-macGEmin = 0.3 {fraction}
-macGEmax = 0.7 {fraction}
+meioGEmin = 0.4 {fraction}
+meioGEmax = 0.8 {fraction}
+macroGEmin = 0.3 {fraction}
+macroGEmax = 0.7 {fraction}
 ## END PARAMETERS
 
 ## VARIABLES
@@ -70,33 +70,33 @@ macGEmax = 0.7 {fraction}
 !-- Declare variable before you use it for another variable.
 
 ! Total defecation
-meiDef = meiDefLab + meiDefRefrac
-macDef = macDefLab + macDefRefrac
+meioDef = meioDefLab + meioDefRefrac
+macroDef = macroDefLab + macroDefRefrac
 
 ! Assimilation
-meiAss = flowto(MEIO) - meiDef
-macAss = flowto(MACRO) - macDef
+meioAss = flowto(MEIO) - meioDef
+macroAss = flowto(MACRO) - macroDef
 
 ! Secondary production (growth)
-meiGrowth = meiAss - meiResp
-macGrowth = macAss - macResp
+meioGrowth = meioAss - meioResp
+macroGrowth = macroAss - macroResp
 ## END VARIABLES
 
 ## Equalities
 ! Flows or variables that can only have one value
-meiDef = meiDefRate
-macDef = macDefRate
+meioDef = meioDefRate
+macroDef = macroDefRate
 ## End equalities
 
 ## Inequalities
 ! Flows or variables that can have a range of values
 ! Assimilation
-meiAss = flowto(MEIO) * [meiAEmin, meiAEmax]
-macAss = flowto(MACRO) * [macAEmin, macAEmax]
+meioAss = flowto(MEIO) * [meioAEmin, meioAEmax]
+macroAss = flowto(MACRO) * [macroAEmin, macroAEmax]
 
 ! Secondary production (growth)
-meiGrowth = meiAss * [meiGEmin, meiGEmax]
-macGrowth = macAss * [macGEmin, macGEmax]
+meioGrowth = meioAss * [meioGEmin, meioGEmax]
+macroGrowth = macroAss * [macroGEmin, macroGEmax]
 ## End inequalities
 
 

@@ -32,12 +32,12 @@ FMe <- matrix(c(
 0,      0,     0, 0, 0, 0
 ), nrow = nC, ncol = nC, byrow = TRUE)
 rownames(FMe) <- fwnames ; colnames(FMe) <- fwnames
-variables <- c(lim_solved$X["meiDefLab"] + lim_solved$X["meiDefRefrac"],
-               lim_solved$X["macDefLab"] + lim_solved$X["macDefRefrac"],
-               lim_solved$X["meiGrazDet"] - lim_solved$X["meiDefLab"] - lim_solved$X["meiDefRefrac"],
-               lim_solved$X["macPredMeio"] - lim_solved$X["macDefLab"] - lim_solved$X["macDefRefrac"],
-               lim_solved$X["meiGrazDet"] - lim_solved$X["meiDefLab"] - lim_solved$X["meiDefRefrac"] - lim_solved$X["meiResp"],
-               lim_solved$X["macPredMeio"] - lim_solved$X["macDefLab"] - lim_solved$X["macDefRefrac"] - lim_solved$X["macResp"]
+variables <- c(lim_solved$X["meioDefLab"] + lim_solved$X["meioDefRefrac"],
+               lim_solved$X["macroDefLab"] + lim_solved$X["macroDefRefrac"],
+               lim_solved$X["meioGrazDet"] - lim_solved$X["meioDefLab"] - lim_solved$X["meioDefRefrac"],
+               lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"],
+               lim_solved$X["meioGrazDet"] - lim_solved$X["meioDefLab"] - lim_solved$X["meioDefRefrac"] - lim_solved$X["meioResp"],
+               lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"] - lim_solved$X["macroResp"]
                )
 names(variables) <- lim$Variables
 
