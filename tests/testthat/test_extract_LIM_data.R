@@ -11,10 +11,7 @@
 # - externals
 # - getXratioMatrix
 
-# Import lim model
 library(LIM)
-
-# Solve lim model
 # readLIM allows you to easily access all data from the input file
 readLIM <- Read(system.file("extdata", "foodweb2.lim", package = "fwstability"))
 # Setup can directly use the input file, or the readLIM variable.
@@ -22,7 +19,8 @@ readLIM <- Read(system.file("extdata", "foodweb2.lim", package = "fwstability"))
 lim <- Setup(readLIM)
 # The Least Distance optimization is used to quantify all unknown flows.
 lim_solved <- Ldei(lim)
-# Expected answer
+
+# Expected answers
 fwnames <- c("LABILE", "REFRAC", "MEIO", "MACRO", "IN", "OUT")
 nC = lim$NExternal + lim$NComponents
 FMe <- matrix(c(
@@ -34,13 +32,25 @@ FMe <- matrix(c(
 0,      0,     0, 0, 0, 0
 ), nrow = nC, ncol = nC, byrow = TRUE)
 rownames(FMe) <- fwnames ; colnames(FMe) <- fwnames
+variables <- c(lim_solved$X["meiDefLab"] + lim_solved$X["meiDefRefrac"],
+               lim_solved$X["macDefLab"] + lim_solved$X["macDefRefrac"],
+               lim_solved$X["meiGrazDet"] - lim_solved$X["meiDefLab"] - lim_solved$X["meiDefRefrac"],
+               lim_solved$X["macPredMeio"] - lim_solved$X["macDefLab"] - lim_solved$X["macDefRefrac"],
+               lim_solved$X["meiGrazDet"] - lim_solved$X["meiDefLab"] - lim_solved$X["meiDefRefrac"] - lim_solved$X["meiResp"],
+               lim_solved$X["macPredMeio"] - lim_solved$X["macDefLab"] - lim_solved$X["macDefRefrac"] - lim_solved$X["macResp"]
+               )
+names(variables) <- lim$Variables
 
-# Test
+# Test getFlowMatrix function
 test_that("the Flowmatrix function works with parallel flows", {
   #expect_equal(Flowmatrix(lim, web = lim_solved$X), FMe)
   expect_equal(getFlowMatrix(readLIM), FMe)
 })
 
+# Test getVariables function
+test_that("the getVariables function gives right answer", {
+  expect_equal(getVariables(readLIM, web = lim_solved$X), variables)
+})
 
 
 

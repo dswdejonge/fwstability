@@ -1,18 +1,29 @@
-#################
-# findVariables #
-#################
-# Find value of variables based on the flow solution values.
-getsVariables <- function(LIM = NULL,
-                          readLIM = NULL,
-                          flowvalues = NULL) {
-  # Create vector to store data in
-  vals <-  numeric(LIM$NVariables)
-  # Get all needed data
-  # the vector with the variable values (varvec) is refreshed after every loop
-  vareq <- readLIM$vars       # contains matrix which defines the variable equations
-  parvec <- readLIM$pars$val  # vector with all parameter values in the right order
-  flowvec <- flowvalues       # vector with all parsimonious flow values (also contains levels)
-
+#' Calculate value of LIM variables from flow solutions.
+#'
+#' This function calculates the value of variables as defined in the LIM from the flow solutions.
+#' @references LIM package reference.
+#' @param readLIM (required) A linear inverse model read into the R environment with the R-package LIM.
+#' Can be achieved through \code{readLIM <- Read("path_to_input_file")}
+#' @param web (optional) The solved (food) web problem, i.e. the values of the unknowns;
+#' if not specified, the model is solved first, using Ldei.
+#' @details The optimal solution of the LIM only provides the flow solutions.
+#' However, in the LIM variables can be defined as the sum of some values.
+#' This function calculates the actual value of these variables based on the flow solutions.
+#' @return Returns an energy-flux model in the format needed for the getJacobian function.
+#' @export
+getsVariables <- function(readLIM, web = NULL) {
+  lim <- Setup(readLIM)
+  vars <- numeric(lim$NVariables) # vals
+  pars <- readLIM$pars$val # parvec
+  vareq <- readLIM$vars
+  if(is.null(web)) {
+    if(!is.null(lim$Cost) || !is.null(lim$Profit)) {
+      web <- Linp(lim)$X
+    } else {
+      web <- Lsei(lim, parsimonious = TRUE)$X
+    }
+  }
+  # Possible to remove loop?
   for (i in 1:LIM$NVariables) {
     # refresh vector with variable parsimonious values
     varvec <- vals # vector with all variables values in right order: needs to be refreshed every time
