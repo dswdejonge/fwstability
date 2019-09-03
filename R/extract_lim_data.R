@@ -1,3 +1,11 @@
+getTag <- function(vars, tag) {
+  names(vars) <- toupper(names(vars))
+  tag <- toupper(tag)
+  x <- vars[which(grepl(tag, names(vars)))]
+  names(x) <- gsub(tag, "", names(x))
+  return(x)
+}
+
 #' Get a Flowmatrix from a LIM
 #'
 #' This function extracts flow data from the LIM and produces a Flowmatrix i.e. flows from sources
@@ -81,12 +89,6 @@ getVariables <- function(readLIM, web = NULL) {
   names(vars) <- lim$Variables
   return(vars)
 }
-s
-getTag <- function(vars, tag) {
-  x <- vars[which(grepl(tag, names(vars)))]
-  names(x) <- gsub(tag, "", names(x))
-  return(x)
-}
 
 #' Get conversion efficiencies from a LIM.
 #'
@@ -115,28 +117,93 @@ getTag <- function(vars, tag) {
 #' !!! Growth efficiency BAC = growth / inflow
 #' @return Returns a named vector with assimilation efficiencies.
 #' @export
-getCE <- function(FM, vars, lim, aTag = "ass", gTag = "growth") {
+getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
+  if(is.null(aTag)) { aTag <- "ass"}
+  if(is.null(gTag)) {gTag <- "growth"}
   # TODO: how to deal with bacteria
   # TODO: how to deal with words containing more than comp name and tag.
-  names(vars) <- toupper(names(vars))
   AE <- rep(NA, length = lim$NComponents)
   names(AE) <- lim$Components$name
   GE <- rep(NA, length = lim$NComponents)
   names(GE) <- lim$Components$name
-  AP <- getTag(vars, toupper(aTag))
-  GP <- getTag(vars, toupper(gTag))
+  AP <- getTag(vars = vars, tag = aTag)
+  GP <- getTag(vars = vars, tag = gTag)
   AE[names(AP)] <- AP / colSums(FM[,names(AP)], na.rm = TRUE)
-  GE[names(GP)] <- GP / AP
+  GE[names(GP)] <- GP / AP[names(GP)]
   CE <- list(AE = AE, GE = GE)
   return(CE)
 }
 
+#' Get mortality rates from a LIM.
+#'
+#' This function calculates the mortality rates (per unit time) of all organisms from a LIM.
+#' @references LIM package reference
+#' @param BM (required) A named vector containing biomasses of all LIM components.
+#' @param web (required) A named vector with the flow values.
+#' @param mTag (optional) Tag assigned to the variables/flows containing the natural
+#' flow mortality. Default is set to "mort". Not case sensitive.
+#' @details The LIM must be set up in a specific way. The assimilation efficiency is calculated as
+#' the assimilated part (which is defined as variable in the LIM and calculated in the
+#' function getVariables) divided by the ingestion (which is the sum of the organism's
+#' column in the Flow Matrix FM).
+#' by dividing the amount of assimilated material/energy
+#' (must be defined in the original LIM model as variable) by the total ingestion of the organism.
+#' This function calculates growth (or secondary production) efficiences by dividing the amount
+#' of growth by the amount of assimilated material/energy
+#' (both must be defined in the original LIM model as variable).
+#' The LIM must be set up in a specific way. The assimilation efficiency is calculated as
+#' the assimilated part (which is defined as variable in the LIM and calculated in the
+#' function getVariables) divided by the ingestion (which is the sum of the organism's
+#' column in the Flow Matrix FM).
+#' !!! Growth efficiency BAC = growth / inflow
+#' @return Returns a named vector with mortality rates (per unit time).
+#' @export
+getMR <- function(BM, web, mTag = "mort") {
+  MR <- rep(NA, length = length(BM))
+  names(MR) <- names(BM)
+  MP <- getTag(web, mTag)
+  MR[names(MP)] <- MP / BM[names(MP)]
+  return(MR)
+}
+
+getDeadInfo <- function(dead, readLIM, web, FM = NULL) {
+  if(is.null(FM)) {
+    FM <- getFlowMatrix(readLIM, web)
+  }
+
+  dead <- adjustDeadInput(dead)
+
+  dead$def <- rep("noDef", length(dead$names))
+  allSinks <- readLIM$flows[,"to"]
+  names(allSinks) <- readLIM$flows[,"name"]
+  defComps <- getTag(allSinks, "mort")
+  dead$def[dead$names %in% readLIM$compnames[defComps]] <- "Def"
+
+  DM <- matrix(1, nrow = length(readLIM$compnames), ncol = length(readLIM$compnames))
+  rownames(DM) <- readLIM$compnames
+  colnames(DM) <- readLIM$compnames
+  flows <- readLIM$flows[,1:2]
+  dup <- which(duplicated(flows))
+  for(i in dup) {
+    a <- which(flows[,1] == flows[i, 1])
+    b <- which(flows[,2] == flows[i, 2])
+    same <- c(a, b)[duplicated(c(a, b))]
+
+    DM[flows[i,"from"],flows[i,"to"]] <-
+      sum(getTag(web[same], tag = "def"), na.rm = T) /
+      FM[flows[i,"from"],flows[i,"to"]]
+  }
+  dead$frac <- DM
+
+  return(dead)
+}
+
 # model$type
 # model$LIM
-# model$web
+# model$web)
 # model$aTag
 # model$gTag
-extractLIMdata() <- function(model) {
+extractLIMdata <- function(model) {
   FM <- getFlowMatrix(model$LIM, web = model$web)
 
   BM <- model$LIM$comp[,"val"]
@@ -152,10 +219,17 @@ extractLIMdata() <- function(model) {
 
   externals <- model$LIM$externnames
 
-  #TODO dead
-  #TODO MR
+  if(is.null(model$dead)) {
+    # search for compartments with the dead tag
+  } else {
+    dead <- getDeadInfo(
+      dead = model$dead, readLIM = model$LIM, web = model$web, FM = FM)
+  }
+
+  MR <- getMR(BM = BM, web = model$web)
 
   return(list(
-    FM = FM, BM = BM, AE = CE$AE, GE = CE$GE, externals = externals
-  ))
+    FM = FM, BM = BM, AE = CE$AE, GE = CE$GE,
+    externals = externals, dead = dead, MR = MR)
+  )
 }

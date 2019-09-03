@@ -167,7 +167,6 @@ adjustDeadInput <- function(dead) {
               length(which(dead$def == "Def" | dead$def == "noDef"))) {
       stop("the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
     }
-
   }
   return(dead)
 }
@@ -357,18 +356,19 @@ getJacobian <- function(model = stop("Model input required")) {
       externals = model$externals,
       MR = model$MR)
   } else if(model$type == "LIM") {
+    if(is.null(model$web)) {
+      model$web <- Ldei(Setup(model$LIM))$X
+    }
     extracted_data <- extractLIMdata(model)
     JM <- getJacobianEnergyFlux(
       FM = extracted_data$FM,
       BM = extracted_data$BM,
       AE = extracted_data$AE,
       GE = extracted_data$GE,
-      diagonal = model$diagonal,
-      #TODO:extract dead from model
-      dead = model$dead,
+      dead = extracted_data$dead,
       externals = extracted_data$externals,
-      #TODO: extract mortality from model
-      MR = extracted_data$MR
+      MR = extracted_data$MR,
+      diagonal = model$diagonal
     )
   } else {
     stop("Unknown model input")
