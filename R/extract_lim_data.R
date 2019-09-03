@@ -169,11 +169,10 @@ getMR <- function(BM, web, mTag = NULL) {
   return(MR)
 }
 
-getDeadInfo <- function(dead, readLIM, web, FM = NULL, deadTag = NULL, defTag = NULL) {
+getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
   if(is.null(FM)) {
     FM <- getFlowMatrix(readLIM, web)
   }
-  if(is.null(deadTag)) {deadTag <- "dead"}
   if(is.null(defTag)) {defTag <- "def"}
 
   dead <- adjustDeadInput(dead)
@@ -232,8 +231,8 @@ extractLIMdata <- function(model) {
     model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)]))
   }
   dead <- getDeadInfo(
-    dead = model$dead, readLIM = model$LIM, web = model$web, FM = FM,
-    deadTag = model$deadTag, defTag = model$defTag)
+    dead = model$dead, readLIM = model$LIM,
+    web = model$web, FM = FM, defTag = model$defTag)
 
   MR <- getMR(BM = BM, web = model$web, mTag = model$mTag)
 
