@@ -42,8 +42,7 @@ model2 <- list(
   LIM = readLIM,
   web = "foo"
 )
-mo
-del3 <- list(
+model3 <- list(
   type = "LIM",
   LIM = readLIM,
   aTag = "foo"
