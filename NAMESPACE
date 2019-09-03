@@ -2,9 +2,12 @@
 
 export(effectOnConsumer)
 export(effectOnResource)
+export(getCE)
 export(getDiagonal)
 export(getDiagonalSpecies)
 export(getFlowMatrix)
 export(getJacobian)
 export(getJacobianEnergyFlux)
+export(getMR)
 export(getStability)
+export(getVariables)

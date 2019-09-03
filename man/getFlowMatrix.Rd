@@ -4,10 +4,14 @@
 \alias{getFlowMatrix}
 \title{Get a Flowmatrix from a LIM}
 \usage{
-getFlowMatrix(originalFM = NULL, flows = NULL, answers = NULL)
+getFlowMatrix(readLIM, web = NULL, lim = NULL)
 }
 \arguments{
-\item{lim}{(required) A lim model.}
+\item{readLIM}{(required) A linear inverse model read into the R environment with the R-package LIM.
+Can be achieved through \code{readLIM <- Read("path_to_input_file")}}
+
+\item{web}{(optional) The solved (food) web problem, i.e. the values of the unknowns;
+if not specified, the model is solved first, using Ldei.}
 }
 \value{
 Returns an energy-flux model in the format needed for the getJacobian function.
@@ -17,7 +21,7 @@ This function extracts flow data from the LIM and produces a Flowmatrix i.e. flo
 in rows to the sinks in columns.
 }
 \details{
-The LIM must be set up in a specific way.
+The LIM must be set up in a specific way. sum columns must equal sum rows.
 }
 \references{
 LIM package reference
