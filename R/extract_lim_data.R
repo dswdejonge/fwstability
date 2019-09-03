@@ -18,8 +18,10 @@ getTag <- function(vars, tag) {
 #' @details The LIM must be set up in a specific way. sum columns must equal sum rows.
 #' @return Returns an energy-flux model in the format needed for the getJacobian function.
 #' @export
-getFlowMatrix <- function(readLIM, web = NULL) {
-  lim <- Setup(readLIM)
+getFlowMatrix <- function(readLIM, web = NULL, lim = NULL) {
+  if(is.null(lim)) {
+    lim <- Setup(readLIM)
+  }
   flows <- readLIM$flows[,1:2]
   flowmatrix <- lim$Flowmatrix
   if(is.null(web)) {
@@ -204,15 +206,17 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL) {
 # model$aTag
 # model$gTag
 extractLIMdata <- function(model) {
-  FM <- getFlowMatrix(model$LIM, web = model$web)
+  FM <- getFlowMatrix(readLIM = model$LIM, web = model$web, lim = model$setup)
 
   BM <- model$LIM$comp[,"val"]
   names(BM) <- model$LIM$comp[,"name"]
 
+  vars <- getVariables(model$LIM, model$web)
+
   CE <- getCE(
     FM = FM,
-    vars = getVariables(model$LIM, model$web),
-    lim = Setup(model$LIM),
+    vars = vars,
+    lim = model$setup,
     aTag = model$aTag,
     gTag = model$gTag
   )

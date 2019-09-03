@@ -356,8 +356,11 @@ getJacobian <- function(model = stop("Model input required")) {
       externals = model$externals,
       MR = model$MR)
   } else if(model$type == "LIM") {
+    if(is.null(model$setup)) {
+      model$setup <- Setup(model$LIM)
+    }
     if(is.null(model$web)) {
-      model$web <- Ldei(Setup(model$LIM))$X
+      model$web <- Ldei(model$setup)$X
     }
     extracted_data <- extractLIMdata(model)
     JM <- getJacobianEnergyFlux(
