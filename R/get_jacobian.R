@@ -321,7 +321,7 @@ getJacobianODE <- function(y, func, parms) {
 #' This is a wrapper function that reviews the given food web model and redirects
 #' the input to the correct function for obtaining interaction strengths in a Jacobian matrix.
 #' @param model (required) A named list containing elements with food web model data.
-#' One list element named \emph{type} must exist and should either be the string "ODE" or "EF".
+#' One list element named \emph{type} must exist and should either be the string "ODE", "EF", or "LIM".
 #' \itemize{
 #' \item \bold{ODE} should be used if the model is dynamic and comprises a set of
 #' ordinary differential equations. Other list element required for ODE type models are
@@ -330,6 +330,10 @@ getJacobianODE <- function(y, func, parms) {
 #' \item \bold{EF} should be used if the model is a quantified energy flux model. Other list elements required
 #' for EF models are \emph{FM}, \emph{BM}, \emph{AE}, and \emph{GE} to be used by the
 #' \code{\link{getJacobianEnergyFlux}} function.
+#' \item \bold{LIM} should be used if the model is a linear inverse model created with the package LIM.
+#' Other list elements required for LIM type models are \emph{lim} containing a read-in LIM, \emph{aTag}
+#' and \emph{gTAg} containing the tag to search for the assimilated and growht part respectively.
+#' Optional are \emph{web} containing the flow solutions.
 #' }
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
@@ -352,6 +356,20 @@ getJacobian <- function(model = stop("Model input required")) {
       dead = model$dead,
       externals = model$externals,
       MR = model$MR)
+  } else if(model$type == "LIM") {
+    extracted_data <- extractLIMdata(model)
+    JM <- getJacobianEnergyFlux(
+      FM = extracted_data$FM,
+      BM = extracted_data$BM,
+      AE = extracted_data$AE,
+      GE = extracted_data$GE,
+      diagonal = model$diagonal,
+      #TODO:extract dead from model
+      dead = model$dead,
+      externals = extracted_data$externals,
+      #TODO: extract mortality from model
+      MR = extracted_data$MR
+    )
   } else {
     stop("Unknown model input")
   }
