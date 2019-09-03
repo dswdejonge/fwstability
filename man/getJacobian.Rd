@@ -8,19 +8,20 @@ getJacobian(model = stop("Model input required"))
 }
 \arguments{
 \item{model}{(required) A named list containing elements with food web model data.
-One list element named \emph{type} must exist and should either be the string "ODE", "EF", or "LIM".
+One list element named \emph{type} denoting the type of input model must exist
+and should either be the string "ODE", "EF", or "LIM".
 \itemize{
-\item \bold{ODE} should be used if the model is dynamic and comprises a set of
+\item \bold{ODE} should be used if the model is a set of
 ordinary differential equations. Other list element required for ODE type models are
-\emph{func}, \emph{y}, and \emph{parms} to be used by the \code{\link{getJacobianODE}}
-function.
+\emph{func} and \emph{y}. The element \emph{parms} is optional. All data will be used
+in the \code{\link{getJacobianODE}} function which relies on the rootSolve package.
 \item \bold{EF} should be used if the model is a quantified energy flux model. Other list elements required
 for EF models are \emph{FM}, \emph{BM}, \emph{AE}, and \emph{GE} to be used by the
 \code{\link{getJacobianEnergyFlux}} function.
 \item \bold{LIM} should be used if the model is a linear inverse model created with the package LIM.
-Other list elements required for LIM type models are \emph{lim} containing a read-in LIM, \emph{aTag}
-and \emph{gTAg} containing the tag to search for the assimilated and growht part respectively.
-Optional are \emph{web} containing the flow solutions.
+The other list element required for LIM type models is \emph{lim} containing a read-in LIM.
+If the LIM is resolved the flow solutions can be provided in the list element \emph{web}.
+If the LIM is not resolved, the function will use the parsiomious (least distance) solution.
 }}
 }
 \value{
@@ -32,6 +33,36 @@ interactions in the food web.
 This is a wrapper function that reviews the given food web model and redirects
 the input to the correct function for obtaining interaction strengths in a Jacobian matrix.
 }
+\section{ODE models}{
+
+ODE type models should be set-up in such a way that it can be used by the rootSolve package.
+For details, please refer to the documentation of this package.
+The element \emph{func} should contain a function that calculates the rate of change for all
+compartments i.e. a set of ODEs. This function will need an initial state (i.e. biomass)
+of compartments, which should be given in the element \emph{y} as a named vector.
+In this respect is the data in \emph{y} similar to the BM vector that needs to be provided
+for the EF type models.
+The function containing the set of ODEs can also rely on certain parameters,
+which can optionally be given in the element \emph{parms} as a named numeric vector.
+}
+
+\section{Energy Flux models}{
+
+Required elements, optional elements.
+Effect of diagonal settings.
+Concept and References.
+Please see documentation of this function.
+}
+
+\section{Linear Inverse models}{
+
+Required elements: Read(LIM) as input. optional Setup(readLIM).
+web solutions. How to get these (least distance or likelihood)
+Effect of diagonal see EF.
+How to use the tags. Model must be set up in a specific way.
+}
+
 \seealso{
-\code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}}.
+\code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}},
+\code{\link{extractLIMdata}}.
 }
