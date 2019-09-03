@@ -1,4 +1,4 @@
-context("Finding the right answer of a LIM")
+context("Extracting data from a LIM")
 
 # input
 library(LIM)
@@ -7,7 +7,6 @@ model <- list(
   type = "LIM",
   LIM = readLIM
 )
-
 
 # Expected answers
 lim <- Setup(readLIM)
