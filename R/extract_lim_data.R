@@ -1,4 +1,9 @@
 getTag <- function(vars, tag) {
+  if(!is.atomic(vars) | is.null(names(vars))) {
+    stop("getTag only accepts named vectors for argument \"vars\"")
+  } else if(!is.character(tag) | length(tag) > 1) {
+    stop("getTag only accepts a string for argument \"tag\"")
+  }
   names(vars) <- toupper(names(vars))
   tag <- toupper(tag)
   x <- vars[which(grepl(tag, names(vars)))]

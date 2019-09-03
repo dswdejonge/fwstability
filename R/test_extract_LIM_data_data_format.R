@@ -29,3 +29,29 @@ test_that("the getTag function extract the right information", {
   expect_error(getTag(vars = vars1, tag = c("tag", "B")),
                "getTag only accepts a string for argument \"tag\"")
 })
+
+library(LIM)
+readLIM <- Read(system.file("extdata", "foodweb2.lim", package = "fwstability"))
+model1 <- list(
+  type = "LIM",
+  LIM = Setup(readLIM),
+  web = "foo"
+)
+model2 <- list(
+  type = "LIM",
+  LIM = readLIM,
+  web = "foo"
+)
+mo
+del3 <- list(
+  type = "LIM",
+  LIM = readLIM,
+  aTag = "foo"
+)
+
+test_that("The function only works with right model format", {
+  expect_error(getJacobian(model = model1))
+  expect_error(getJacobian(model = model2),
+               "Model solutions in \"web\" must be named numeric vector.")
+  #expect_warning(getJacobian(model = model3))
+})

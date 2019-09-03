@@ -84,12 +84,17 @@ test_that("the Flowmatrix function works with parallel flows", {
 
 test_that("the getVariables function gives right answer", {
   expect_equal(getVariables(readLIM, web = lim_solved$X), variables)
+  expect_equal(getVariables(readLIM), variables)
 })
 
 test_that("the right conversion efficiencies are extracted", {
   expect_equal(getCE(FM = FM, vars = variables, lim = lim, aTag = "ass", gTag = "growth")$AE,
                AE)
   expect_equal(getCE(FM = FM, vars = variables, lim = lim, aTag = "ass", gTag = "growth")$GE,
+               GE)
+  expect_equal(getCE(FM = FM, vars = variables, lim = lim)$AE,
+               AE)
+  expect_equal(getCE(FM = FM, vars = variables, lim = lim)$GE,
                GE)
 })
 
