@@ -160,7 +160,8 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
 #' !!! Growth efficiency BAC = growth / inflow
 #' @return Returns a named vector with mortality rates (per unit time).
 #' @export
-getMR <- function(BM, web, mTag = "mort") {
+getMR <- function(BM, web, mTag = NULL) {
+  if(is.null(mTag)) {mTag <- "mort"}
   MR <- rep(NA, length = length(BM))
   names(MR) <- names(BM)
   MP <- getTag(web, mTag)
@@ -168,17 +169,19 @@ getMR <- function(BM, web, mTag = "mort") {
   return(MR)
 }
 
-getDeadInfo <- function(dead, readLIM, web, FM = NULL) {
+getDeadInfo <- function(dead, readLIM, web, FM = NULL, deadTag = NULL, defTag = NULL) {
   if(is.null(FM)) {
     FM <- getFlowMatrix(readLIM, web)
   }
+  if(is.null(deadTag)) {deadTag <- "dead"}
+  if(is.null(defTag)) {defTag <- "def"}
 
   dead <- adjustDeadInput(dead)
 
   dead$def <- rep("noDef", length(dead$names))
   allSinks <- readLIM$flows[,"to"]
   names(allSinks) <- readLIM$flows[,"name"]
-  defComps <- getTag(allSinks, "mort")
+  defComps <- getTag(allSinks, defTag)
   dead$def[dead$names %in% readLIM$compnames[defComps]] <- "Def"
 
   DM <- matrix(1, nrow = length(readLIM$compnames), ncol = length(readLIM$compnames))
@@ -192,7 +195,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL) {
     same <- c(a, b)[duplicated(c(a, b))]
 
     DM[flows[i,"from"],flows[i,"to"]] <-
-      sum(getTag(web[same], tag = "def"), na.rm = T) /
+      sum(getTag(web[same], tag = defTag), na.rm = T) /
       FM[flows[i,"from"],flows[i,"to"]]
   }
   dead$frac <- DM
@@ -224,13 +227,15 @@ extractLIMdata <- function(model) {
   externals <- model$LIM$externnames
 
   if(is.null(model$dead)) {
-    # search for compartments with the dead tag
-  } else {
-    dead <- getDeadInfo(
-      dead = model$dead, readLIM = model$LIM, web = model$web, FM = FM)
+    fwnames <- toupper(model$LIM$compnames)
+    if(is.null(model$deadTag)) {deadTag <- "dead"}
+    model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)]))
   }
+  dead <- getDeadInfo(
+    dead = model$dead, readLIM = model$LIM, web = model$web, FM = FM,
+    deadTag = model$deadTag, defTag = model$defTag)
 
-  MR <- getMR(BM = BM, web = model$web)
+  MR <- getMR(BM = BM, web = model$web, mTag = model$mTag)
 
   return(list(
     FM = FM, BM = BM, AE = CE$AE, GE = CE$GE,

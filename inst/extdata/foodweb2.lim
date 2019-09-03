@@ -18,33 +18,33 @@ OUT ! export
 ## END EXTERNAL
 
 ## COMPONENT
-LABILE = 30 {g C m-2} ! Labile detritus
-REFRAC = 20 {g C m-2} ! Refractory detritus
+DEADLABILE = 30 {g C m-2} ! Labile detritus
+DEADREFRAC = 20 {g C m-2} ! Refractory detritus
 MEIO   = 10 {g C m-2} ! Meiofauna
 MACRO  = 5  {g C m-2} ! Macrofauna
 ## END COMPONENT
 
 ## FLOWS
-import      : IN -> LABILE
-export      : REFRAC -> OUT
+import      : IN -> DEADLABILE
+export      : DEADREFRAC -> OUT
 
 !-- Meiofauna processes
 ! in
-meioGrazDet    : LABILE -> MEIO
+meioGrazDet    : DEADLABILE -> MEIO
 ! out
-meioDefLab     : MEIO -> LABILE
-meioDefRefrac  : MEIO -> REFRAC
+meioDefLab     : MEIO -> DEADLABILE
+meioDefRefrac  : MEIO -> DEADREFRAC
 meioResp       : MEIO -> OUT
-meioMort       : MEIO -> LABILE
+meioMort       : MEIO -> DEADLABILE
 
 !-- Macrofauna processes
 ! in
 macroPredMeio   : MEIO -> MACRO
 !out
-macroDefLab     : MACRO -> LABILE
-macroDefRefrac  : MACRO -> REFRAC
+macroDefLab     : MACRO -> DEADLABILE
+macroDefRefrac  : MACRO -> DEADREFRAC
 macroResp       : MACRO -> OUT
-macroMort       : MACRO -> LABILE
+macroMort       : MACRO -> DEADLABILE
 ## END FLOWS
 
 ## PARAMETERS

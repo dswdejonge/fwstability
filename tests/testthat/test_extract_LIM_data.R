@@ -5,8 +5,7 @@ library(LIM)
 readLIM <- Read(system.file("extdata", "foodweb2.lim", package = "fwstability"))
 model <- list(
   type = "LIM",
-  LIM = readLIM,
-  dead = list(names = c("LABILE", "REFRAC"))
+  LIM = readLIM
 )
 
 
@@ -14,7 +13,7 @@ model <- list(
 lim <- Setup(readLIM)
 lim_solved <- Ldei(lim)
 
-fwnames <- c("LABILE", "REFRAC", "MEIO", "MACRO", "IN", "OUT")
+fwnames <- c("DEADLABILE", "DEADREFRAC", "MEIO", "MACRO", "IN", "OUT")
 nC = lim$NExternal + lim$NComponents
 FM <- matrix(c(
 0,      0, 12.25, 0, 0, 0,
@@ -49,8 +48,8 @@ BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames[1:4]
 DM <- matrix(1, nrow = 4, ncol = 4)
 rownames(DM) <- fwnames[1:4]
 colnames(DM) <- fwnames[1:4]
-DM["MEIO", "LABILE"] <- lim_solved$X["meioDefLab"] / FM["MEIO", "LABILE"]
-DM["MACRO", "LABILE"] <- lim_solved$X["macroDefLab"] / FM["MACRO", "LABILE"]
+DM["MEIO", "DEADLABILE"] <- lim_solved$X["meioDefLab"] / FM["MEIO", "DEADLABILE"]
+DM["MACRO", "DEADLABILE"] <- lim_solved$X["macroDefLab"] / FM["MACRO", "DEADLABILE"]
 FDM <- FM[1:4,1:4] * DM
 
 JM <- matrix(c(0,
