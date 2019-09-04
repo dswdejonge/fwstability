@@ -274,6 +274,20 @@ extractLIMdata <- function(model) {
 
   MR <- getMR(BM = BM, web = model$web, mTag = model$mTag)
 
+  remove <- which(BM == 0)
+  if(length(remove) > 0) {
+    message("Internal components with biomass of zero are removed.")
+    FM <- FM[-remove, -remove]
+    BM <- BM[-remove]
+    CE$AE <- CE$AE[-remove]
+    CE$GE <- CE$GE[-remove]
+    MR <- MR[-remove]
+    dead$frac <- dead$frac[-remove, -remove]
+    l <- !(dead$names %in% names(BM)[remove])
+    dead$names <- dead$names[l]
+    dead$def <- dead$def[l]
+  }
+
   return(list(
     FM = FM, BM = BM, AE = CE$AE, GE = CE$GE,
     externals = externals, dead = dead, MR = MR)
