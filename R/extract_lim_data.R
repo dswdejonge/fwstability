@@ -229,20 +229,20 @@ extractLIMdata <- function(model) {
   FM <- getFlowMatrix(readLIM = model$LIM, web = model$web, lim = model$setup)
 
   BM <- model$LIM$comp[,"val"]
-  names(BM) <- model$LIM$comp[,"name"]
+  names(BM) <- toupper(model$LIM$comp[,"name"])
   ### TEMPORARY CODE - start ###
   if(model$site == "dist") {
-    BM["DOCphyto_s"] <- 0.28
-    BM["DOCother_s"] <- 6.91
-    BM["Carc"] <- sum(FM[,"CARC"])
+    BM["DOCPHYTO_S"] <- 0.28
+    BM["DOCOTHER_S"] <- 6.91
+    BM["CARC"] <- sum(FM[,"CARC"])
   } else if(model$site == "undist") {
-    BM["DOCphyto_s"] <- 0.28
-    BM["DOCother_s"] <- 4.46
-    BM["Carc"] <- sum(FM[,"CARC"])
+    BM["DOCPHYTO_S"] <- 0.28
+    BM["DOCPHYTO_S"] <- 4.46
+    BM["CARC"] <- sum(FM[,"CARC"])
   } else if(model$site == "ref") {
-    BM["DOCphyto_s"] <- 0.65
-    BM["DOCother_s"] <- 9.47
-    BM["Carc"] <- sum(FM[,"CARC"])
+    BM["DOCPHYTO_S"] <- 0.65
+    BM["DOCPHYTO_S"] <- 9.47
+    BM["CARC"] <- sum(FM[,"CARC"])
   } else {stop("Error! Unknown site.")}
   ### TEMPORARY CODE - stop ###
 
