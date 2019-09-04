@@ -34,7 +34,8 @@ meioGrazDet    : DEADLABILE -> MEIO
 ! out
 meioDefLab     : MEIO -> DEADLABILE
 meioDefRefrac  : MEIO -> DEADREFRAC
-meioResp       : MEIO -> OUT
+meioRespOne       : MEIO -> OUT
+meioRespTwo      : MEIO -> OUT ! test external parallel flows
 meioMort       : MEIO -> DEADLABILE
 
 !-- Macrofauna processes
@@ -72,6 +73,7 @@ macroGEmax = 0.7 {fraction}
 ! Total defecation
 meioDef = meioDefLab + meioDefRefrac
 macroDef = macroDefLab + macroDefRefrac
+meioResp = meioRespOne + meioRespTwo
 
 ! Assimilation
 meioAss = flowto(MEIO) - meioDef

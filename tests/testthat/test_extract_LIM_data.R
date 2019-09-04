@@ -26,10 +26,13 @@ rownames(FM) <- fwnames ; colnames(FM) <- fwnames
 
 variables <- c(lim_solved$X["meioDefLab"] + lim_solved$X["meioDefRefrac"],
                lim_solved$X["macroDefLab"] + lim_solved$X["macroDefRefrac"],
+               lim_solved$X["meioRespOne"] + lim_solved$X["meioRespTwo"],
                lim_solved$X["meioGrazDet"] - lim_solved$X["meioDefLab"] - lim_solved$X["meioDefRefrac"],
                lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"],
-               lim_solved$X["meioGrazDet"] - lim_solved$X["meioDefLab"] - lim_solved$X["meioDefRefrac"] - lim_solved$X["meioResp"],
-               lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"] - lim_solved$X["macroResp"]
+               lim_solved$X["meioGrazDet"] - lim_solved$X["meioDefLab"] - lim_solved$X["meioDefRefrac"]
+               - lim_solved$X["meioRespOne"] - lim_solved$X["meioRespTwo"],
+               lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"]
+               - lim_solved$X["macroResp"]
                )
 names(variables) <- lim$Variables
 
@@ -52,7 +55,7 @@ DM["MACRO", "DEADLABILE"] <- lim_solved$X["macroDefLab"] / FM["MACRO", "DEADLABI
 FDM <- FM[1:4,1:4] * DM
 
 JM <- matrix(c(0,
-              0,
+               0,
                (FM[3,1] - FM[1,3] + FM[3,4]*(1-AE[4])*(FDM[4,1]/(FDM[4,1]+FDM[4,2]))) / BM[3],
                (FM[4,1] - FM[1,4]) / BM[4],#
 

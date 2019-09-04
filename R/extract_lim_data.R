@@ -134,9 +134,17 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
   GE <- rep(NA, length = lim$NComponents)
   names(GE) <- lim$Components$name
   AP <- getTag(vars = vars, tag = aTag)
+  ### TEMPORARY CODE - start ###
+  #AP["BAC"] <- sum(FM[,"BAC"], na.rm = TRUE)
+  ### TEMPORARY CODE - stop ###
   GP <- getTag(vars = vars, tag = gTag)
   AE[names(AP)] <- AP / colSums(FM[,names(AP)], na.rm = TRUE)
   GE[names(GP)] <- GP / AP[names(GP)]
+  ### TEMPORARY CODE - start ###
+  #temp <- AE
+  #temp <- GE[names(AE)]
+  #GE <- temp
+  ### TEMPORARY CODE - stop ###
   CE <- list(AE = AE, GE = GE)
   return(CE)
 }
@@ -192,15 +200,20 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
   rownames(DM) <- readLIM$compnames
   colnames(DM) <- readLIM$compnames
   flows <- readLIM$flows[,1:2]
+  #flows <- flows[-c(which(flows$from < 0), which(flows$to < 0)),]
   dup <- which(duplicated(flows))
   for(i in dup) {
-    a <- which(flows[,1] == flows[i, 1])
-    b <- which(flows[,2] == flows[i, 2])
-    same <- c(a, b)[duplicated(c(a, b))]
+    if(TRUE %in% (flows[i,] < 0)) {
+      next
+    } else {
+      a <- which(flows[,1] == flows[i, 1])
+      b <- which(flows[,2] == flows[i, 2])
+      same <- c(a, b)[duplicated(c(a, b))]
 
-    DM[flows[i,"from"],flows[i,"to"]] <-
-      sum(getTag(web[same], tag = defTag), na.rm = T) /
-      FM[flows[i,"from"],flows[i,"to"]]
+      DM[flows[i,"from"],flows[i,"to"]] <-
+        sum(getTag(web[same], tag = defTag), na.rm = T) /
+        FM[flows[i,"from"],flows[i,"to"]]
+    }
   }
   dead$frac <- DM
 
@@ -217,6 +230,21 @@ extractLIMdata <- function(model) {
 
   BM <- model$LIM$comp[,"val"]
   names(BM) <- model$LIM$comp[,"name"]
+  ### TEMPORARY CODE - start ###
+  #if(model$site == "dist") {
+  #  BM["DOCphyto_s"] <- 0.28
+  #  BM["DOCother_s"] <- 6.91
+  #  BM["Carc"] <- sum(FM[,"CARC"])
+  #} else if(model$site == "undist") {
+  #  BM["DOCphyto_s"] <- 0.28
+  #  BM["DOCother_s"] <- 4.46
+  #  BM["Carc"] <- sum(FM[,"CARC"])
+  #} else if(model$site == "ref") {
+  #  BM["DOCphyto_s"] <- 0.65
+  #  BM["DOCother_s"] <- 9.47
+  #  BM["Carc"] <- sum(FM[,"CARC"])
+  #} else {stop("Error! Unknown site.")}
+  ### TEMPORARY CODE - stop ###
 
   vars <- getVariables(model$LIM, model$web)
 
@@ -234,6 +262,11 @@ extractLIMdata <- function(model) {
     fwnames <- toupper(model$LIM$compnames)
     if(is.null(model$deadTag)) {deadTag <- "dead"}
     model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)]))
+    ### TEMPORARY CODE - start ###
+    #deadnames = c("PHYTO_S", "PHYTO_W", "SLAB_S", "SLAB_W", "REFRAC",
+    #          "DOCPHYTO_S", "DOCOTHER_S", "CARC")
+    #model$dead <- list(names = deadnames)
+    ### TEMPORARY CODE - stop ###
   }
   dead <- getDeadInfo(
     dead = model$dead, readLIM = model$LIM,
