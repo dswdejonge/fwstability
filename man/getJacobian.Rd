@@ -19,7 +19,7 @@ in the \code{\link{getJacobianODE}} function which relies on the rootSolve packa
 for EF models are \emph{FM}, \emph{BM}, \emph{AE}, and \emph{GE} to be used by the
 \code{\link{getJacobianEnergyFlux}} function.
 \item \bold{LIM} should be used if the model is a linear inverse model created with the package LIM.
-The other list element required for LIM type models is \emph{lim} containing a read-in LIM.
+The other list element required for LIM type models is \emph{LIM} containing a read-in LIM.
 If the LIM is resolved the flow solutions can be provided in the list element \emph{web}.
 If the LIM is not resolved, the function will use the parsiomious (least distance) solution.
 }}
