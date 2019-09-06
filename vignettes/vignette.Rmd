@@ -150,7 +150,6 @@ mymodel <- list(
 
 The getJacobian function by default creates an all-zero diagonal. If you want another diagonal you can specify this in your list under the element "diagonal". The options are either a single value (will set the whole diagonal to this value), a numeric vector, or the word "model" which will calculate the upperbound values of the diagonal from the model.
 ```{r}
-setupLIM <- Setup(lim)
 mymodel <- list(
   type = "LIM",
   model = lim,
@@ -161,10 +160,10 @@ mymodel <- list(
 
 ### 1.1B. Energy flux model
 If you don't have a LIM or your LIM is formatted in such a way that it cannot be automatically used by the getJacobian function, you need to extract the necessary data first. In order to obtain a Jacobian matrix you need:  
-- a flowmatrix containing the total flow of material/energy between compartments,  
-- a named vector with biomasses for all compartments (including the dead ones),  
-- a named vector with assimilation efficiencies for all non-dead compartments,  
-- a named vector with growth efficiencies for all non-dead compartments.  
+- a flowmatrix containing the total flow of material/energy between compartments.  
+- a named vector with biomasses for all compartments (including the dead ones).  
+- a named vector with assimilation efficiencies for all non-dead compartments. An organism assimilates (A) the part of all ingested food (I) that is not defecated (D): $A = I-D$. So, assimilation efficiency (AE) is the assimilated amount of food (A) divided by the total of ingested food (I): $AE = A/I $.  
+- a named vector with growth efficiencies for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$.  
 Optionally, you can specify:
 - a list containg three elements with the names of dead compartments (element "names"), if those compartments receive feaces (string "Def") or not (string "noDef") (element def), and a matrix with the fraction of each flow that constitutes defecation (element "frac"). The element "def" and "frac" are optional. If "def" is omitted, it is assumed no defecation occurs in the food web. The element "frac" is only necessary if you have multiple parallel flows between two compartments, of which only one or a couple constitute defecation.
 - a character vector containing the names of external compartments (these are removed from the flowmatrix before the calculations).
@@ -173,6 +172,12 @@ Optionally, you can specify:
 This information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the getJacbianEnergyFlux function. For a working example please see the examples from literatures De Ruiter 1995.
 
 ```{r}
+# An example food web model (not necessarily ecologically correct...)
+# Detritus takes up CO2.
+# Plants and animals take up detritus.
+# Plants are eaten by animals.
+# Animals and plants both deposit material into detritus compartment.
+# Animals respire into the external CO2 compartment.
 compartments <- c("DETRITUS", "PLANT", "ANIMAL", "CO2")
 # A named flow matrix
 FM <- matrix(c(0, 3, 8, 1, 7, 0, 0, 0, 4, 4, 0, 0, 0, 0, 1, 0), nrow = 4, ncol = 4)
@@ -205,6 +210,21 @@ getJacobianEnergyFlux(
   BM = BM, AE = AE, GE = GE,
   dead = dead, externals = externals)
 ```
+
+If you have a LIM with the wrong data format, the functions getFlowMatrix and getVariables  may still be of use to easily calculate the needed data. The function getFlowMatrix is similar to the function Flowmatrix from the LIM package, but enhanced so that it also works if parallel flows exist between the same two compartments. The function getVariables returns a named list with the values of all defined variables calculated from the food web flows. So, for example, if you have defined variables related to assimilation but for some reason didn't use the tag system, you can easily extract the variables values and find your assimilation efficiency.
+
+```{r}
+# Use the LIM package for importing your model
+require(LIM)
+lim <- Read(system.file("extdata", "foodweb.lim", package = "fwstability"))
+
+FM <- getFlowMatrix(lim)
+print(FM)
+
+vars <- getVariables(lim)
+print(vars)
+```
+
 
 ## 1.2. A dynamic model
 A dynamic food web model is a set of differential equations that describe the change in biomass of each food web compartment based on the biomass of other compartments and potentially other factors. It is common to use a set of (generalized) Lotka-Volterra equations for your food web model. The form of a generalized Lotka-Volterra equation is:
@@ -545,31 +565,21 @@ rownames(FM) <- foodweb_data$compartment
 colnames(FM) <- foodweb_data$compartment
 ```
 
-Now we use this data to calculate interaction strength values to get a Jacobian matrix. The authors state that intragroup interferences i.e. the values for the diagonal of the Jacobian matrix, could not be established empirically. Therefore, the diagonal is set to zero for now. In the original paper the interaction strengths related to the detritus compartment were not calculated with a function specific for detritus. Therefore, the results from the paper can be duplicated by NOT defining  detritus as a dead compartment.
+Now we use this data to calculate interaction strength values to get a Jacobian matrix. The authors state that intragroup interferences i.e. the values for the diagonal of the Jacobian matrix, could not be established empirically. Therefore, the diagonal is set to zero for now (default). In the original paper the interaction strengths related to the detritus compartment were not calculated with a function specific for detritus. Therefore, the results from the paper can be duplicated by NOT defining  detritus as a dead compartment.
 
-```{r eval = FALSE}
-JM <- getJacobian(
+```{r}
+model <- list(
+  type = "EF",
   FM = FM,
   BM = foodweb_data$BM,
   AE = foodweb_data$AE,
   GE = foodweb_data$GE
 )
-```
-
-Taking into account new insights from Neutel & Thorne (2014) the effects of trophic groups on detritical compartments can be calculated with an altered equation. To calculate the interaction strengths based on this other equation we have to include detritus as a dead compartment.
-
-```{r eval = FALSE}
-JM <- getJacobian(
-  FM = FM,
-  BM = foodweb_data$BM,
-  AE = foodweb_data$AE,
-  GE = foodweb_data$GE,
-  dead = "Detritus"
-)
+JM <- getJacobian(model)
 ```
 
 The stability of the food web can now be found by finding the maximum real part of the eigenvalues. Remember our Jacobian matrix has an all-zero diagonal.
-```{r eval = FALSE}
+```{r}
 getStability(JM)
 ```
 
