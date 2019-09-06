@@ -244,7 +244,9 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
 
   FM <- removeExternals(externals, FM)
   dead <- adjustDeadInput(dead)
-  if(is.null(diagonal)) {diagonal <- 0}
+  if(is.null(diagonal)) {
+    diagonal <- 0
+    message("fwstab: Diagonal by default set to all-zero.")}
 
   # Do checks for required data formats: throws errors
   if(dim(FM)[1] != dim(FM)[2]) {

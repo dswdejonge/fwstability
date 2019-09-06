@@ -33,6 +33,7 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL) {
   flows <- readLIM$flows[,1:2]
   flowmatrix <- lim$Flowmatrix
   if(is.null(web)) {
+    message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
     if(!is.null(lim$Cost) || !is.null(lim$Profit)) {
       web <- Linp(lim)$X
     } else {
@@ -77,6 +78,7 @@ getVariables <- function(readLIM, web = NULL) {
   pars <- readLIM$pars$val
   vareq <- readLIM$vars
   if(is.null(web)) {
+    message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
     if(!is.null(lim$Cost) || !is.null(lim$Profit)) {
       web <- Linp(lim)$X
     } else {
@@ -128,8 +130,12 @@ getVariables <- function(readLIM, web = NULL) {
 #' @return Returns a named vector with assimilation efficiencies.
 #' @export
 getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
-  if(is.null(aTag)) { aTag <- "ass"}
-  if(is.null(gTag)) {gTag <- "growth"}
+  if(is.null(aTag)) {
+    aTag <- "ass"
+    message("fwstab: Default tag \"ass\" is used to search model for assimilation.")}
+  if(is.null(gTag)) {
+    gTag <- "growth"
+    message("fwstab: Default tag \"growth\" is used to search model for secondary production.")}
   # TODO: how to deal with bacteria
   # TODO: how to deal with words containing more than comp name and tag.
   AE <- rep(NA, length = lim$NComponents)
@@ -177,7 +183,9 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
 #' @return Returns a named vector with mortality rates (per unit time).
 #' @export
 getMR <- function(BM, web, mTag = NULL) {
-  if(is.null(mTag)) {mTag <- "mort"}
+  if(is.null(mTag)) {
+    mTag <- "mort"
+    message("fwstab: Default tag \"mort\" is used to search model for mortality.")}
   names(BM) <- toupper(names(BM))
   MR <- rep(NA, length = length(BM))
   names(MR) <- names(BM)
@@ -190,7 +198,9 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
   if(is.null(FM)) {
     FM <- getFlowMatrix(readLIM, web)
   }
-  if(is.null(defTag)) {defTag <- "def"}
+  if(is.null(defTag)) {
+    defTag <- "def"
+    message("fwstab: Default tag \"def\" used to search model for defecation.")}
 
   dead <- adjustDeadInput(dead)
 
@@ -263,7 +273,9 @@ extractLIMdata <- function(model) {
 
   if(is.null(model$dead)) {
     fwnames <- toupper(model$LIM$compnames)
-    if(is.null(model$deadTag)) {deadTag <- "dead"}
+    if(is.null(model$deadTag)) {
+      deadTag <- "dead"
+      message("fwstab: Default tag \"dead\" is used to search model for dead compartments.")}
     model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)]))
     ### TEMPORARY CODE - start ###
     #deadnames = c("PHYTO_S", "PHYTO_W", "SLAB_S", "SLAB_W", "REFRAC",
