@@ -266,10 +266,10 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   } else if(length(diagonal) != 1 & length(diagonal) != length(BM)) {
     stop("given diagonal has incorrect length")
   } else if(!is.null(dead)) {
-    if(!all(is.na(AE[which(names(AE) == dead$names)])) |
-       !all(is.na(GE[which(names(GE) == dead$names)]))) {
-      AE[which(names(AE) == dead$names)] <- NA
-      GE[which(names(GE) == dead$names)] <- NA
+    if(!all(is.na(AE[names(AE) %in% dead$names])) |
+       !all(is.na(GE[names(GE) %in% dead$names]))) {
+      AE[names(AE) %in% dead$names] <- NA
+      GE[names(GE) %in% dead$names] <- NA
       warning("physiological values set to NA for dead compartments")
     }
   }
