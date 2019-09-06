@@ -78,6 +78,7 @@ meioResp = meioRespOne + meioRespTwo
 ! Assimilation
 meioAss = flowto(MEIO) - meioDef
 macroAss = flowto(MACRO) - macroDef
+macroAssTest = flowto(MACRO) - macroDef + 0 ! test if right Ass is taken
 
 ! Secondary production (growth)
 meioGrowth = meioAss - meioResp

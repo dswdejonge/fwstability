@@ -136,19 +136,22 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
   if(is.null(gTag)) {
     gTag <- "growth"
     message("fwstab: Default tag \"growth\" is used to search model for secondary production.")}
-  # TODO: how to deal with bacteria
   # TODO: how to deal with words containing more than comp name and tag.
   AE <- rep(NA, length = lim$NComponents)
-  names(AE) <- lim$Components$name
+  names(AE) <- toupper(lim$Components$name)
   GE <- rep(NA, length = lim$NComponents)
-  names(GE) <- lim$Components$name
+  names(GE) <- toupper(lim$Components$name)
   AP <- getTag(vars = vars, tag = aTag)
   ### TEMPORARY CODE - start ###
   #AP["BAC"] <- sum(FM[,"BAC"], na.rm = TRUE)
   ### TEMPORARY CODE - stop ###
   GP <- getTag(vars = vars, tag = gTag)
-  AE[names(AP)] <- AP / colSums(FM[,names(AP)], na.rm = TRUE)
-  GE[names(GP)] <- GP / AP[names(GP)]
+  inAE <- names(AE) %in% names(AP)
+  inAP <- names(AP) %in% names(AE)
+  AE[inAE] <- AP[inAP] / colSums(FM[,names(AE)[inAE]], na.rm = TRUE)
+  inGE <- names(GE) %in% names(GP)
+  inGP <- names(GP) %in% names(GE)
+  GE[inGE] <- GP[inGP] / AP[names(GE)[inGE]]
   ### TEMPORARY CODE - start ###
   #temp <- AE
   #temp <- GE[names(AE)]
