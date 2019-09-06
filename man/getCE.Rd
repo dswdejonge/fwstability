@@ -13,34 +13,30 @@ getCE(FM, vars, lim, aTag = NULL, gTag = NULL)
 
 \item{lim}{(required) Setup(Read(lim.input))}
 
-\item{aTag}{(optional) Tag assigned to the variables containing the assimilated part. Default is set to
-"ass". Not case sensitive.}
+\item{aTag}{(optional) Tag assigned to the variables representing the assimilated amount of material.
+Default is set to "ass". Not case sensitive.}
 
-\item{gTag}{(optional) Tag assigned to the variables containing the growth part. Default is set to
-"growth". Not case sensitive.}
+\item{gTag}{(optional) Tag assigned to the variables representing growth.
+Default is set to "growth". Not case sensitive.}
 }
 \value{
-Returns a named vector with assimilation efficiencies.
+Returns a list with element "AE" (named vector with assimilation efficiencies) and element
+"GE" (named vector with growth efficiencies).
 }
 \description{
 This function calculates assimilation and growth efficiences from a given LIM.
 }
 \details{
-The LIM must be set up in a specific way. The assimilation efficiency is calculated as
-the assimilated part (which is defined as variable in the LIM and calculated in the
-function getVariables) divided by the ingestion (which is the sum of the organism's
-column in the Flow Matrix FM).
-by dividing the amount of assimilated material/energy
-(must be defined in the original LIM model as variable) by the total ingestion of the organism.
-This function calculates growth (or secondary production) efficiences by dividing the amount
-of growth by the amount of assimilated material/energy
-(both must be defined in the original LIM model as variable).
-The LIM must be set up in a specific way. The assimilation efficiency is calculated as
-the assimilated part (which is defined as variable in the LIM and calculated in the
-function getVariables) divided by the ingestion (which is the sum of the organism's
-column in the Flow Matrix FM).
-!!! Growth efficiency BAC = growth / inflow
+In order for this function to work, the LIM must be set-up in a specific way.
+The variables representing total assimilation and growth of an organism must be named as:
+"compartmentTag" or "tagCompartment" (not case sensitive).
+All non-dead organisms must have a variable with assimilation and growth.
+For more information on setting up the LIM, please review the vignette.
+
+The assimilation efficiency is calculated as amount of assimilated material divided by the
+total ingestion. Growth (or secondary production) efficiency is calculated by dividing
+growth by the amount of assimilated material.
 }
 \references{
-LIM package reference
+\code{\link{LIM}} package, Soetaert & van Oevelen 2015.
 }

@@ -2,27 +2,32 @@
 % Please edit documentation in R/extract_lim_data.R
 \name{getFlowMatrix}
 \alias{getFlowMatrix}
-\title{Get a Flowmatrix from a LIM}
+\title{Get Flowmatrix from LIM}
 \usage{
 getFlowMatrix(readLIM, web = NULL, lim = NULL)
 }
 \arguments{
 \item{readLIM}{(required) A linear inverse model read into the R environment with the R-package LIM.
-Can be achieved through \code{readLIM <- Read("path_to_input_file")}}
+Can be achieved with \code{readLIM <- Read("path_to_input_file")}}
 
 \item{web}{(optional) The solved (food) web problem, i.e. the values of the unknowns;
 if not specified, the model is solved first, using Ldei.}
+
+\item{lim}{(optional) The set-up linear problem.
+Can be achieved with \code{lim <- Setup(readLIM)}.}
 }
 \value{
-Returns an energy-flux model in the format needed for the getJacobian function.
+Returns a named numeric matrix.
 }
 \description{
 This function extracts flow data from the LIM and produces a Flowmatrix i.e. flows from sources
 in rows to the sinks in columns.
 }
 \details{
-The LIM must be set up in a specific way. sum columns must equal sum rows.
+This function is very similar to the \code{Flowmatrix} function from the LIM package.
+The major difference is that this function also provides the right answer if multiple parallel flows occur
+between the same two compartments.
 }
 \references{
-LIM package reference
+\code{\link{LIM}} package, Soetaert & van Oevelen 2015.
 }

@@ -14,17 +14,21 @@ getTag <- function(vars, tag) {
   return(x)
 }
 
-#' Get a Flowmatrix from a LIM
+#' Get Flowmatrix from LIM
 #'
 #' This function extracts flow data from the LIM and produces a Flowmatrix i.e. flows from sources
 #' in rows to the sinks in columns.
-#' @references LIM package reference
+#' @references \code{\link{LIM}} package, Soetaert & van Oevelen 2015.
 #' @param readLIM (required) A linear inverse model read into the R environment with the R-package LIM.
-#' Can be achieved through \code{readLIM <- Read("path_to_input_file")}
+#' Can be achieved with \code{readLIM <- Read("path_to_input_file")}
 #' @param web (optional) The solved (food) web problem, i.e. the values of the unknowns;
 #' if not specified, the model is solved first, using Ldei.
-#' @details The LIM must be set up in a specific way. sum columns must equal sum rows.
-#' @return Returns an energy-flux model in the format needed for the getJacobian function.
+#' @param lim (optional) The set-up linear problem.
+#' Can be achieved with \code{lim <- Setup(readLIM)}.
+#' @details This function is very similar to the \code{Flowmatrix} function from the LIM package.
+#' The major difference is that this function also provides the right answer if multiple parallel flows occur
+#' between the same two compartments.
+#' @return Returns a named numeric matrix.
 #' @export
 getFlowMatrix <- function(readLIM, web = NULL, lim = NULL) {
   if(is.null(lim)) {
@@ -63,15 +67,14 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL) {
 #' Calculate value of LIM variables from flow solutions.
 #'
 #' This function calculates the value of variables as defined in the LIM from the flow solutions.
-#' @references LIM package reference.
+#' @references \code{\link{LIM}} package, Soetaert & van Oevelen 2015.
 #' @param readLIM (required) A linear inverse model read into the R environment with the R-package LIM.
-#' Can be achieved through \code{readLIM <- Read("path_to_input_file")}
+#' Can be achieved with \code{readLIM <- Read("path_to_input_file")}
 #' @param web (optional) The solved (food) web problem, i.e. the values of the unknowns;
 #' if not specified, the model is solved first, using Ldei.
-#' @details The optimal solution of the LIM only provides the flow solutions.
-#' However, in the LIM variables can be defined as the sum of some values.
-#' This function calculates the actual value of these variables based on the flow solutions.
-#' @return Returns a named vector with all variable values.
+#' @details Variables in the LIM can be defined as the sum of flows, other variables and parameters.
+#' This function calculates the value of these variables based on the flow solutions and LIM parameters.
+#' @return Returns a named vector with all variables.
 #' @export
 getVariables <- function(readLIM, web = NULL) {
   lim <- Setup(readLIM)
@@ -86,7 +89,6 @@ getVariables <- function(readLIM, web = NULL) {
       web <- Lsei(lim, parsimonious = TRUE)$X
     }
   }
-  # Possible to remove loop?
   for (i in 1:lim$NVariables) {
     tempvars <- vars
     subset <- vareq[vareq$nr == i,]
@@ -106,29 +108,25 @@ getVariables <- function(readLIM, web = NULL) {
 #' Get conversion efficiencies from a LIM.
 #'
 #' This function calculates assimilation and growth efficiences from a given LIM.
-#' @references LIM package reference
+#' @references \code{\link{LIM}} package, Soetaert & van Oevelen 2015.
 #' @param FM (required) A flow matrix with flows from source in rows to sink in columns.
 #' @param vars (required) A named vector with the values of variables defined in the LIM.
 #' @param lim (required) Setup(Read(lim.input))
-#' @param aTag (optional) Tag assigned to the variables containing the assimilated part. Default is set to
-#' "ass". Not case sensitive.
-#' @param gTag (optional) Tag assigned to the variables containing the growth part. Default is set to
-#' "growth". Not case sensitive.
-#' @details The LIM must be set up in a specific way. The assimilation efficiency is calculated as
-#' the assimilated part (which is defined as variable in the LIM and calculated in the
-#' function getVariables) divided by the ingestion (which is the sum of the organism's
-#' column in the Flow Matrix FM).
-#' by dividing the amount of assimilated material/energy
-#' (must be defined in the original LIM model as variable) by the total ingestion of the organism.
-#' This function calculates growth (or secondary production) efficiences by dividing the amount
-#' of growth by the amount of assimilated material/energy
-#' (both must be defined in the original LIM model as variable).
-#' The LIM must be set up in a specific way. The assimilation efficiency is calculated as
-#' the assimilated part (which is defined as variable in the LIM and calculated in the
-#' function getVariables) divided by the ingestion (which is the sum of the organism's
-#' column in the Flow Matrix FM).
-#' !!! Growth efficiency BAC = growth / inflow
-#' @return Returns a named vector with assimilation efficiencies.
+#' @param aTag (optional) Tag assigned to the variables representing the assimilated amount of material.
+#' Default is set to "ass". Not case sensitive.
+#' @param gTag (optional) Tag assigned to the variables representing growth.
+#' Default is set to "growth". Not case sensitive.
+#' @details In order for this function to work, the LIM must be set-up in a specific way.
+#' The variables representing total assimilation and growth of an organism must be named as:
+#' "compartmentTag" or "tagCompartment" (not case sensitive).
+#' All non-dead organisms must have a variable with assimilation and growth.
+#' For more information on setting up the LIM, please review the vignette.
+#'
+#' The assimilation efficiency is calculated as amount of assimilated material divided by the
+#' total ingestion. Growth (or secondary production) efficiency is calculated by dividing
+#' growth by the amount of assimilated material.
+#' @return Returns a list with element "AE" (named vector with assimilation efficiencies) and element
+#' "GE" (named vector with growth efficiencies).
 #' @export
 getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
   if(is.null(aTag)) {
@@ -137,7 +135,6 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
   if(is.null(gTag)) {
     gTag <- "growth"
     message("fwstab: Default tag \"growth\" is used to search model for secondary production.")}
-  # TODO: how to deal with words containing more than comp name and tag.
   AE <- rep(NA, length = lim$NComponents)
   names(AE) <- toupper(lim$Components$name)
   GE <- rep(NA, length = lim$NComponents)
@@ -165,25 +162,18 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
 #' Get mortality rates from a LIM.
 #'
 #' This function calculates the mortality rates (per unit time) of all organisms from a LIM.
-#' @references LIM package reference
-#' @param BM (required) A named vector containing biomasses of all LIM components.
-#' @param web (required) A named vector with the flow values.
-#' @param mTag (optional) Tag assigned to the variables/flows containing the natural
-#' flow mortality. Default is set to "mort". Not case sensitive.
-#' @details The LIM must be set up in a specific way. The assimilation efficiency is calculated as
-#' the assimilated part (which is defined as variable in the LIM and calculated in the
-#' function getVariables) divided by the ingestion (which is the sum of the organism's
-#' column in the Flow Matrix FM).
-#' by dividing the amount of assimilated material/energy
-#' (must be defined in the original LIM model as variable) by the total ingestion of the organism.
-#' This function calculates growth (or secondary production) efficiences by dividing the amount
-#' of growth by the amount of assimilated material/energy
-#' (both must be defined in the original LIM model as variable).
-#' The LIM must be set up in a specific way. The assimilation efficiency is calculated as
-#' the assimilated part (which is defined as variable in the LIM and calculated in the
-#' function getVariables) divided by the ingestion (which is the sum of the organism's
-#' column in the Flow Matrix FM).
+#' @references \code{\link{LIM}} package, Soetaert & van Oevelen 2015.
+#' @param BM (required) A named numeric vector containing biomasses of all LIM components.
+#' @param web (required) A named numeric vector with the flow solutions.
+#' @param vars (required) A named numeric vector with the LIM variables.
+#' @param mTag (optional) Tag assigned to the flows or variables containing the natural, i.e.
+#' non-predatory, mortality. Default is set to "mort". Not case sensitive.
+#' @details In order for this function to work, the LIM must be set-up in a specific way.
+#' The flows or variables representing total natural mortality of an organism must be named as:
+#' "compartmentTag" or "tagCompartment" (not case sensitive).
+#' For more information on setting up the LIM, please review the vignette.
 #' @return Returns a named vector with mortality rates (per unit time).
+#' @seealso \code{getVariables}
 #' @export
 getMR <- function(BM, web, vars, mTag = NULL) {
   if(is.null(mTag)) {
@@ -201,6 +191,32 @@ getMR <- function(BM, web, vars, mTag = NULL) {
   return(MR)
 }
 
+#' Gets list with information on dead comparments.
+#'
+#' This function determines for each dead compartment wether or not defecation occurs into it, and,
+#' if parallel flows occur, what fraction of each flow is defecation.
+#' @references \code{\link{LIM}} package, Soetaert & van Oevelen 2015.
+#' @param dead (required) A list with the element "names" that contains a character vector with
+#' names of all dead compartments.
+#' @param readLIM (required) A linear inverse model read into the R environment with the R-package LIM.
+#' Can be achieved with \code{readLIM <- Read("path_to_input_file")}
+#' @param web (required) A named numeric vector with the flow solutions.
+#' @param FM (optional) A flow matrix with flows from source in rows to sink in columns.
+#' @param defTag (optional) Tag assigned to the flows representing defecation.
+#' Default is set to "def". Not case sensitive.
+#' @details In order for this function to work, the LIM must be set-up in a specific way.
+#' The flows representing defecation of an organism must be named as:
+#' "compartmentTag" or "tagCompartment" (not case sensitive).
+#' For more information on setting up the LIM, please review the vignette.
+#' @return Returns a list with three elements:
+#' \itemize{
+#' \item{names: a character vector with names of dead compartments}
+#' \item{def: a character vector with either "Def" or "noDef" defining wether or not defecation occurs
+#' into the corresponding dead compartment}
+#' \item{frac: a matrix the same size as FM containing the fractor of each flow that is defecation}
+#' }
+#' @seealso \code{getFlowMatrix}
+#' @export
 getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
   if(is.null(FM)) {
     FM <- getFlowMatrix(readLIM, web)
@@ -240,11 +256,42 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
   return(dead)
 }
 
-# model$type
-# model$LIM
-# model$web)
-# model$aTag
-# model$gTag
+#' Extract data from formatted LIM.
+#'
+#' This function automatically extracts (physiological) data from a LIM that is formatted
+#' with tags.
+#' @references \code{\link{LIM}} package, Soetaert & van Oevelen 2015.
+#' @param model (required) A named list containing elements with food web model data.
+#' \itemize{
+#' \item \code{LIM} (required) should contain a read-in LIM. Achieved through \code{Read(<path-to-input-file>)}
+#' \item \code{web} (optional) can contain a named numeric vector with flow solutions.
+#' If the LIM is not resolved, the function will use the parsiomious (least distance) solution.
+#' \item \code{aTag} (optional) Tag assigned to the variables representing the assimilated amount of material.
+#' Default is set to "ass". Not case sensitive.
+#' \item \code{gTag} (optional) Tag assigned to the variables representing growth.
+#' Default is set to "growth". Not case sensitive.
+#' \item \code{mTag} (optional) Tag assigned to the flows or variables containing the natural, i.e.
+#' non-predatory, mortality. Default is set to "mort". Not case sensitive.
+#' \item \code{deadTag} (optional) Tag assigned to the dead compartments (e.g. detritus, carrion, nutrients).
+#' Default is set to "dead". Not case sensitive.
+#' \item \code{defTag} (optional) Tag assigned to the flows representing defecation.
+#' Default is set to "def". Not case sensitive.
+#' \item \code{setup} (optional) Setup(Read(lim.input)). By inclusion the function won't setup the model,
+#' thereby potentially saving time.
+#' \item \code{diagonal} (optional) Either a single value, a numeric vector or the string "model".
+#' Default is an all-zero diagonal. The string "model" calculates the diagonal values from flux values.
+#' If diagonal is set to "model" mortality must be explicity included in the LIM.
+#' }
+#' @details In order for this function to work, the LIM must be set-up in a specific way.
+#' The flows and variables representing assimilation, growth, defecation, and mortality of an organism
+#' must be named as: "compartmentTag" or "tagCompartment" (not case sensitive).
+#' The dead compartments must include the deadTag.
+#' For more information on setting up the LIM, please review the vignette.
+#' @return Returns a list with flowmatrix \code{FM}, biomasses \code{BM}, conversion efficiencies
+#' \code{CE$AE and CE$GE}, names of external compartments \cod{externals}, information on dead
+#' compartments \code{dead}, and mortality rates \code{MR}.
+#' @seealso \code{getJacobian}
+#' @export
 extractLIMdata <- function(model) {
   FM <- getFlowMatrix(readLIM = model$LIM, web = model$web, lim = model$setup)
 

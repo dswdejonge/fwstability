@@ -8,22 +8,21 @@ getVariables(readLIM, web = NULL)
 }
 \arguments{
 \item{readLIM}{(required) A linear inverse model read into the R environment with the R-package LIM.
-Can be achieved through \code{readLIM <- Read("path_to_input_file")}}
+Can be achieved with \code{readLIM <- Read("path_to_input_file")}}
 
 \item{web}{(optional) The solved (food) web problem, i.e. the values of the unknowns;
 if not specified, the model is solved first, using Ldei.}
 }
 \value{
-Returns a named vector with all variable values.
+Returns a named vector with all variables.
 }
 \description{
 This function calculates the value of variables as defined in the LIM from the flow solutions.
 }
 \details{
-The optimal solution of the LIM only provides the flow solutions.
-However, in the LIM variables can be defined as the sum of some values.
-This function calculates the actual value of these variables based on the flow solutions.
+Variables in the LIM can be defined as the sum of flows, other variables and parameters.
+This function calculates the value of these variables based on the flow solutions and LIM parameters.
 }
 \references{
-LIM package reference.
+\code{\link{LIM}} package, Soetaert & van Oevelen 2015.
 }
