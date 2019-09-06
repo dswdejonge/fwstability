@@ -17,11 +17,12 @@ knitr::opts_chunk$set(
 ```
 
 # Quick start
-This vignette explains how you can use the fwstability package to assess food web stability. There are basically four sections:  
+This vignette explains how you can use the fwstability package to assess food web stability. There are basically five sections:  
 1) how to prepare your food web model for stability analysis,  
-2) how to conduct stability analysis,  
-3) how to assess your food web for characteristics related to stability, and  
-4) examples with food webs from literature.  
+2) how to derive the Jacobian matrix,
+3) how to conduct stability analysis,  
+4) how to assess your food web for characteristics related to stability, and  
+5) examples with food webs from literature.  
 These sections contain details about all the features of the package and the scientific background. Reading this is highly recommended so that you can interpret your results correctly. This quick start section will give you a general idea about the usage of the package.
 
 First, we load the package.
@@ -30,8 +31,135 @@ library(fwstability)
 ```
 
 # 1. Preparing a food web model for stability analysis
-## A linear inverse model
-A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). This example food web model is the same food web model as in the LIM vignette, so please refer to this document to understand the concept and set-up of a LIM.
+## 1.1. A linear inverse model
+In a linear inverse model (LIM) all processes in a food web are captured by a set of linear equations. These linear equations can be either equalities (the outcome of an equation should equal another value) or inequalities (the outcome of an equation should be equal or greater than another value). The equations can parameterized with known data, but often not all processes are studied well enough to quantify. The unknowns in the equations can then be found with linear programming, thereby fully quantifying your model. A simple example of a linear optimization problem can be found on \link[Wikipedia](https://en.wikipedia.org/wiki/Linear_programming#Example). More information on using LIM for food web quantification can be found in van Oevelen, D., van den Meersche, K., Meysman, F.J.R., Soetaert, K., Middelburg, J.J., Vézina, A.F., 2010. Quantifying food web flows using linear inverse models. Ecosystems 13, 32–45. https://doi.org/10.1007/s10021-009-9297-6.
+
+A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). The example food web models used in this section are the same food web model as in the LIM vignette with small alterations, so please refer to this document to understand the concept and set-up of a LIM. A LIM model produced by the LIM package can be used directly by the fwstability package if it is formatted in a certain why. If your model is not formatted according to the requirements of the package, you will need to extract certain data from the model yourself before using the package. Both are explained below.
+
+### 1.1A. Formatting of LIM model for direct usage in the fwstability package
+In order to obtain a Jacobian matrix, certain physiological processes must be calculated from your LIM. The fwstability can automatically extract this data if you labelled them with a unique tag. In the model you specify:  
+
+- which compartments are dead compartments (e.g. detritus and carrion, default tag is "dead")  
+- which flows specifically represent defecation (default tag is "def")  
+- which flows specifically represent mortality (default tag is "mort")  
+- which variables represent total assimilation (default tag is "ass")  
+- which variables represent total growth (secondary production, default tag is "growth")  
+
+You can use the default tags, but it is also possible to use your own tags. In the latter case you will need to provide the package with the name of your chosen tags in order to extract the correct information. The package will warn you if it cannot find the tag in your model. 
+
+Rules and tips for using tags:  
+- The variables representing total defecation, mortality, assimilation, and growth should be **named by combining the component name and tag only**. The code subtracts the tag from the name of the variable and uses it to place the data with the right compartment. So, a variable containing total rabbit mortality should be named "rabbitMort". If you would name it "thisisRabbitMort" it is not recognized due to the superfluous text. It is possible to specify multiple mortality flows, e.g. if the carcass of the rabbit consists of both high-energy and low-enegy material which you want to seperate into two separate carcass compartments. In this case it is necessary to define rabbitMort as the sum of these flows in the variable section of the model.  
+- **Tags are not case sensitive**. So, RABBITmort and RaBbItMoRt are both valid.  
+- **The tag may occur anywhere in the string** (so, it does not have to be added specifically at the beginning or ending of the name of the compartment/flow/variable). Ensure that the rest of names do not accidentally contain a tag! For example, if you include the Indian wild ass (*Equus hemionus khur*) in your foodweb, a variable representing its respiration called respirationAss will be interpreted as the assimilation variable of an unknown compartment 'respiration' because it contains the default assimilation tag "ass".    
+- Dead compartments, defecation, and mortality can be omitted from your model if you don't want to include them. However, including assimilation and growth is required for all non-dead compartments. If you have no growth or assimilation data (for example for bacteria) you can assume the full ingestion is used for assimilation and/or growth and define your variable accordingly.
+- It is recommended to be consistent in your naming of flows and variables so later you can easily extract data. For naming flows for example: sourceProcessSink.
+
+Specifying your compartments in a LIM input file can look like this:  
+*****  
+\#\# EXTERNALS  
+CO2  
+EXPORT  
+\#\# END EXTERNALS  
+
+\#\# COMPARTMENTS  
+Plant = 700 {g C m-2}  
+Animal = 50 {g C m-2}  
+deadDetritus = 1000 {g C m-2} ! contains the default "dead" tag  
+xxxDetritus  = 1000 {g C m-2} ! chosen tag "xxx" is equally valid if you specify this for the fwstability package.  
+\#\# END COMPARTMENTS  
+*****  
+
+Specifying flows can look like this:  
+*****  
+\#\# FLOWS  
+NetPrimProd     : CO2 -> Plant  
+animalGrazPlant : Plant -> Animal  
+animalGrazDetritus: deadDetritus -> Animal  
+animalResp      : Animal -> CO2  
+animalMort      : Animal -> EXPORT  
+animalYYY       : Animal -> EXPORT ! equally valid mortality tag, if specified for the package later.  
+plantMort       : Plant -> deadDetritus   
+animalDef       : Animal -> deadDetritus  
+detritusMineralization: deadDetritus -> CO2  
+\#\# END FLOWS  
+*****  
+Make sure you use the name as specified in "COMPARTMENT", so including the tag for dead compartments. The name of defecation and mortality flows should only contain the name of the compartment and the tag. If it contains more words, like "thisAnimalMort" the package ignores this flow. If, for some reason, you want to include multiple parallel defecation or mortality flows, you need to define a variable (in the VARIABLE section) that includes the sum of all defecation and mortality flows. Like this:  
+*****   
+\#\# FLOWS  
+animalDefOne       : Animal -> deadDetritusOne    
+animalDefTwo       : Animal -> deadDetritusTwo  
+\#\# END FLOWS  
+
+\#\# VARIABLES  
+animalIngestion = animalGrazPlant + animalGrazDetritus  
+animalIngestion = flowto(Animal) ! Usefull feature of LIM package
+animalDef       = animalDefOne + animalDefTwo ! Sum all defecation flows  
+animalAss       = animalIngestion - animalDef ! Default assimilation tag "ass"  
+animalGrowth    = animalAss * animalGrowthEfficiency ! Default growht tag "growth"  
+\#\# END VARIABLES  
+*****  
+
+When your LIM input file is done, you can read it into R, and optionally solve it with the LIM package. 
+```{r}
+# Use the LIM package for importing your model
+require(LIM)
+lim <- Read(system.file("extdata", "foodweb.lim", package = "fwstability"))
+# This example is only one of many ways to solve a LIM.
+lim_solved <- Ldei(lim)
+```
+
+The model should be included in a list that can later be parsed into the getJacobian function. The getJacobian matrix will need a list with at least the elements "type" and "model". The element "type" must be set to "LIM", and the element "model" is the read-in LIM (beware, not yet set up!). If there is no solution specified, the parsimonious solution is used (minimizing the sum of squares).
+```{r eval = FALSE}
+mymodel <- list(
+  type = "LIM",
+  model = lim
+)
+# Ready to use in the fwstability package!
+```
+
+If you have solved the model, you can include it in your list under the element "web" so that it can be used by the package. This element must be a named vector with flow values and their names.
+```{r eval = false}
+mymodel <- list(
+  type = "LIM",
+  model = lim,
+  web = lim_solved$X
+)
+```
+
+If you use your own tags in the model, for example "RIP" in stead of "MORT", you  need to specify this in the list under the elements "aTag", "gTag", "mTag", "deadTag", and/or "defTag". If one or more of these elements are omitted, the default tags are used.
+```{r}
+# Example when I want to use my own tags for growth, mortality and defecation.
+mymodel <- list(
+  type = "LIM",
+  model = lim,
+  gTag = "production",
+  mTag = "RIP",
+  defTag = "poop"
+)
+```
+
+If setting up your model takes a long time (quite rare), you can include your set-up model in the element "setup" so that it is not setup within the function.
+```{r}
+setupLIM <- Setup(lim)
+mymodel <- list(
+  type = "LIM",
+  model = lim,
+  setup = setupLIM
+)
+```
+
+The getJacobian function by default creates an all-zero diagonal. If you want another diagonal you can specify this in your list under the element "diagonal". The options are either a single value (will set the whole diagonal to this value), a numeric vector, or the word "model" which will calculate the upperbound values of the diagonal from the model.
+```{r}
+setupLIM <- Setup(lim)
+mymodel <- list(
+  type = "LIM",
+  model = lim,
+  diagonal = "model"
+)
+```
+
+
+### 1.1B. Extracting LIM data
 ```{r LIM}
 library(LIM)
 lim <- Setup(system.file("extdata", "foodweb.lim", package = "fwstability"))
@@ -59,7 +187,7 @@ names(BM) <- rownames(FM)[1:3]
 ```
 
 The food web data and calculated flows can be used to calculate a Jacobian matrix with the function getJacobian(). It is important to tell the function which compartments to regard as dead compartments (in this case detritus) and which compartments are external.
-```{r getJacobian}
+```{r getJacobian, eval = FALSE}
 JM <- getJacobian(
   FM = FM,
   BM = BM,
@@ -101,7 +229,7 @@ The Jacobian matrix we calculated earlier had the default all-zero diagonal. You
 
 To calculate diagonal values based on the model we include the argument "diagonal" and set the value to the string "model". In our model natural mortality flows are already specified, so we can extract this information and use it as input for the mortality rates argument "MR". The mortality rate for Detritus is set to NA.
 
-```{r getJacobian_diagonal}
+```{r getJacobian_diagonal, eval = FALSE}
 MR <- c(FM["PL","DET"], FM["AN", "EXP"], NA)
 names(MR) <- rownames(FM)[1:3]
 
@@ -123,7 +251,7 @@ Some notes:
 - The inclusion of biomasses in the LIM is not required to be able to solve the model. However, it is required that all internal compartments have quantified biomasses to calculate the Jacobian matrix. If there are compartments that do not have biomasses in the LIM, they must either be quantified anyway or excluded from the getJacobian() function by including them as 'externals'.
 - The diagonal values calculated from the model for non-dead compartments represent the UPPER bound (in absolute value). This means we assume maximum self-dampening effects of populations. Jacobian matrixes with model-based diagonals are therefore often stable. If you want to compare stability between two food web models that are initially both stable, you can redefine stability as the minimum fraction of natural mortality needed to stabilize the matrix (see below 2. Stability analysis).
 
-## A dynamic model
+## 1.2. A dynamic model
 A dynamic food web model is a set of differential equations that describe the change in biomass of each food web compartment based on the biomass of other compartments and potentially other factors. It is common to use a set of (generalized) Lotka-Volterra equations for your food web model. The form of a generalized Lotka-Volterra equation is:
 $$\frac{dx_i}{dt} = x_i (r_i + \sum_{j=1}^n c_{ij}x_j) $$
 where $r_i$ is the natural per capita growth rate and $c_ij$ is the coefficient of the interaction i.e. the effect of population $j$ on population $i$. 
@@ -172,6 +300,7 @@ plot <- ggplot(as.data.frame(simulation)) +
 Mathematically speaking, the Jacobian matrix contains elements $\alpha_{ij}$ which are the first-order partial derivatives of each differential function valued with initial state biomasses. The rootSolve package numerically estimates these values by perturbing the initial state values.
 
 ```{r}
+library(rootSolve)
 newState <- simulation[50,2:4]
 JM <- jacobian.full(y=newState, func=LotkaVolterra, parms = Pars)
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
@@ -183,9 +312,12 @@ This Jacobian matrix already contains diagonal values. The stability can be foun
 getStability(JM)
 ```
 
-# 2. Stability analysis
+
+# 2. Obtaining a Jacobian matrix
+
+# 3. Stability analysis
 A Jacobian matrix is only stable if all real parts of the eigenvalues are negative. Therefore, the stability of a Jacobian matrix can be measured as the maximum real value of the eigenvalues. A negative value indicates a stable matrix, a positive value indicates an unstable matrix.
-```{r}
+```{r eval = FALSE}
 # Using the default 'eigenvalue' method.
 # Jacobian matrix with all-zero diagonal
 getStability(JM)
@@ -199,16 +331,17 @@ If you use different methods to quantify the diagonal the stability of different
 There is a second stability measurement that is commonly used, that allows comparison of food web models that are initially stable. In this case the minimum fraction of self-dampening needed to stabilize the Jacobian matrix is used as measure. For example, two Jacobian matrices with a diagonal calculated from the model are stable i.e. the maximum real part of the eigenvalues is negative. The diagonal of both Jacobian matrices contain the upper bound values representing the maximum possible self-dampening effect possible. If you start reducing the self-dampening effect, at some point the Jacobian matrix will become unstable. If the first matrix becomes unstable with 75% of its original self-dampening and the second becomes unstable at 50% of its original self-dampening, we can conclude that the second matrix is more stable than the first one. The second matrix requires a lot less intra-specific feedback to dampen the destabilizing effects of interspecific interactions.
 
 This concept is implemented in the getStability() function using the 'scalar' method. For this method the additional argument mortalities is required, and 'dead' is required only if there are indeed dead compartments.
-```{r}
+```{r eval = FALSE}
 getStability(JM2, method = "scalar", 
              mortalities = MR/BM, dead = "DET")
 ```
 
 In this case, the diagonal value for detritus is calculated from the model (see 1. Preparing a food web model for stability analysis). If we then scale the natural mortality rates of non-dead compartments we see that the minimum fraction natural mortality needed to stabilize the matrix is 0.45. This means that at least 45% of the maximum self-dampening effect of populations is needed in order to buffer pertubations to the whole system.
 
-# 3. Analysize food web for (de)stabilizing characteristics
 
-# 4. Examples from literature
+# 4. Analysize food web for (de)stabilizing characteristics
+
+# 5. Examples from literature
 
 ## de Ruiter et al. (1995) Energetics, Patterns of Interaction Strenghts, and Stability in Real Ecosystems. Science, 269 (5228), 1257 - 1260
 
@@ -379,7 +512,7 @@ colnames(FM) <- foodweb_data$compartment
 
 Now we use this data to calculate interaction strength values to get a Jacobian matrix. The authors state that intragroup interferences i.e. the values for the diagonal of the Jacobian matrix, could not be established empirically. Therefore, the diagonal is set to zero for now. In the original paper the interaction strengths related to the detritus compartment were not calculated with a function specific for detritus. Therefore, the results from the paper can be duplicated by NOT defining  detritus as a dead compartment.
 
-```{r}
+```{r eval = FALSE}
 JM <- getJacobian(
   FM = FM,
   BM = foodweb_data$BM,
@@ -390,7 +523,7 @@ JM <- getJacobian(
 
 Taking into account new insights from Neutel & Thorne (2014) the effects of trophic groups on detritical compartments can be calculated with an altered equation. To calculate the interaction strengths based on this other equation we have to include detritus as a dead compartment.
 
-```{r}
+```{r eval = FALSE}
 JM <- getJacobian(
   FM = FM,
   BM = foodweb_data$BM,
@@ -401,12 +534,12 @@ JM <- getJacobian(
 ```
 
 The stability of the food web can now be found by finding the maximum real part of the eigenvalues. Remember our Jacobian matrix has an all-zero diagonal.
-```{r}
+```{r eval = FALSE}
 getStability(JM)
 ```
 
 It is also possible to find stability as the scalar of the natural mortality rates needed to produce a stable matrix (the method used in the original paper).
-```{r}
+```{r eval = FALSE}
 getStability(JM, method = "scalar", 
              mortalities = foodweb_data$MR, dead = "Detritus")
 ```
@@ -414,7 +547,7 @@ getStability(JM, method = "scalar",
 Both methods are valid, altough it is clear that the actual values differ. Therefore, it is important to know what stability method has been used in order to interpret the results correctly.
 
 It is also possible to calculate values for the diagonal instead of setting them to zero.
-```{r}
+```{r eval = FALSE}
 JM <- getJacobian(
   FM = FM,
   BM = foodweb_data$BM,
