@@ -8,6 +8,9 @@ getTag <- function(vars, tag) {
   tag <- toupper(tag)
   x <- vars[which(grepl(tag, names(vars)))]
   names(x) <- gsub(tag, "", names(x))
+  if(length(x) == 0) {
+    warning(paste("Provided or default tag",tag,"not found in model."))
+  }
   return(x)
 }
 
@@ -276,7 +279,7 @@ extractLIMdata <- function(model) {
 
   remove <- which(BM == 0)
   if(length(remove) > 0) {
-    message("Internal components with biomass of zero are removed.")
+    message("fwstab: Internal components with biomass of zero are removed.")
     FM <- FM[-remove, -remove]
     BM <- BM[-remove]
     CE$AE <- CE$AE[-remove]

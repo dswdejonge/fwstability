@@ -52,5 +52,5 @@ test_that("The function only works with right model format", {
   expect_error(getJacobian(model = model1))
   expect_error(getJacobian(model = model2),
                "Model solutions in \"web\" must be named numeric vector.")
-  #expect_warning(getJacobian(model = model3))
+  expect_warning(getJacobian(model = model3))
 })
