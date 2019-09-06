@@ -34,7 +34,7 @@ meioGrazDet    : DEADLABILE -> MEIO
 ! out
 meioDefLab     : MEIO -> DEADLABILE
 meioDefRefrac  : MEIO -> DEADREFRAC
-meioRespOne       : MEIO -> OUT
+meioRespOne       : MEIO -> OUT ! test external parallel flows
 meioRespTwo      : MEIO -> OUT ! test external parallel flows
 meioMort       : MEIO -> DEADLABILE
 
@@ -45,7 +45,8 @@ macroPredMeio   : MEIO -> MACRO
 macroDefLab     : MACRO -> DEADLABILE
 macroDefRefrac  : MACRO -> DEADREFRAC
 macroResp       : MACRO -> OUT
-macroMort       : MACRO -> DEADLABILE
+macroMortOne    : MACRO -> DEADLABILE ! test double mortality flows
+macroMortTwo    : MACRO -> DEADLABILE ! test double mortality flows
 ## END FLOWS
 
 ## PARAMETERS
@@ -74,6 +75,7 @@ macroGEmax = 0.7 {fraction}
 meioDef = meioDefLab + meioDefRefrac
 macroDef = macroDefLab + macroDefRefrac
 meioResp = meioRespOne + meioRespTwo
+macroMort = macroMortOne + macroMortTwo
 
 ! Assimilation
 meioAss = flowto(MEIO) - meioDef

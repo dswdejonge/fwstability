@@ -41,12 +41,13 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL) {
     }
   }
   X <- as.vector(web)
+  X2 <- X
   dup <- which(duplicated(flows))
   for(i in dup) {
     a <- which(flows[,1] == flows[i, 1])
     b <- which(flows[,2] == flows[i, 2])
     same <- c(a, b)[duplicated(c(a, b))]
-    X[i] <- sum(X[same])
+    X[i] <- sum(X2[same])
   }
   Xpos <- pmax(0, X)
   ii <- which(flowmatrix > 0, arr.ind = TRUE)
@@ -182,18 +183,21 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
 #' the assimilated part (which is defined as variable in the LIM and calculated in the
 #' function getVariables) divided by the ingestion (which is the sum of the organism's
 #' column in the Flow Matrix FM).
-#' !!! Growth efficiency BAC = growth / inflow
 #' @return Returns a named vector with mortality rates (per unit time).
 #' @export
-getMR <- function(BM, web, mTag = NULL) {
+getMR <- function(BM, web, vars, mTag = NULL) {
   if(is.null(mTag)) {
     mTag <- "mort"
     message("fwstab: Default tag \"mort\" is used to search model for mortality.")}
   names(BM) <- toupper(names(BM))
   MR <- rep(NA, length = length(BM))
   names(MR) <- names(BM)
-  MP <- getTag(web, mTag)
-  MR[names(MP)] <- MP / BM[names(MP)]
+  for(values in list(web, vars)){
+    MP <- getTag(values, mTag)
+    inMR <- names(MR) %in% names(MP)
+    inMP <- names(MP) %in% names(MR)
+    MR[inMR] <- MP[inMP] / BM[names(MP)[inMP]]
+  }
   return(MR)
 }
 
@@ -290,7 +294,7 @@ extractLIMdata <- function(model) {
     dead = model$dead, readLIM = model$LIM,
     web = model$web, FM = FM, defTag = model$defTag)
 
-  MR <- getMR(BM = BM, web = model$web, mTag = model$mTag)
+  MR <- getMR(BM = BM, web = model$web, vars = vars, mTag = model$mTag)
 
   remove <- which(BM == 0)
   if(length(remove) > 0) {
