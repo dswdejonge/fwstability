@@ -42,8 +42,8 @@ In order to obtain a Jacobian matrix, certain physiological processes must be ca
 - which compartments are dead compartments (e.g. detritus and carrion, default tag is "dead")  
 - which flows specifically represent defecation (default tag is "def")  
 - which flows specifically represent mortality (default tag is "mort")  
-- which variables represent total assimilation (default tag is "ass")  
-- which variables represent total growth (secondary production, default tag is "growth")  
+- which variables represent total assimilation (default tag is "ass", beware to not tag assimilation *efficiency*)  
+- which variables represent total growth (secondary production, default tag is "growth", beware to not tag growth *efficiency*)  
 
 You can use the default tags, but it is also possible to use your own tags. In the latter case you will need to provide the package with the name of your chosen tags in order to extract the correct information. The package will warn you if it cannot find the tag in your model. 
 
@@ -159,17 +159,116 @@ mymodel <- list(
 ```
 
 
-### 1.1B. Extracting LIM data
-```{r LIM}
-library(LIM)
-lim <- Setup(system.file("extdata", "foodweb.lim", package = "fwstability"))
-FM <- Flowmatrix(lim)
+### 1.1B. Energy flux model
+If you don't have a LIM or your LIM is formatted in such a way that it cannot be automatically used by the getJacobian function, you need to extract the necessary data first. In order to obtain a Jacobian matrix you need:  
+- a flowmatrix containing the total flow of material/energy between compartments,  
+- a named vector with biomasses for all compartments (including the dead ones),  
+- a named vector with assimilation efficiencies for all non-dead compartments,  
+- a named vector with growth efficiencies for all non-dead compartments.  
+Optionally, you can specify:
+- a list containg three elements with the names of dead compartments (element "names"), if those compartments receive feaces (string "Def") or not (string "noDef") (element def), and a matrix with the fraction of each flow that constitutes defecation (element "frac"). The element "def" and "frac" are optional. If "def" is omitted, it is assumed no defecation occurs in the food web. The element "frac" is only necessary if you have multiple parallel flows between two compartments, of which only one or a couple constitute defecation.
+- a character vector containing the names of external compartments (these are removed from the flowmatrix before the calculations).
+- a numeric vector with mortality rates (in the same unit as the flowmatrix). This information is obligator if you want to calculate diagonal values for the Jacobian matrix from the flux values.
 
-print(lim$Components)
-print(lim$Externals)
-print(FM)
+This information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the getJacbianEnergyFlux function. For a working example please see the examples from literatures De Ruiter 1995.
+
+```{r}
+compartments <- c("DETRITUS", "PLANT", "ANIMAL", "CO2")
+# A named flow matrix
+FM <- matrix(c(0, 3, 8, 1, 7, 0, 0, 0, 4, 4, 0, 0, 0, 0, 1, 0), nrow = 4, ncol = 4)
+rownames(FM) <- compartments
+colnames(FM) <- compartments
+# Named numeric vectors with biomasses, assimilation efficiencies,
+# and growth efficiencies
+BM <- c(30, 20, 10) ; names(BM) <- compartments[1:3]
+AE <- c(NA, 0.2, 0.3) ; names(AE) <- compartments[1:3]
+GE <- c(NA, 0.2, 0.3) ; names(GE) <- compartments[1:3]
+# There is one dead compartment into which defecation occurs.
+# All flow from the animal to detritus constitutes defecation (and
+# not for example also mortality) so the element "frac" is omitted.
+dead <- list(names = "DETRITUS", def = "Def")
+# There is one external compartment
+externals <- "CO2"
+
+# Option 1
+model <- list(
+  type = "EF", 
+  FM = FM, 
+  BM = BM, AE = AE, GE = GE,
+  dead = dead, externals = externals
+)
+getJacobian(model)
+
+# Option 2
+getJacobianEnergyFlux(
+  FM = FM, 
+  BM = BM, AE = AE, GE = GE,
+  dead = dead, externals = externals)
 ```
 
+## 1.2. A dynamic model
+A dynamic food web model is a set of differential equations that describe the change in biomass of each food web compartment based on the biomass of other compartments and potentially other factors. It is common to use a set of (generalized) Lotka-Volterra equations for your food web model. The form of a generalized Lotka-Volterra equation is:
+$$\frac{dx_i}{dt} = x_i (r_i + \sum_{j=1}^n c_{ij}x_j) $$
+where $r_i$ is the natural per capita growth rate and $c_ij$ is the coefficient of the interaction i.e. the effect of population $j$ on population $i$. 
+
+Lets create a dynamic model based on the same food web structure and data as the linear inverse model described above. Plants have a natural growth rate as they take up CO2 for primary production. Furthermore, plants are negatively impacted by animals as they are preyed upon. Plants have a negative effect on their own population growth, and are not influenced by detritus. Growth of animals is dependen on the feeding on plants. Animals, like plants, have a negative effect on their own population growth. Detritus have natural decline by decomposition, but are positively affected by animal defecation and plant waste.
+
+The deSolve package is great for solving a system of orginary differential equations. You can write your model in R, plug in parameters, and simulate the change over time in your ecosystem.
+```{r Lotka-Volterra}
+library(deSolve)
+library(ggplot2)
+
+fwnames <- c("PLANT", "ANIMAL", "DETRITUS")
+
+# Define the set of differential equations
+LotkaVolterra <- function (Time, State, Pars) {
+  with(as.list(c(State, Pars)), {
+    dP = PLANT * (r1 - c11 * PLANT - c12 * ANIMAL)
+    dA = ANIMAL * (-r2 + c21 * PLANT - c22 * ANIMAL - c23 * DET)
+    dD = DET * (-r3 + c31 * PLANT + c32 * ANIMAL - c33 * DET)
+    return(list(c(dP, dA, dD)))
+  })
+}
+
+# Parameters to initialize model
+#Pars <- c(alpha = 2, beta = 0.5, gamma = 0.2, delta = 0.6)
+Pars <- c(
+  r1 = 10, r2 = 1, r3 = 1,
+  c11 = 0.05, c12 = 0.5,
+  c21 = 7, c22 = 0.5, c23 = 0.5,
+  c31 = 0.75, c32 = 3, c33 = 2
+)
+# Initial biomass of compartments
+State <- c(PLANT = 10, ANIMAL = 5, DET = 10)
+# Time to run the simulation
+Time <- seq(0, 50, by = 1)
+
+# Run and plot simulation
+simulation <- ode(func = LotkaVolterra, y = State, parms = Pars, times = Time)
+plot <- ggplot(as.data.frame(simulation)) +
+  geom_line(aes(x = time, y = PLANT), colour = "green") +
+  geom_line(aes(x = time, y = ANIMAL), colour = "blue") +
+  geom_line(aes(x = time, y = DET), colour = "brown")
+
+```
+
+Mathematically speaking, the Jacobian matrix contains elements $\alpha_{ij}$ which are the first-order partial derivatives of each differential function valued with initial state biomasses. The rootSolve package numerically estimates these values by perturbing the initial state values.
+
+```{r}
+library(rootSolve)
+newState <- simulation[50,2:4]
+JM <- jacobian.full(y=newState, func=LotkaVolterra, parms = Pars)
+rownames(JM) <- fwnames ; colnames(JM) <- fwnames
+print(JM)
+```
+
+This Jacobian matrix already contains diagonal values. The stability can be found from this complete Jacobian matrix.
+```{r}
+getStability(JM)
+```
+
+
+# 2. Obtaining a Jacobian matrix
 This food web model consists of three compartments of which the biomass is measured; Plants, Animals, and Detritus, and two external compartments with infinite biomass; CO2 and export. The unit of biomass is g C m-2 and the unit of flow flux is g C m-2 d-1. Plants take up CO2 and are consumed by Animals. Animals also consume Detritus. Both Plants and Animals deposit carbon into the Detritus compartment through natural mortality and defecation. Animals respire into the CO2 compartment and export carbon from the system, for example when they are predated upon by external animals. Detritus decomposes and thereby releases carbon into the CO2 pool. 
 
 Some of these flows are constrained by measured values. Therefore, linear programming can be used to find the parsimonious solution of all the flows (see LIM vignette). The quantified flows are stored in FM. 
@@ -250,70 +349,6 @@ print(JM2)
 Some notes:
 - The inclusion of biomasses in the LIM is not required to be able to solve the model. However, it is required that all internal compartments have quantified biomasses to calculate the Jacobian matrix. If there are compartments that do not have biomasses in the LIM, they must either be quantified anyway or excluded from the getJacobian() function by including them as 'externals'.
 - The diagonal values calculated from the model for non-dead compartments represent the UPPER bound (in absolute value). This means we assume maximum self-dampening effects of populations. Jacobian matrixes with model-based diagonals are therefore often stable. If you want to compare stability between two food web models that are initially both stable, you can redefine stability as the minimum fraction of natural mortality needed to stabilize the matrix (see below 2. Stability analysis).
-
-## 1.2. A dynamic model
-A dynamic food web model is a set of differential equations that describe the change in biomass of each food web compartment based on the biomass of other compartments and potentially other factors. It is common to use a set of (generalized) Lotka-Volterra equations for your food web model. The form of a generalized Lotka-Volterra equation is:
-$$\frac{dx_i}{dt} = x_i (r_i + \sum_{j=1}^n c_{ij}x_j) $$
-where $r_i$ is the natural per capita growth rate and $c_ij$ is the coefficient of the interaction i.e. the effect of population $j$ on population $i$. 
-
-Lets create a dynamic model based on the same food web structure and data as the linear inverse model described above. Plants have a natural growth rate as they take up CO2 for primary production. Furthermore, plants are negatively impacted by animals as they are preyed upon. Plants have a negative effect on their own population growth, and are not influenced by detritus. Growth of animals is dependen on the feeding on plants. Animals, like plants, have a negative effect on their own population growth. Detritus have natural decline by decomposition, but are positively affected by animal defecation and plant waste.
-
-The deSolve package is great for solving a system of orginary differential equations. You can write your model in R, plug in parameters, and simulate the change over time in your ecosystem.
-```{r Lotka-Volterra}
-library(deSolve)
-library(ggplot2)
-
-fwnames <- c("PLANT", "ANIMAL", "DETRITUS")
-
-# Define the set of differential equations
-LotkaVolterra <- function (Time, State, Pars) {
-  with(as.list(c(State, Pars)), {
-    dP = PLANT * (r1 - c11 * PLANT - c12 * ANIMAL)
-    dA = ANIMAL * (-r2 + c21 * PLANT - c22 * ANIMAL - c23 * DET)
-    dD = DET * (-r3 + c31 * PLANT + c32 * ANIMAL - c33 * DET)
-    return(list(c(dP, dA, dD)))
-  })
-}
-
-# Parameters to initialize model
-#Pars <- c(alpha = 2, beta = 0.5, gamma = 0.2, delta = 0.6)
-Pars <- c(
-  r1 = 10, r2 = 1, r3 = 1,
-  c11 = 0.05, c12 = 0.5,
-  c21 = 7, c22 = 0.5, c23 = 0.5,
-  c31 = 0.75, c32 = 3, c33 = 2
-)
-# Initial biomass of compartments
-State <- c(PLANT = 10, ANIMAL = 5, DET = 10)
-# Time to run the simulation
-Time <- seq(0, 50, by = 1)
-
-# Run and plot simulation
-simulation <- ode(func = LotkaVolterra, y = State, parms = Pars, times = Time)
-plot <- ggplot(as.data.frame(simulation)) +
-  geom_line(aes(x = time, y = PLANT), colour = "green") +
-  geom_line(aes(x = time, y = ANIMAL), colour = "blue") +
-  geom_line(aes(x = time, y = DET), colour = "brown")
-
-```
-
-Mathematically speaking, the Jacobian matrix contains elements $\alpha_{ij}$ which are the first-order partial derivatives of each differential function valued with initial state biomasses. The rootSolve package numerically estimates these values by perturbing the initial state values.
-
-```{r}
-library(rootSolve)
-newState <- simulation[50,2:4]
-JM <- jacobian.full(y=newState, func=LotkaVolterra, parms = Pars)
-rownames(JM) <- fwnames ; colnames(JM) <- fwnames
-print(JM)
-```
-
-This Jacobian matrix already contains diagonal values. The stability can be found from this complete Jacobian matrix.
-```{r}
-getStability(JM)
-```
-
-
-# 2. Obtaining a Jacobian matrix
 
 # 3. Stability analysis
 A Jacobian matrix is only stable if all real parts of the eigenvalues are negative. Therefore, the stability of a Jacobian matrix can be measured as the maximum real value of the eigenvalues. A negative value indicates a stable matrix, a positive value indicates an unstable matrix.
