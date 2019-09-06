@@ -16,14 +16,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Quick start
-This vignette explains how you can use the fwstability package to assess food web stability. There are basically five sections:  
-1) how to prepare your food web model for stability analysis,  
-2) how to derive the Jacobian matrix,
-3) how to conduct stability analysis,  
-4) how to assess your food web for characteristics related to stability, and  
-5) examples with food webs from literature.  
+This vignette explains how you can use the fwstability package to assess food web stability. There are basically six sections:  
+
+1) Quick start,  
+2) how to prepare your food web model for stability analysis,  
+3) how to derive the Jacobian matrix,  
+4) how to conduct stability analysis,   
+5) how to assess your food web for characteristics related to stability, and   
+6) examples with food webs from literature.  
+
 These sections contain details about all the features of the package and the scientific background. Reading this is highly recommended so that you can interpret your results correctly. This quick start section will give you a general idea about the usage of the package.
+
+# Quick start
+Install.
 
 First, we load the package.
 ```{r setup}
@@ -32,7 +37,8 @@ library(fwstability)
 
 # 1. Preparing a food web model for stability analysis
 ## 1.1. A linear inverse model
-In a linear inverse model (LIM) all processes in a food web are captured by a set of linear equations. These linear equations can be either equalities (the outcome of an equation should equal another value) or inequalities (the outcome of an equation should be equal or greater than another value). The equations can parameterized with known data, but often not all processes are studied well enough to quantify. The unknowns in the equations can then be found with linear programming, thereby fully quantifying your model. A simple example of a linear optimization problem can be found on \link[Wikipedia](https://en.wikipedia.org/wiki/Linear_programming#Example). More information on using LIM for food web quantification can be found in van Oevelen, D., van den Meersche, K., Meysman, F.J.R., Soetaert, K., Middelburg, J.J., Vézina, A.F., 2010. Quantifying food web flows using linear inverse models. Ecosystems 13, 32–45. https://doi.org/10.1007/s10021-009-9297-6.
+In a linear inverse model (LIM) all processes in a food web are captured by a set of linear equations. These linear equations can be either equalities (the outcome of an equation should equal another value) or inequalities (the outcome of an equation should be equal or greater than another value). The equations can parameterized with known data, but often not all processes are studied well enough to quantify. The unknowns in the equations can then be found with linear programming, thereby fully quantifying your model. A simple example of a linear optimization problem can be found on \link{Wikipedia}[https://en.wikipedia.org/wiki/Linear_programming#Example]. More information on using LIM for food web quantification can be found in:  
+van Oevelen, D., van den Meersche, K., Meysman, F.J.R., Soetaert, K., Middelburg, J.J., Vézina, A.F., 2010. Quantifying food web flows using linear inverse models. Ecosystems 13, 32–45. https://doi.org/10.1007/s10021-009-9297-6.
 
 A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). The example food web models used in this section are the same food web model as in the LIM vignette with small alterations, so please refer to this document to understand the concept and set-up of a LIM. A LIM model produced by the LIM package can be used directly by the fwstability package if it is formatted in a certain why. If your model is not formatted according to the requirements of the package, you will need to extract certain data from the model yourself before using the package. Both are explained below.
 
@@ -47,12 +53,14 @@ In order to obtain a Jacobian matrix, certain physiological processes must be ca
 
 You can use the default tags, but it is also possible to use your own tags. In the latter case you will need to provide the package with the name of your chosen tags in order to extract the correct information. The package will warn you if it cannot find the tag in your model. 
 
-Rules and tips for using tags:  
+Rules and tips for using tags:   
+
 - The variables representing total defecation, mortality, assimilation, and growth should be **named by combining the component name and tag only**. The code subtracts the tag from the name of the variable and uses it to place the data with the right compartment. So, a variable containing total rabbit mortality should be named "rabbitMort". If you would name it "thisisRabbitMort" it is not recognized due to the superfluous text. It is possible to specify multiple mortality flows, e.g. if the carcass of the rabbit consists of both high-energy and low-enegy material which you want to seperate into two separate carcass compartments. In this case it is necessary to define rabbitMort as the sum of these flows in the variable section of the model.  
 - **Tags are not case sensitive**. So, RABBITmort and RaBbItMoRt are both valid.  
 - **The tag may occur anywhere in the string** (so, it does not have to be added specifically at the beginning or ending of the name of the compartment/flow/variable). Ensure that the rest of names do not accidentally contain a tag! For example, if you include the Indian wild ass (*Equus hemionus khur*) in your foodweb, a variable representing its respiration called respirationAss will be interpreted as the assimilation variable of an unknown compartment 'respiration' because it contains the default assimilation tag "ass".    
 - Dead compartments, defecation, and mortality can be omitted from your model if you don't want to include them. However, including assimilation and growth is required for all non-dead compartments. If you have no growth or assimilation data (for example for bacteria) you can assume the full ingestion is used for assimilation and/or growth and define your variable accordingly.
-- It is recommended to be consistent in your naming of flows and variables so later you can easily extract data. For naming flows for example: sourceProcessSink.
+- It is recommended to be consistent in your naming of flows and variables so later you can easily extract data. For naming flows for example: sourceProcessSink.  
+
 
 Specifying your compartments in a LIM input file can look like this:  
 *****  
@@ -105,7 +113,7 @@ When your LIM input file is done, you can read it into R, and optionally solve i
 require(LIM)
 lim <- Read(system.file("extdata", "foodweb.lim", package = "fwstability"))
 # This example is only one of many ways to solve a LIM.
-lim_solved <- Ldei(lim)
+lim_solved <- Ldei(Setup(lim))
 ```
 
 The model should be included in a list that can later be parsed into the getJacobian function. The getJacobian matrix will need a list with at least the elements "type" and "model". The element "type" must be set to "LIM", and the element "model" is the read-in LIM (beware, not yet set up!). If there is no solution specified, the parsimonious solution is used (minimizing the sum of squares).
@@ -118,7 +126,7 @@ mymodel <- list(
 ```
 
 If you have solved the model, you can include it in your list under the element "web" so that it can be used by the package. This element must be a named vector with flow values and their names.
-```{r eval = false}
+```{r eval = FALSE}
 mymodel <- list(
   type = "LIM",
   model = lim,
@@ -127,7 +135,7 @@ mymodel <- list(
 ```
 
 If you use your own tags in the model, for example "RIP" in stead of "MORT", you  need to specify this in the list under the elements "aTag", "gTag", "mTag", "deadTag", and/or "defTag". If one or more of these elements are omitted, the default tags are used.
-```{r}
+```{r eval = FALSE}
 # Example when I want to use my own tags for growth, mortality and defecation.
 mymodel <- list(
   type = "LIM",
@@ -139,7 +147,7 @@ mymodel <- list(
 ```
 
 If setting up your model takes a long time (quite rare), you can include your set-up model in the element "setup" so that it is not setup within the function.
-```{r}
+```{r eval = FALSE}
 setupLIM <- Setup(lim)
 mymodel <- list(
   type = "LIM",
@@ -149,7 +157,7 @@ mymodel <- list(
 ```
 
 The getJacobian function by default creates an all-zero diagonal. If you want another diagonal you can specify this in your list under the element "diagonal". The options are either a single value (will set the whole diagonal to this value), a numeric vector, or the word "model" which will calculate the upperbound values of the diagonal from the model.
-```{r}
+```{r eval = FALSE}
 mymodel <- list(
   type = "LIM",
   model = lim,
@@ -160,16 +168,20 @@ mymodel <- list(
 
 ### 1.1B. Energy flux model
 If you don't have a LIM or your LIM is formatted in such a way that it cannot be automatically used by the getJacobian function, you need to extract the necessary data first. In order to obtain a Jacobian matrix you need:  
-- a flowmatrix containing the total flow of material/energy between compartments.  
+
+- a flowmatrix containing the total flow of material/energy between compartments.   
 - a named vector with biomasses for all compartments (including the dead ones).  
 - a named vector with assimilation efficiencies for all non-dead compartments. An organism assimilates (A) the part of all ingested food (I) that is not defecated (D): $A = I-D$. So, assimilation efficiency (AE) is the assimilated amount of food (A) divided by the total of ingested food (I): $AE = A/I $.  
 - a named vector with growth efficiencies for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$.  
-Optionally, you can specify:
-- a list containg three elements with the names of dead compartments (element "names"), if those compartments receive feaces (string "Def") or not (string "noDef") (element def), and a matrix with the fraction of each flow that constitutes defecation (element "frac"). The element "def" and "frac" are optional. If "def" is omitted, it is assumed no defecation occurs in the food web. The element "frac" is only necessary if you have multiple parallel flows between two compartments, of which only one or a couple constitute defecation.
-- a character vector containing the names of external compartments (these are removed from the flowmatrix before the calculations).
-- a numeric vector with mortality rates (in the same unit as the flowmatrix). This information is obligator if you want to calculate diagonal values for the Jacobian matrix from the flux values.
 
-This information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the getJacbianEnergyFlux function. For a working example please see the examples from literatures De Ruiter 1995.
+Optionally, you can specify:  
+
+- a list containg three elements with the names of dead compartments (element "names"), if those compartments receive feaces (string "Def") or not (string "noDef") (element def), and a matrix with the fraction of each flow that constitutes defecation (element "frac"). The element "def" and "frac" are optional. If "def" is omitted, it is assumed no defecation occurs in the food web. The element "frac" is only necessary if you have multiple parallel flows between two compartments, of which only one or a couple constitute defecation.  
+- a character vector containing the names of external compartments (these are removed from the flowmatrix before the calculations).  
+- a numeric vector with mortality rates (in the same unit as the flowmatrix). This information is obligatory if you want to calculate diagonal values for the Jacobian matrix from the flux values. Perhaps this is already included in your model as a flow from the organism into a detritus or carrion compartment. Beware that these mortality rates must represent non-predatory mortality! Mortality rates can be searched for in literature or calculated as the inverse of the natural lifespan (per unit time) and multiplied by the biomass of the compartment to obtain the same unit as in the flowmatrix.  
+
+
+This information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the getJacbianEnergyFlux function. For a working example please see the examples from literatures De Ruiter 1995.  
 
 ```{r}
 # An example food web model (not necessarily ecologically correct...)
@@ -295,7 +307,7 @@ Some of these flows are constrained by measured values. Therefore, linear progra
 
 Based on the final flow values and the constraints defined in the model it is possible to calculate the assimilation and growth efficiencies of animals and plants. Assimilation efficiency is 1 - (defecation / ingestion) and assumed 1 for Plants. Growth efficiency is defined in model for Animals and assumed 1 for Plants. The vectors containing biomass, assimilation and growth efficiencies must be named for usage in the getJacobian function. If assimilation and growth efficiencies are not specified in the model, or cannot be calculated from the model, you can estimate a value or try to find a value from literature.
 
-```{r}
+```{r eval = FALSE}
 # Order Plant, Animal, Detritus. Just like the FM.
 AE <- c(1, 1 - (FM[2,3] / sum(FM[,2])), NA)
 GE <- c(1, 0.3, NA)
