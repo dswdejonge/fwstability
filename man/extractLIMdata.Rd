@@ -31,7 +31,7 @@ If diagonal is set to "model" mortality must be explicity included in the LIM.
 }
 \value{
 Returns a list with flowmatrix \code{FM}, biomasses \code{BM}, conversion efficiencies
-\code{CE$AE and CE$GE}, names of external compartments \cod{externals}, information on dead
+\code{CE$AE and CE$GE}, names of external compartments \code{externals}, information on dead
 compartments \code{dead}, and mortality rates \code{MR}.
 }
 \description{

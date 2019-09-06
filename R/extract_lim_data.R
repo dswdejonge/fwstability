@@ -288,7 +288,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
 #' The dead compartments must include the deadTag.
 #' For more information on setting up the LIM, please review the vignette.
 #' @return Returns a list with flowmatrix \code{FM}, biomasses \code{BM}, conversion efficiencies
-#' \code{CE$AE and CE$GE}, names of external compartments \cod{externals}, information on dead
+#' \code{CE$AE and CE$GE}, names of external compartments \code{externals}, information on dead
 #' compartments \code{dead}, and mortality rates \code{MR}.
 #' @seealso \code{getJacobian}
 #' @export

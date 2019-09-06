@@ -2,7 +2,9 @@
 
 export(effectOnConsumer)
 export(effectOnResource)
+export(extractLIMdata)
 export(getCE)
+export(getDeadInfo)
 export(getDiagonal)
 export(getDiagonalSpecies)
 export(getFlowMatrix)
