@@ -53,20 +53,83 @@ in \code{func}.}
 
 \section{Energy Flux models}{
 
-Required elements, optional elements.
-Effect of diagonal settings.
-Concept and References.
-Please see documentation of this function.
+Interaction strenghts can be calculated from energy flux models as presented in
+De Ruiter (1995) and Neutel & Thorne (2014). The energy flux model should at least include
+quantified flows, compartment biomasses, and conversion efficiencies.
+If you want to calculate the intraspecific interactions, i.e. the diagonal values, from the
+model, then non-predatory mortality rates should also be included. Beware that these model-derived
+diagonal values represent an \bold{upperbound}. It is the maximum amount of self-dampening possible
+in the respective populations.
+If your model includes dead compartments, like detritus or nutrients, it is highly recommended to
+also include these in the special argument \code{dead}. Conversion efficiences are not needed for
+dead compartments, and you can include information on defecation into these compartments.
+Interaction strengths of dead compartments are calculated in another way than for living compartments.
+Inclusion of recycling processes may impact your stability results (Wilson & Wolkovich, 2011).\cr
+The list with model information should contain:
+\itemize{
+\item{\code{type} (required) should be "EF" for energy flux models.}
+\item{\code{FM} (required) is a named square flowmatrix with sources in rows and sinks in columns.}
+\item{\code{BM} (required) is a named numeric with biomasses for all compartments.}
+\item{\code{AE} (required) is a named numeric with assimilation efficiencies for living compartments.}
+\item{\code{GE} (required) is a named numeric with growth efficiencies for living compartments.}
+\item{\code{diagonal} (required) is by default an all-zero diagonal. Can also be set to other values
+or calculated from the model by setting it to "model".}
+\item{\code{dead} (optional) is a list with the elements \code{names}, \code{def}, \code{frac} that
+contains the names of dead compartments (character vector), wether or not defecation occurs into these
+dead compartments ("Def" or "noDef" in character vector in same order as names), and what fraction
+of each flow comprises defecation (matrix similar to \code{FM}, only required with parallel flows).}
+\item{\code{externals} (optional) is a character vector with any compartments that should not be
+considered in the calculations}.
+\item{\code{MR} (required if \code{diagonal} is set to "model") is a named numeric with non-predatory
+mortality rates in the same units as the flows.}
+}
+More detailed information about argument requirements see \code{?getJacobianEnergyFlux}.
 }
 
 \section{Linear Inverse models}{
 
-Required elements: Read(LIM) as input. optional Setup(readLIM).
-web solutions. How to get these (least distance or likelihood)
-Effect of diagonal see EF.
-How to use the tags. Model must be set up in a specific way.
+Linear programming can be used to quantify fluxes. Therefore, a solved linear inverse model (LIM)
+often already contains the elements needed to calculate interaction strengths, but they need to be
+extracted and calculated first. A LIM can be created with the R-package LIM. By sticking to certain
+rules when writing the model input file, the \code{fwstability} package can automatically derive the
+necessary information for stability analysis. These requirements include the use of tags in the
+names of compartments, variables, and flows to later identify dead compartments, defecation and
+mortality flows, and variables representing assimilation and growth. Tags should be used in combination
+with only the compartmentname to assign the extracted value to the right compartment (exception is
+for defecation flows). Tags are not case-sensitive and can be placed either in front or after the
+compartmentname. Default tags are "dead", "ass", "growth", "mort", and "def", but you can also choose
+your own tag names. More information on setting up the input model with these tags can be found in
+the vignette. \cr
+The LIM can be solved and quantified in various ways (e.g. by optimization or maximum likelihood)
+and added to the model list in the element \code{web} as named numeric.
+If you do not solve your LIM  before parsing it into this function, the model will be solved using
+Ldei, which is the parsimonious solution minimizing the sum of squares.\cr
+The list with model information should contain:
+\itemize{
+\item{\code{type} (required) should be "LIM"}
+\item{\code{LIM} (required) should be a read-in LIM. This can be acquired by Read(<path-to-input-file>) from the
+LIM R-package.}
+\item{\code{setup} (optional) can be Setup(Read(<path-to-input-file>)), otherwise set-up within function.}
+\item{\code{web} (optional) named numeric with flow solutions.}
+\item{\code{diagonal} (optional) all-zero by default, can also be other numbers or calculated from model
+by setting this element to "model".}
+\item{\code{aTag}, \code{gTag}, \code{mTag}, \code{defTag}, \code{deadTag} are optional. Default tags are
+"ass", "growth", "mort", "def", and "dead" respectively.}
+}
+More information on the requirments of the arguments see \code{?extractLIMdata}
 }
 
+\references{
+\itemize{
+\item{de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+}
+\item{Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17, 651–661. https://doi.org/10.1111/ele.12266
+}
+\item{Wilson, E.E., Wolkovich, E.M., 2011. Scavenging: How carnivores and carrion structure communities. Trends Ecol. Evol. 26, 129–135. https://doi.org/10.1016/j.tree.2010.12.011
+}
+\item{\code{\link{LIM}} package, Soetaert & van Oevelen 2015.}
+}
+}
 \seealso{
 \code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}},
 \code{\link{extractLIMdata}}.
