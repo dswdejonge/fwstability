@@ -58,9 +58,14 @@ Rules and tips for using tags:
 - The variables representing total defecation, mortality, assimilation, and growth should be **named by combining the component name and tag only**. The code subtracts the tag from the name of the variable and uses it to place the data with the right compartment. So, a variable containing total rabbit mortality should be named "rabbitMort". If you would name it "thisisRabbitMort" it is not recognized due to the superfluous text. It is possible to specify multiple mortality flows, e.g. if the carcass of the rabbit consists of both high-energy and low-enegy material which you want to seperate into two separate carcass compartments. In this case it is necessary to define rabbitMort as the sum of these flows in the variable section of the model.  
 - **Tags are not case sensitive**. So, RABBITmort and RaBbItMoRt are both valid.  
 - **The tag may occur anywhere in the string** (so, it does not have to be added specifically at the beginning or ending of the name of the compartment/flow/variable). Ensure that the rest of names do not accidentally contain a tag! For example, if you include the Indian wild ass (*Equus hemionus khur*) in your foodweb, a variable representing its respiration called respirationAss will be interpreted as the assimilation variable of an unknown compartment 'respiration' because it contains the default assimilation tag "ass".    
-- Dead compartments, defecation, and mortality can be omitted from your model if you don't want to include them. However, including assimilation and growth is required for all non-dead compartments. If you have no growth or assimilation data (for example for bacteria) you can assume the full ingestion is used for assimilation and/or growth and define your variable accordingly.
-- It is recommended to be consistent in your naming of flows and variables so later you can easily extract data. For naming flows for example: sourceProcessSink.  
+- Dead compartments, defecation, and mortality can be omitted from your model if you don't want to include them. However, including assimilation and growth is required for all non-dead compartments. If you have no growth or assimilation data (for example for bacteria) you can assume the full ingestion is used for assimilation and/or growth and define your variable accordingly.  
 
+
+
+General tips for setting up a LIM:  
+
+- It is recommended to be consistent in your naming of flows and variables so later you can easily extract data. For naming flows for example: sourceProcessSink.  
+- In order to prevent certain processes to be quantified as zero, include minimum constraints. This is especially important if you later want to normalize the Jacobian matrix, because this process does not allow zeroes on the diagonal. For example, if you don't set a minimum constraint for non-predatory mortality, the parsimonious solution might set this flow to zero. This is not realistic and it the occurence of these zeroes may hamper your future calculations.
 
 Specifying your compartments in a LIM input file can look like this:  
 *****  
