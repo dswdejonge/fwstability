@@ -167,7 +167,6 @@ adjustDeadInput <- function(dead) {
               length(which(dead$def == "Def" | dead$def == "noDef"))) {
       stop("the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
     }
-
   }
   return(dead)
 }
@@ -245,7 +244,9 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
 
   FM <- removeExternals(externals, FM)
   dead <- adjustDeadInput(dead)
-  if(is.null(diagonal)) {diagonal <- 0}
+  if(is.null(diagonal)) {
+    diagonal <- 0
+    message("fwstab: Diagonal by default set to all-zero.")}
 
   # Do checks for required data formats: throws errors
   if(dim(FM)[1] != dim(FM)[2]) {
@@ -267,10 +268,10 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   } else if(length(diagonal) != 1 & length(diagonal) != length(BM)) {
     stop("given diagonal has incorrect length")
   } else if(!is.null(dead)) {
-    if(!all(is.na(AE[which(names(AE) == dead$names)])) |
-       !all(is.na(GE[which(names(GE) == dead$names)]))) {
-      AE[which(names(AE) == dead$names)] <- NA
-      GE[which(names(GE) == dead$names)] <- NA
+    if(!all(is.na(AE[names(AE) %in% dead$names])) |
+       !all(is.na(GE[names(GE) %in% dead$names]))) {
+      AE[names(AE) %in% dead$names] <- NA
+      GE[names(GE) %in% dead$names] <- NA
       warning("physiological values set to NA for dead compartments")
     }
   }
@@ -321,20 +322,112 @@ getJacobianODE <- function(y, func, parms) {
 #' This is a wrapper function that reviews the given food web model and redirects
 #' the input to the correct function for obtaining interaction strengths in a Jacobian matrix.
 #' @param model (required) A named list containing elements with food web model data.
-#' One list element named \emph{type} must exist and should either be the string "ODE" or "EF".
+#' One list element named \code{type} denoting the type of input model must exist
+#' and should either be the string "ODE", "EF", or "LIM".
 #' \itemize{
-#' \item \bold{ODE} should be used if the model is dynamic and comprises a set of
+#' \item \bold{"ODE"} should be used if the model is a set of
 #' ordinary differential equations. Other list element required for ODE type models are
-#' \emph{func}, \emph{y}, and \emph{parms} to be used by the \code{\link{getJacobianODE}}
-#' function.
-#' \item \bold{EF} should be used if the model is a quantified energy flux model. Other list elements required
-#' for EF models are \emph{FM}, \emph{BM}, \emph{AE}, and \emph{GE} to be used by the
+#' \code{func} and \code{y}. The element \code{parms} is optional. All data will be used
+#' in the \code{\link{getJacobianODE}} function which relies on the rootSolve package.
+#' \item \bold{"EF"} should be used if the model is a quantified energy flux model. Other list elements required
+#' for EF models are \code{FM}, \code{BM}, \code{AE}, and \code{GE} to be used by the
 #' \code{\link{getJacobianEnergyFlux}} function.
+#' \item \bold{"LIM"} should be used if the model is a linear inverse model created
+#' with the package LIM and is formatted to contain tags.
+#' The other list element required for LIM type models is \code{LIM} containing a read-in LIM.
+#' If the LIM is resolved the flow solutions can be provided in the list element \code{web}.
+#' If the LIM is not resolved, the function will use the parsimonious (least distance) solution.
 #' }
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
-#' @seealso \code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}}.
+#' @section ODE models:
+#' A ODE type model should be set-up in such a way that it can be used by the \code{rootSolve} package.
+#' For details, please refer to the documentation of this package.
+#' \itemize{
+#' \item{The element \code{type} should be "ODE".}
+#' \item{The element \code{func} should contain a function that calculates the rate of change for all
+#' compartments i.e. a set of ODEs.}
+#' \item{The element \code{y} is a named vector with the initial state (i.e. biomass) of compartments,
+#' which is needed by the function in \code{func}.
+#' In this respect is the data in \emph{y} similar to the BM vector that needs to be provided
+#' for the EF type models.}
+#' \item{The element \code{parms} is optional and contain parameters that can be used by the function
+#' in \code{func}.}
+#' }
+#' @section Energy Flux models:
+#' Interaction strenghts can be calculated from energy flux models as presented in
+#' De Ruiter (1995) and Neutel & Thorne (2014). The energy flux model should at least include
+#' quantified flows, compartment biomasses, and conversion efficiencies.
+#' If you want to calculate the intraspecific interactions, i.e. the diagonal values, from the
+#' model, then non-predatory mortality rates should also be included. Beware that these model-derived
+#' diagonal values represent an \bold{upperbound}. It is the maximum amount of self-dampening possible
+#' in the respective populations.
+#' If your model includes dead compartments, like detritus or nutrients, it is highly recommended to
+#' also include these in the special argument \code{dead}. Conversion efficiences are not needed for
+#' dead compartments, and you can include information on defecation into these compartments.
+#' Interaction strengths of dead compartments are calculated in another way than for living compartments.
+#' Inclusion of recycling processes may impact your stability results (Wilson & Wolkovich, 2011).\cr
+#' The list with model information should contain:
+#' \itemize{
+#' \item{\code{type} (required) should be "EF" for energy flux models.}
+#' \item{\code{FM} (required) is a named square flowmatrix with sources in rows and sinks in columns.}
+#' \item{\code{BM} (required) is a named numeric with biomasses for all compartments.}
+#' \item{\code{AE} (required) is a named numeric with assimilation efficiencies for living compartments.}
+#' \item{\code{GE} (required) is a named numeric with growth efficiencies for living compartments.}
+#' \item{\code{diagonal} (required) is by default an all-zero diagonal. Can also be set to other values
+#' or calculated from the model by setting it to "model".}
+#' \item{\code{dead} (optional) is a list with the elements \code{names}, \code{def}, \code{frac} that
+#' contains the names of dead compartments (character vector), wether or not defecation occurs into these
+#' dead compartments ("Def" or "noDef" in character vector in same order as names), and what fraction
+#' of each flow comprises defecation (matrix similar to \code{FM}, only required with parallel flows).}
+#' \item{\code{externals} (optional) is a character vector with any compartments that should not be
+#' considered in the calculations}.
+#' \item{\code{MR} (required if \code{diagonal} is set to "model") is a named numeric with non-predatory
+#' mortality rates in the same units as the flows.}
+#' }
+#' More detailed information about argument requirements see \code{?getJacobianEnergyFlux}.
+#' @section Linear Inverse models:
+#' Linear programming can be used to quantify fluxes. Therefore, a solved linear inverse model (LIM)
+#' often already contains the elements needed to calculate interaction strengths, but they need to be
+#' extracted and calculated first. A LIM can be created with the R-package LIM. By sticking to certain
+#' rules when writing the model input file, the \code{fwstability} package can automatically derive the
+#' necessary information for stability analysis. These requirements include the use of tags in the
+#' names of compartments, variables, and flows to later identify dead compartments, defecation and
+#' mortality flows, and variables representing assimilation and growth. Tags should be used in combination
+#' with only the compartmentname to assign the extracted value to the right compartment (exception is
+#' for defecation flows). Tags are not case-sensitive and can be placed either in front or after the
+#' compartmentname. Default tags are "dead", "ass", "growth", "mort", and "def", but you can also choose
+#' your own tag names. More information on setting up the input model with these tags can be found in
+#' the vignette. \cr
+#' The LIM can be solved and quantified in various ways (e.g. by optimization or maximum likelihood)
+#' and added to the model list in the element \code{web} as named numeric.
+#' If you do not solve your LIM  before parsing it into this function, the model will be solved using
+#' Ldei, which is the parsimonious solution minimizing the sum of squares.\cr
+#' The list with model information should contain:
+#' \itemize{
+#' \item{\code{type} (required) should be "LIM"}
+#' \item{\code{LIM} (required) should be a read-in LIM. This can be acquired by Read(<path-to-input-file>) from the
+#' LIM R-package.}
+#' \item{\code{setup} (optional) can be Setup(Read(<path-to-input-file>)), otherwise set-up within function.}
+#' \item{\code{web} (optional) named numeric with flow solutions.}
+#' \item{\code{diagonal} (optional) all-zero by default, can also be other numbers or calculated from model
+#' by setting this element to "model".}
+#' \item{\code{aTag}, \code{gTag}, \code{mTag}, \code{defTag}, \code{deadTag} are optional. Default tags are
+#' "ass", "growth", "mort", "def", and "dead" respectively.}
+#' }
+#' More information on the requirments of the arguments see \code{?extractLIMdata}
+#' @seealso \code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}},
+#' \code{\link{extractLIMdata}}.
+#' @references \itemize{
+#' \item{de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+#' }
+#' \item{Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17, 651–661. https://doi.org/10.1111/ele.12266
+#' }
+#' \item{Wilson, E.E., Wolkovich, E.M., 2011. Scavenging: How carnivores and carrion structure communities. Trends Ecol. Evol. 26, 129–135. https://doi.org/10.1016/j.tree.2010.12.011
+#' }
+#' \item{\code{\link{LIM}} package, Soetaert & van Oevelen 2015.}
+#' }
 #' @export
 getJacobian <- function(model = stop("Model input required")) {
   if(model$type == "ODE") {
@@ -352,6 +445,27 @@ getJacobian <- function(model = stop("Model input required")) {
       dead = model$dead,
       externals = model$externals,
       MR = model$MR)
+  } else if(model$type == "LIM") {
+    if(is.null(model$setup)) {
+      model$setup <- Setup(model$LIM)
+    }
+    if(is.null(model$web)) {
+      message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+      model$web <- Ldei(model$setup)$X
+    } else if(!is.numeric(model$web) | is.null(names(model$web))) {
+      stop("Model solutions in \"web\" must be named numeric vector.")
+    }
+    extracted_data <- extractLIMdata(model)
+    JM <- getJacobianEnergyFlux(
+      FM = extracted_data$FM,
+      BM = extracted_data$BM,
+      AE = extracted_data$AE,
+      GE = extracted_data$GE,
+      dead = extracted_data$dead,
+      externals = extracted_data$externals,
+      MR = extracted_data$MR,
+      diagonal = model$diagonal
+    )
   } else {
     stop("Unknown model input")
   }

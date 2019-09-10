@@ -1,0 +1,107 @@
+=====================================================
+file: foodweb2.lim
+Meiofauna feeds on labile detritus.
+Meiofauna and macrofauna defecate into both labile and refractory detritus.
+Meiofauna and macrofauna both also deposit carbon due to mortality into the labile compartment.
+  IN          OUT       OUT
+  /            /         /
+ LABILE ----> MEIO --->  MACRO
+  ^_____________/ <________/  defecation + mortality
+ REFRAC <------/ <--------/   defecation
+  /
+  OUT
+=====================================================
+
+## EXTERNAL
+IN  ! import
+OUT ! export
+## END EXTERNAL
+
+## COMPONENT
+DEADLABILE = 30 {g C m-2} ! Labile detritus
+DEADREFRAC = 20 {g C m-2} ! Refractory detritus
+MEIO   = 10 {g C m-2} ! Meiofauna
+MACRO  = 5  {g C m-2} ! Macrofauna
+## END COMPONENT
+
+## FLOWS
+import      : IN -> DEADLABILE
+export      : DEADREFRAC -> OUT
+
+!-- Meiofauna processes
+! in
+meioGrazDet    : DEADLABILE -> MEIO
+! out
+meioDefLab     : MEIO -> DEADLABILE
+meioDefRefrac  : MEIO -> DEADREFRAC
+meioRespOne       : MEIO -> OUT ! test external parallel flows
+meioRespTwo      : MEIO -> OUT ! test external parallel flows
+meioMort       : MEIO -> DEADLABILE
+
+!-- Macrofauna processes
+! in
+macroPredMeio   : MEIO -> MACRO
+!out
+macroDefLab     : MACRO -> DEADLABILE
+macroDefRefrac  : MACRO -> DEADREFRAC
+macroResp       : MACRO -> OUT
+macroMortOne    : MACRO -> DEADLABILE ! test double mortality flows
+macroMortTwo    : MACRO -> DEADLABILE ! test double mortality flows
+## END FLOWS
+
+## PARAMETERS
+! Measured data
+meioDefrate  = 6 {g C m-2}
+macroDefrate  = 3 {g C m-2}
+
+! Data from literature (min max values)
+! AE constraints
+meioAEmin = 0.5 {fraction}
+meioAEmax = 0.9 {fraction}
+macroAEmin = 0.4 {fraction}
+macroAEmax = 0.8 {fraction}
+! GE constraints
+meioGEmin = 0.4 {fraction}
+meioGEmax = 0.8 {fraction}
+macroGEmin = 0.3 {fraction}
+macroGEmax = 0.7 {fraction}
+## END PARAMETERS
+
+## VARIABLES
+!-- Should only be addition or subtraction of flows and variables.
+!-- Declare variable before you use it for another variable.
+
+! Total defecation
+meioDef = meioDefLab + meioDefRefrac
+macroDef = macroDefLab + macroDefRefrac
+meioResp = meioRespOne + meioRespTwo
+macroMort = macroMortOne + macroMortTwo
+
+! Assimilation
+meioAss = flowto(MEIO) - meioDef
+macroAss = flowto(MACRO) - macroDef
+macroAssTest = flowto(MACRO) - macroDef + 0 ! test if right Ass is taken
+
+! Secondary production (growth)
+meioGrowth = meioAss - meioResp
+macroGrowth = macroAss - macroResp
+## END VARIABLES
+
+## Equalities
+! Flows or variables that can only have one value
+meioDef = meioDefRate
+macroDef = macroDefRate
+## End equalities
+
+## Inequalities
+! Flows or variables that can have a range of values
+! Assimilation
+meioAss = flowto(MEIO) * [meioAEmin, meioAEmax]
+macroAss = flowto(MACRO) * [macroAEmin, macroAEmax]
+
+! Secondary production (growth)
+meioGrowth = meioAss * [meioGEmin, meioGEmax]
+macroGrowth = macroAss * [macroGEmin, macroGEmax]
+## End inequalities
+
+
