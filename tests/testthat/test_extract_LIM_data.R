@@ -28,9 +28,9 @@ variables <- c(lim_solved$X["meioDefLab"] + lim_solved$X["meioDefRefrac"],
                lim_solved$X["macroDefLab"] + lim_solved$X["macroDefRefrac"],
                lim_solved$X["meioRespOne"] + lim_solved$X["meioRespTwo"],
                lim_solved$X["macroMortOne"] + lim_solved$X["macroMortTwo"],
+               lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"],
+               lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"],
                lim_solved$X["meioGrazDet"] - lim_solved$X["meioDefLab"] - lim_solved$X["meioDefRefrac"],
-               lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"],
-               lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"],
                lim_solved$X["meioGrazDet"] - lim_solved$X["meioDefLab"] - lim_solved$X["meioDefRefrac"]
                - lim_solved$X["meioRespOne"] - lim_solved$X["meioRespTwo"],
                lim_solved$X["macroPredMeio"] - lim_solved$X["macroDefLab"] - lim_solved$X["macroDefRefrac"]

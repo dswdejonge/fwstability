@@ -141,19 +141,19 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
   names(GE) <- toupper(lim$Components$name)
   AP <- getTag(vars = vars, tag = aTag)
   ### TEMPORARY CODE - start ###
-  AP["BAC"] <- sum(FM[,"BAC"], na.rm = TRUE)
+  #AP["BAC"] <- sum(FM[,"BAC"], na.rm = TRUE)
   ### TEMPORARY CODE - stop ###
   GP <- getTag(vars = vars, tag = gTag)
   inAE <- names(AE) %in% names(AP)
-  inAP <- names(AP) %in% names(AE)
-  AE[inAE] <- AP[inAP] / colSums(FM[,names(AE)[inAE]], na.rm = TRUE)
+  ii <- sort(names(AE)[inAE])
+  AE[ii] <- AP[ii] / colSums(FM[,ii], na.rm = TRUE)
   inGE <- names(GE) %in% names(GP)
-  inGP <- names(GP) %in% names(GE)
-  GE[inGE] <- GP[inGP] / AP[names(GE)[inGE]]
+  ii <- sort(names(GE)[inGE])
+  GE[ii] <- GP[ii] / AP[ii]
   ### TEMPORARY CODE - start ###
-  temp <- AE
-  temp <- GE[names(AE)]
-  GE <- temp
+  #temp <- AE
+  #temp <- GE[names(AE)]
+  #GE <- temp
   ### TEMPORARY CODE - stop ###
   CE <- list(AE = AE, GE = GE)
   return(CE)
@@ -298,19 +298,19 @@ extractLIMdata <- function(model) {
   BM <- model$LIM$comp[,"val"]
   names(BM) <- toupper(model$LIM$comp[,"name"])
   ### TEMPORARY CODE - start ###
-  if(model$site == "dist") {
-    BM["DOCPHYTO_S"] <- 0.28
-    BM["DOCOTHER_S"] <- 6.91
-    BM["CARC"] <- sum(FM[,"CARC"])
-  } else if(model$site == "undist") {
-    BM["DOCPHYTO_S"] <- 0.28
-    BM["DOCPHYTO_S"] <- 4.46
-    BM["CARC"] <- sum(FM[,"CARC"])
-  } else if(model$site == "ref") {
-    BM["DOCPHYTO_S"] <- 0.65
-    BM["DOCPHYTO_S"] <- 9.47
-    BM["CARC"] <- sum(FM[,"CARC"])
-  } else {stop("Error! Unknown site.")}
+  #if(model$site == "dist") {
+  #  BM["DOCPHYTO_S"] <- 0.28
+  #  BM["DOCOTHER_S"] <- 6.91
+  #  BM["CARC"] <- sum(FM[,"CARC"])
+  #} else if(model$site == "undist") {
+  #  BM["DOCPHYTO_S"] <- 0.28
+  #  BM["DOCPHYTO_S"] <- 4.46
+  #  BM["CARC"] <- sum(FM[,"CARC"])
+  #} else if(model$site == "ref") {
+  #  BM["DOCPHYTO_S"] <- 0.65
+  #  BM["DOCPHYTO_S"] <- 9.47
+  #  BM["CARC"] <- sum(FM[,"CARC"])
+  #} else {stop("Error! Unknown site.")}
   ### TEMPORARY CODE - stop ###
 
   vars <- getVariables(model$LIM, model$web)
@@ -330,11 +330,11 @@ extractLIMdata <- function(model) {
     if(is.null(model$deadTag)) {
       deadTag <- "dead"
       message("fwstab: Default tag \"dead\" is used to search model for dead compartments.")}
-    #model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)])) #
+    model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)])) #
     ### TEMPORARY CODE - start ###
-    deadnames = c("PHYTO_S", "PHYTO_W", "SLAB_S", "SLAB_W", "REFRAC",
-              "DOCPHYTO_S", "DOCOTHER_S", "CARC")
-    model$dead <- list(names = deadnames)
+    #deadnames = c("PHYTO_S", "PHYTO_W", "SLAB_S", "SLAB_W", "REFRAC",
+    #          "DOCPHYTO_S", "DOCOTHER_S", "CARC")
+    #model$dead <- list(names = deadnames)
     ### TEMPORARY CODE - stop ###
   }
   dead <- getDeadInfo(
