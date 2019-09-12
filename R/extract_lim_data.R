@@ -187,13 +187,6 @@ getMR <- function(BM, web, vars, mTag = NULL) {
   inMR <- names(MR) %in% names(MP)
   ii <- names(MR)[inMR]
   MR[ii] <- MP[ii] / BM[ii]
-
-  #for(values in list(web, vars)){
-  #  MP <- getTag(values, mTag)
-  #  inMR <- names(MR) %in% names(MP)
-  #  inMP <- names(MP) %in% names(MR)
-  #  MR[inMR] <- MP[inMP] / BM[names(MP)[inMP]]
-  #}
   return(MR)
 }
 
