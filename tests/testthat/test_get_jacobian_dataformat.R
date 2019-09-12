@@ -149,3 +149,19 @@ test_that("the function only executes if all biomasses are greater than zero", {
   expect_error(getJacobianEnergyFlux(FM, BM = BM9, AE, GE, dead = dead, externals = "CO2"),
                "biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
 })
+
+# Error: AE and GE have incorrect values
+AE1 <- AE; AE1[3] <- -1
+AE2 <- AE; AE2[3] <- 2
+GE1 <- GE; GE1[3] <- -1
+GE2 <- GE; GE2[3] <- 2
+test_that("the function only executes if all AE and GE are 0-1.", {
+  expect_error(getJacobianEnergyFlux(FM, BM = BM, AE1, GE, dead = dead, externals = "CO2"),
+               "assimilation and growth efficiencies must lie between 0 and 1")
+  expect_error(getJacobianEnergyFlux(FM, BM = BM, AE2, GE, dead = dead, externals = "CO2"),
+               "assimilation and growth efficiencies must lie between 0 and 1")
+  expect_error(getJacobianEnergyFlux(FM, BM = BM, AE, GE1, dead = dead, externals = "CO2"),
+               "assimilation and growth efficiencies must lie between 0 and 1")
+  expect_error(getJacobianEnergyFlux(FM, BM = BM, AE, GE2, dead = dead, externals = "CO2"),
+               "assimilation and growth efficiencies must lie between 0 and 1")
+})

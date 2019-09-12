@@ -267,6 +267,8 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     stop("given diagonal not numeric or set to \"model\"")
   } else if(length(diagonal) != 1 & length(diagonal) != length(BM)) {
     stop("given diagonal has incorrect length")
+  } else if(any(AE > 1 | AE < 0 | GE > 1 | GE < 0, na.rm = TRUE)) {
+    stop("assimilation and growth efficiencies must lie between 0 and 1")
   } else if(!is.null(dead)) {
     if(!all(is.na(AE[names(AE) %in% dead$names])) |
        !all(is.na(GE[names(GE) %in% dead$names]))) {
