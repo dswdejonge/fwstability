@@ -139,7 +139,7 @@ averageMutualInfo <- function(FM, cannibalism = FALSE){
 }
 
 # get weighted connectance
-getCw <- function(JM, cannibalism = FALSE) {
+getCw <- function(FM, cannibalism = FALSE) {
   c = cannibalism
   Cw <- exp((fluxSizeDiversity(FM, c) - averageMutualInfo(FM, c)) / 2) / length(FM[,1])
   return(Cw)

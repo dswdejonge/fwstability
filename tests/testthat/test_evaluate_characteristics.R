@@ -1,4 +1,5 @@
 context("Assessing stabilizing characteristics")
+require(ineq)
 
 # Example matrix
 fwnames <- c("DET", "BAC", "FUN", "ENCH")
@@ -33,3 +34,32 @@ JM <- matrix(c(0,
                0
 ), nrow = 4, ncol = 4)
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
+Fsum <- sum(FM)
+Fm <- mean(FM[which(FM > 0)])
+
+H <- -(
+    FM[1,2]/Fsum*log(FM[1,2]/Fsum) +
+    FM[1,3]/Fsum*log(FM[1,3]/Fsum) +
+    FM[1,4]/Fsum*log(FM[1,4]/Fsum) +
+    FM[2,4]/Fsum*log(FM[2,4]/Fsum) +
+    FM[3,4]/Fsum*log(FM[3,4]/Fsum))
+
+A <- FM[1,2]/Fsum*log((FM[1,2]*Fsum)/(sum(FM[1,])*sum(FM[,2]))) +
+      FM[1,3]/Fsum*log((FM[1,3]*Fsum)/(sum(FM[1,])*sum(FM[,3]))) +
+      FM[1,4]/Fsum*log((FM[1,4]*Fsum)/(sum(FM[1,])*sum(FM[,4]))) +
+      FM[2,4]/Fsum*log((FM[2,4]*Fsum)/(sum(FM[2,])*sum(FM[,4]))) +
+      FM[3,4]/Fsum*log((FM[3,4]*Fsum)/(sum(FM[3,])*sum(FM[,4])))
+
+Cw <- exp((H-A)/2)/length(fwnames)
+
+gini <-
+
+
+test_that("The getWConn functions provide correct answers.", {
+  expect_equal(fluxSizeDiversity(FM), H)
+  expect_equal(averageMutualInfo(FM), A)
+  expect_equal(getCw(FM), Cw)
+  expect_equal(Gini(X), gini)
+})
+
+FM[which(FM > 0)]
