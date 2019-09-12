@@ -52,14 +52,37 @@ A <- FM[1,2]/Fsum*log((FM[1,2]*Fsum)/(sum(FM[1,])*sum(FM[,2]))) +
 
 Cw <- exp((H-A)/2)/length(fwnames)
 
-gini <-
+X <- 2*((length(which(FM > 0)))^2)*mean(FM[which(FM > 0)])
+gini <- (abs(FM[1,2] - FM[1,3]) +
+  abs(FM[1,2] - FM[1,4]) +
+  abs(FM[1,2] - FM[2,4]) +
+  abs(FM[1,2] - FM[3,4]) +
 
+  abs(FM[1,3] - FM[1,2]) +
+  abs(FM[1,3] - FM[1,4]) +
+  abs(FM[1,3] - FM[2,4]) +
+  abs(FM[1,3] - FM[3,4]) +
+
+  abs(FM[1,4] - FM[1,2]) +
+  abs(FM[1,4] - FM[1,3]) +
+  abs(FM[1,4] - FM[2,4]) +
+  abs(FM[1,4] - FM[3,4]) +
+
+  abs(FM[2,4] - FM[1,2]) +
+  abs(FM[2,4] - FM[1,3]) +
+  abs(FM[2,4] - FM[1,4]) +
+  abs(FM[2,4] - FM[3,4]) +
+
+  abs(FM[3,4] - FM[1,2]) +
+  abs(FM[3,4] - FM[1,3]) +
+  abs(FM[3,4] - FM[1,4]) +
+  abs(FM[3,4] - FM[2,4]))/X
 
 test_that("The getWConn functions provide correct answers.", {
   expect_equal(fluxSizeDiversity(FM), H)
   expect_equal(averageMutualInfo(FM), A)
   expect_equal(getCw(FM), Cw)
-  expect_equal(Gini(X), gini)
+  expect_equal(Gini(as.vector(FM[which(FM > 0)])), gini)
 })
 
 FM[which(FM > 0)]
