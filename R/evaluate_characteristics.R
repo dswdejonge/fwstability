@@ -138,7 +138,17 @@ averageMutualInfo <- function(FM, cannibalism = FALSE){
   return(A)
 }
 
-# get weighted connectance
+#' Get weighted connectance.
+#'
+#' This function calculates weighted connectance, capturing the skewness of flows.
+#' @param FM (required) A flow matrix with flows from source in rows to sink in columns.
+#' @param cannibalism (optional) If cannibalism occurs in the food web.
+#' @references \itemize{
+#' \item{van Altena et al. 2016
+#' }
+#' }
+#' @return Returns a double.
+#' @export
 getCw <- function(FM, cannibalism = FALSE) {
   c = cannibalism
   Cw <- exp((fluxSizeDiversity(FM, c) - averageMutualInfo(FM, c)) / 2) / length(FM[,1])
