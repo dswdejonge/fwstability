@@ -170,6 +170,34 @@ averageMutualInfo <- function(FM){
   return(A)
 }
 
+#' Get effective or topological connectance per node.
+#'
+#' This function calculates effective or topological connectance per node, which can
+#' plotted in the window of vitality.
+#' @param FM (required) A flow matrix with flows from source in rows to sink in columns.
+#' @param type \itemize{
+#' \item{"eff" calculates the effective connectance per node (m).}
+#' \item{"topo" calculates the topological connectance per node (m*), which is the special
+#' case where all flows have equal weights.}
+#' }
+#' @references \itemize{
+#' \item{
+#' van Altena, C., Hemerik, L., de Ruiter, P.C., 2016. Food web stability and weighted
+#' connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
+#' https://doi.org/10.1007/s12080-015-0291-7
+#' }
+#' \item{Ulanowicz 1997.}
+#' }
+#' @return Returns a double.
+#' @export
+getConnPerNode <- function(FM, type = c("eff", "topo")) {
+  if(length(type) == 1 && type == "topo"){
+    FM[which(FM > 0)] <- 1
+  }
+  m <- exp((fluxSizeDiversity(FM) - averageMutualInfo(FM)) / 2)
+  return(m)
+}
+
 #' Get weighted connectance.
 #'
 #' This function calculates weighted connectance, capturing the skewness of flows.
@@ -186,9 +214,11 @@ averageMutualInfo <- function(FM){
 #' @return Returns a double.
 #' @export
 getCw <- function(FM) {
-  Cw <- exp((fluxSizeDiversity(FM) - averageMutualInfo(FM)) / 2) / length(FM[,1])
+  m <- getConnPerNode(FM)
+  Cw <- m / length(FM[,1])
+  #Cw <- exp((fluxSizeDiversity(FM) - averageMutualInfo(FM)) / 2) / length(FM[,1])
   if(Cw < 0 | Cw > 1) {
-    stop("Something is wrong. Cw should vary witn 0 to 1.")
+    stop("Something is wrong. Cw should vary within 0 to 1.")
   }
   return(Cw)
 }
