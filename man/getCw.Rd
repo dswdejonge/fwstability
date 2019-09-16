@@ -4,12 +4,10 @@
 \alias{getCw}
 \title{Get weighted connectance.}
 \usage{
-getCw(FM, cannibalism = FALSE)
+getCw(FM)
 }
 \arguments{
 \item{FM}{(required) A flow matrix with flows from source in rows to sink in columns.}
-
-\item{cannibalism}{(optional) If cannibalism occurs in the food web.}
 }
 \value{
 Returns a double.
@@ -17,9 +15,16 @@ Returns a double.
 \description{
 This function calculates weighted connectance, capturing the skewness of flows.
 }
+\details{
+Cw can vary between 0 and 1. Larger values of Cw indicate a more even distribution
+of fluxes.
+}
 \references{
 \itemize{
-\item{van Altena et al. 2016
+\item{
+van Altena, C., Hemerik, L., de Ruiter, P.C., 2016. Food web stability and weighted
+connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
+https://doi.org/10.1007/s12080-015-0291-7
 }
 }
 }
