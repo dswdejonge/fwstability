@@ -7,9 +7,24 @@ checkJMformat <- function(JM) {
   }
 }
 
-# Assess absolute and relative change in stability if a compartment disappears.
-# if delta is negative, the system becomes more stable.
-# if delta is positive, the system becomes less stable.
+#' Assess stabiliy effect of each compartment.
+#'
+#' This function assesses the affect on stability of removing one compartment from
+#' the Jacobian matrix.
+#' @param JM (required) A Jacobian matrix.
+#' @references \itemize{
+#' \item{
+#' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles and
+#' the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
+#' 651–661. https://doi.org/10.1111/ele.12266
+#' }
+#' }
+#' @return Returns a dataframe with absolute and relative changes in stability for removal
+#' of each food web compartment from the Jacobian matrix.
+#' @details If the change in stability (delta) is negative, the system becomes more stable if
+#' the respective food web compartment is removed from the Jacobian matrix. The opposite
+#' is true if delta is positive.
+#' @export
 assessComps <- function(JM) {
   checkJMformat(JM)
   ini_s <- getStability(JM)
@@ -27,14 +42,34 @@ assessComps <- function(JM) {
   return(df)
 }
 
-# Assess the effect of altering each link on the overall stability.
-# Default alteration is doubling the interaction strength.
 # if delta is negative, the system becomes more stable.
 # if delta is positive, the system becomes less stable.
 # show in vignette that doubling small interaction strength can have larger
 # effect on stability than doubling large interaction strengths, thus a
 # function + 10 would be more difficult to interpret in stead of relative change.
 # per link (not per link pair) also intraspecific interaction.
+
+#' Assess stabiliy effect of a fixed link alteration
+#'
+#' This function assesses the effect on stability of altering each interaction strength
+#' in a Jacobian matrix according to a fixed function.
+#' @param JM (required) A Jacobian matrix.
+#' @param func (required) Function describing how to alter each interaction strength to
+#' assess the effect on stability of the respective link. Default is doubling each
+#' interaction strength.
+#' @references \itemize{
+#' \item{
+#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction
+#' Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260.
+#' https://doi.org/10.1126/science.269.5228.1257
+#' }
+#' }
+#' @return Returns a dataframe with absolute and relative changes in stability for alteration
+#' of each interaction strength in the Jacobian matrix.
+#' @details If the change in stability (delta) is negative, the system becomes more stable if
+#' the respective food web compartment is removed from the Jacobian matrix. The opposite
+#' is true if delta is positive.
+#' @export
 assessLinksFixed <- function(JM,
                         func = function(x) {return(x * 2)}) {
   checkJMformat(JM)
@@ -113,17 +148,16 @@ assessLinks <- function(JM, method = "default") {
   return(df)
 }
 
-fluxSizeDiversity <- function(FM, cannibalism = FALSE){
+# i = j works
+fluxSizeDiversity <- function(FM){
   FMsum <- sum(FM)
   m <- FM / FMsum * log(FM / FMsum)
-  if(cannibalism == FALSE){
-    diag(m) <- 0
-  }
   H <- -sum(m, na.rm = TRUE)
   return(H)
 }
 
-averageMutualInfo <- function(FM, cannibalism = FALSE){
+# i cannot equal j
+averageMutualInfo <- function(FM){
   FMsum <- sum(FM)
   outgoingSum <- rowSums(FM)
   incomingSum <- colSums(FM)
@@ -131,9 +165,7 @@ averageMutualInfo <- function(FM, cannibalism = FALSE){
   product$product <- product$Var1 * product$Var2
   productM <- matrix(product$product, nrow = dim(FM)[1], ncol = dim(FM)[2])
   m <- FM / FMsum * log(FM * FMsum / productM)
-  if(cannibalism == FALSE){
-    diag(m) <- 0
-  }
+  diag(m) <- 0
   A <- sum(m, na.rm = TRUE)
   return(A)
 }
@@ -142,15 +174,21 @@ averageMutualInfo <- function(FM, cannibalism = FALSE){
 #'
 #' This function calculates weighted connectance, capturing the skewness of flows.
 #' @param FM (required) A flow matrix with flows from source in rows to sink in columns.
-#' @param cannibalism (optional) If cannibalism occurs in the food web.
 #' @references \itemize{
-#' \item{van Altena et al. 2016
+#' \item{
+#' van Altena, C., Hemerik, L., de Ruiter, P.C., 2016. Food web stability and weighted
+#' connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
+#' https://doi.org/10.1007/s12080-015-0291-7
 #' }
 #' }
+#' @details Cw can vary between 0 and 1. Larger values of Cw indicate a more even distribution
+#' of fluxes.
 #' @return Returns a double.
 #' @export
-getCw <- function(FM, cannibalism = FALSE) {
-  c = cannibalism
-  Cw <- exp((fluxSizeDiversity(FM, c) - averageMutualInfo(FM, c)) / 2) / length(FM[,1])
+getCw <- function(FM) {
+  Cw <- exp((fluxSizeDiversity(FM) - averageMutualInfo(FM)) / 2) / length(FM[,1])
+  if(Cw < 0 | Cw > 1) {
+    stop("Something is wrong. Cw should vary witn 0 to 1.")
+  }
   return(Cw)
 }
