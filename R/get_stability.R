@@ -83,13 +83,13 @@ getStability <- function(JM, method = "eigenvalue",
   } else if(is.null(rownames(JM)) | is.null(colnames(JM)) |
             (!is.null(mortalities) & is.null(names(mortalities)))) {
     stop("all required vectors and matrices must be named")
-  } else if(!all(rownames(JM) == colnames(JM))) {
+  } else if(!all(rownames(JM) %in% colnames(JM))) {
     stop("row names and column names of Jacobian matrix do not match")
   } else if(!is.null(mortalities) &&
             (min(mortalities, na.rm = T) <= 0 | !is.numeric(mortalities))) {
     stop("the mortalities vector contains values equal or smaller than zero, or is non-numeric")
-  } else if(!all(rownames(JM) == colnames(JM)) |
-            (!is.null(mortalities) & !all(names(mortalities) == rownames(JM)))) {
+  } else if(!all(rownames(JM) %in% colnames(JM)) |
+            (!is.null(mortalities) & !all(names(mortalities) %in% rownames(JM)))) {
     stop("the names and their order must be equal in all named vectors and matrices")
   } else if(!is.null(dead) & FALSE %in% (dead %in% rownames(JM))) {
     stop("the names of the dead compartments are unknown")
