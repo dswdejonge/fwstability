@@ -11,14 +11,14 @@
 #' @details
 #' @return No returned value, writes .txt file to working directory.
 #' @export
-dfsall <- function(AM, node, visited, pathway, started, output) {
+dfsall <- function(AM, node, visited, pathway, started, output, start) {
   if(visited[node]){
     if(node == start){
       cycle <- c(pathway, start)
       write(cycle,
             file = output,
             append = TRUE,
-            ncolumns = k + 1)
+            ncolumns = length(cycle))
     }
     return()
   }
@@ -26,7 +26,7 @@ dfsall <- function(AM, node, visited, pathway, started, output) {
   pathway <- c(pathway, node)
   children <- which(AM[node,] == 1)
   for(child in children){
-    dfsall(AM, child, visited, pathway, started, output)
+    dfsall(AM, child, visited, pathway, started, output, start)
   }
   visited[node] <- FALSE
   pathway[-length(pathway)]
@@ -45,7 +45,7 @@ dfsall <- function(AM, node, visited, pathway, started, output) {
 #' @details
 #' @return No returned value, writes .txt file to working directory.
 #' @export
-dfsk <- function(AM, node, visited, pathway, k, started, output){
+dfsk <- function(AM, node, visited, pathway, k, started, output, start){
   if(started[node]){
     return()
   }
@@ -55,7 +55,7 @@ dfsk <- function(AM, node, visited, pathway, k, started, output){
       write(cycle,
             file = output,
             append = TRUE,
-            ncolumns = k + 1)
+            ncolumns = length(cycle))
       return()
     }
     return()
@@ -67,11 +67,11 @@ dfsk <- function(AM, node, visited, pathway, k, started, output){
     if(!(start %in% children)){
       return()
     }else{
-      dfsk(AM, start, visited, pathway, k, started, output)
+      dfsk(AM, start, visited, pathway, k, started, output, start)
     }
   }else{
     for(child in children){
-      dfsk(AM, child, visited, pathway, k, started, output)
+      dfsk(AM, child, visited, pathway, k, started, output, start)
     }
   }
   visited[node] <- FALSE
@@ -97,10 +97,10 @@ dfs <- function(AM, k = NULL, output = NULL, verbose = T){
     stop("Adjacency matrix must be square.")
   } else if(!all(AM == 1 | AM == 0)) {
     stop("Adjancency matrix can only contain 0 and 1.")
-  } else if(!is.null(k) & !is.integer(k)) {
+  } else if(!is.null(k) & !is.double(k)) {
     stop("k must be an integer.")
-  } else if(!is.null(output) & is.character(output)) {
-    stop("output should contain string with filename for output")
+  } else if(!is.null(output) & !is.character(output)) {
+    stop("output should contain string with filename for output.")
   }
 
   visited <- logical(length = dim(AM)[1])
@@ -118,14 +118,14 @@ dfs <- function(AM, k = NULL, output = NULL, verbose = T){
   }
 
   if(is.null(k)) {
-    for(start in 1:dim(AM)[1]){
-      dfsall(AM, start, visited, pathway, started, output)
-      started[start] <- TRUE
+    for(startnode in 1:dim(AM)[1]){
+      dfsall(AM, node = startnode, visited, pathway, started, output, start = startnode)
+      started[startnode] <- TRUE
     }
   } else {
-    for(start in 1:dim(AM)[1]){
-      dfsk(AM, start, visited, pathway, k, started, output)
-      started[start] <- TRUEs
+    for(startnode in 1:dim(AM)[1]){
+      dfsk(AM, node = startnode, visited, pathway, k, started, output, start = startnode)
+      started[startnode] <- TRUE
     }
   }
 }

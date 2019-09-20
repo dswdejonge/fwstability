@@ -222,3 +222,42 @@ getCw <- function(FM) {
   }
   return(Cw)
 }
+
+getLoopWeight <- function(IS, d, k) {
+  LW <- abs(prod(IS) / prod(d)) ^ (1/k)
+  return(LW)
+}
+
+getFeedback <- function(IS) {
+  fdb <- prod(IS)
+  return(fdb)
+}
+
+assessFeedback <- function(JM, findLoops = T,
+                           loopFile = "allLoops.txt",
+                           assess = c("fdb", "mlw")) {
+
+  # find cycles if findLoops = T
+
+  # read cycle data
+  allLoops <- readLines(loopFile)
+  allLoops <- strsplit(allLoops, " ")
+  allLoops <- lapply(allLoops, function(x) as.numeric(x))
+
+  # create storage matrix with compname -> compname -> compname fdw mlw
+  result <- matrix(nrow = dim(allLoops)[1], ncol = length(assess))
+  colnames(result) <- assess
+
+  # find fdb and mlw
+  for(i in 1:dim(allLoops)[1]){
+    pathway <- allLoops[i,]
+    coords <- matrix(
+      data = c(pathway[1:length(pathway)-1], pathway[2:length(pathway)]),
+      ncol = 2, nrow = length(pathway)-1)
+    IS <- JM[coords]
+    result[i, "fdb"] <- getFeedback(IS)
+    result[i, "mlw"] <- getLoopWeight(IS, d, k)
+  }
+  allLoops <- cbind(allLoops, result)
+  return(allLoops)
+}
