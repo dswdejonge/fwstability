@@ -1,0 +1,131 @@
+#' Depth-First-Search all loops
+#'
+#' This recursive Depth-First-Search function finds all loops in the foodweb starting from
+#' a certain node and writes them to a text file.
+#' @param
+#' @references \itemize{
+#' \item{
+#' Reference?
+#' }
+#' }
+#' @details
+#' @return No returned value, writes .txt file to working directory.
+#' @export
+dfsall <- function(AM, node, visited, pathway, started, output) {
+  if(visited[node]){
+    if(node == start){
+      cycle <- c(pathway, start)
+      write(cycle,
+            file = output,
+            append = TRUE,
+            ncolumns = k + 1)
+    }
+    return()
+  }
+  visited[node] <- TRUE
+  pathway <- c(pathway, node)
+  children <- which(AM[node,] == 1)
+  for(child in children){
+    dfsall(AM, child, visited, pathway, started, output)
+  }
+  visited[node] <- FALSE
+  pathway[-length(pathway)]
+}
+
+#' Depth-First-Search loops of length k
+#'
+#' This recursive Depth-First-Search function finds all loops of length k starting at a
+#' certain node in the foodweb and writes them to a text file.
+#' @param
+#' @references \itemize{
+#' \item{
+#' Reference?
+#' }
+#' }
+#' @details
+#' @return No returned value, writes .txt file to working directory.
+#' @export
+dfsk <- function(AM, node, visited, pathway, k, started, output){
+  if(started[node]){
+    return()
+  }
+  if(visited[node]){
+    if(node == start && length(pathway) == k){
+      cycle <- c(pathway, start)
+      write(cycle,
+            file = output,
+            append = TRUE,
+            ncolumns = k + 1)
+      return()
+    }
+    return()
+  }
+  visited[node] <- TRUE
+  pathway <- c(pathway, node)
+  children <- which(AM[node,] == 1)
+  if(length(pathway) == k){
+    if(!(start %in% children)){
+      return()
+    }else{
+      dfsk(AM, start, visited, pathway, k, started, output)
+    }
+  }else{
+    for(child in children){
+      dfsk(AM, child, visited, pathway, k, started, output)
+    }
+  }
+  visited[node] <- FALSE
+  pathway[-length(pathway)]
+}
+
+#' Depth-First-Search wrapper
+#'
+#' This function is a wrapper for two recursive Depth-First-Search functions.
+#' The wrapper checks data input, redirects to the right algorithm, and checks if no
+#' file will be overwritten.
+#' @param
+#' @references \itemize{
+#' \item{
+#' Reference?
+#' }
+#' }
+#' @details
+#' @return No returned value, writes .txt file to working directory.
+#' @export
+dfs <- function(AM, k = NULL, output = NULL, verbose = T){
+  if(dim(AM)[1] != dim(AM)[2]){
+    stop("Adjacency matrix must be square.")
+  } else if(!all(AM == 1 | AM == 0)) {
+    stop("Adjancency matrix can only contain 0 and 1.")
+  } else if(!is.null(k) & !is.integer(k)) {
+    stop("k must be an integer.")
+  } else if(!is.null(output) & is.character(output)) {
+    stop("output should contain string with filename for output")
+  }
+
+  visited <- logical(length = dim(AM)[1])
+  pathway <- numeric()
+  started <- logical(length = dim(AM)[1])
+
+  if(is.null(k) & is.null(output)) {
+    output <- "allLoops.txt"
+  } else if(!is.null(k) & is.null(output)) {
+    output <- paste0("allLoops_k=",k,".txt")
+  }
+
+  if(file.exists(output)) {
+    stop("file already exists. Rename or remove to avoid overwriting.")
+  }
+
+  if(is.null(k)) {
+    for(start in 1:dim(AM)[1]){
+      dfsall(AM, start, visited, pathway, started, output)
+      started[start] <- TRUE
+    }
+  } else {
+    for(start in 1:dim(AM)[1]){
+      dfsk(AM, start, visited, pathway, k, started, output)
+      started[start] <- TRUEs
+    }
+  }
+}
