@@ -233,14 +233,17 @@ getFeedback <- function(IS) {
   return(fdb)
 }
 
-assessFeedback <- function(JM, findLoops = T,
-                           loopFile = "allLoops.txt",
-                           assess = c("fdb", "mlw")) {
-
-  # find cycles if findLoops = T
+assessFeedback <- function(JM, findLoops = T, k = NULL,
+                           path = getwd(), file = "allLoops.txt",
+                           assess = c("fdb", "mlw"), verbose = T) {
+  if(findLoops) {
+    AM <- abs(JM)
+    AM[which(AM) > 0] <- 1
+    dfs(AM, k, output = paste0(path,"/",file), verbose)
+  }
 
   # read cycle data
-  allLoops <- readLines(loopFile)
+  allLoops <- readLines(paste0(path,"/",file))
   allLoops <- strsplit(allLoops, " ")
   allLoops <- lapply(allLoops, function(x) as.numeric(x))
 
