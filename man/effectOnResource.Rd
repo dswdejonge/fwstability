@@ -4,7 +4,7 @@
 \alias{effectOnResource}
 \title{Per capita effect on resource population.}
 \usage{
-effectOnResource(FM, BM, AE, dead = NULL)
+effectOnResource(FM, BM, AE, dead = NULL, index = NULL)
 }
 \arguments{
 \item{FM}{(required) A square flowmatrix, source compartments as rows,

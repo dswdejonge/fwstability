@@ -4,7 +4,8 @@
 \alias{getDiagonal}
 \title{Calculate Jacobian diagonal from flux values}
 \usage{
-getDiagonal(MR, BM, dead = NULL, FM = NULL, AE = NULL)
+getDiagonal(MR, BM, dead = NULL, FM = NULL, AE = NULL,
+  index = NULL)
 }
 \arguments{
 \item{MR}{A named numeric vector with non-predatory mortality rates for all

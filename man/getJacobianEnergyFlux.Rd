@@ -5,7 +5,7 @@
 \title{Jacobian matrix with interaction strengths}
 \usage{
 getJacobianEnergyFlux(FM, BM, AE, GE, diagonal = NULL, dead = NULL,
-  externals = NULL, MR = NULL)
+  externals = NULL, MR = NULL, index = NULL, verbose = T)
 }
 \arguments{
 \item{FM}{(required) A named square flowmatrix, source compartments as rows,

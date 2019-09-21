@@ -2,13 +2,19 @@
 #'
 #' This recursive Depth-First-Search function finds all loops in the foodweb starting from
 #' a certain node and writes them to a text file.
-#' @param
+#' @param AM Adjacency matrix.
+#' @param node Current node.
+#' @param visited Logical vector which stores if a node is visited before.
+#' @param pathway Integer vector that tracks the pathway to current node.
+#' @param started Logical vector which stores which nodes have been used
+#' before as starting node.
+#' @param output String with filename to store loops.
+#' @param start Is integer with the current start node.
 #' @references \itemize{
 #' \item{
 #' Reference?
 #' }
 #' }
-#' @details
 #' @return No returned value, writes .txt file to working directory.
 #' @export
 dfsall <- function(AM, node, visited, pathway, started, output, start) {
@@ -36,13 +42,20 @@ dfsall <- function(AM, node, visited, pathway, started, output, start) {
 #'
 #' This recursive Depth-First-Search function finds all loops of length k starting at a
 #' certain node in the foodweb and writes them to a text file.
-#' @param
+#' @param AM Adjacency matrix.
+#' @param node Current node.
+#' @param visited Logical vector which stores if a node is visited before.
+#' @param pathway Integer vector that tracks the pathway to current node.
+#' @param k Integer denoting the length of loops searched for.
+#' @param started Logical vector which stores which nodes have been used
+#' before as starting node.
+#' @param output String with filename to store loops.
+#' @param start Is integer with the current start node.
 #' @references \itemize{
 #' \item{
 #' Reference?
 #' }
 #' }
-#' @details
 #' @return No returned value, writes .txt file to working directory.
 #' @export
 dfsk <- function(AM, node, visited, pathway, k, started, output, start){
@@ -83,13 +96,16 @@ dfsk <- function(AM, node, visited, pathway, k, started, output, start){
 #' This function is a wrapper for two recursive Depth-First-Search functions.
 #' The wrapper checks data input, redirects to the right algorithm, and checks if no
 #' file will be overwritten.
-#' @param
+#' @param AM (required) Adjacency matrix
+#' @param k (optional) Integer of length loop to search for.
+#' @param output (optional) Filename to store loops. Default is "allLoops.txt"
+#' or "allLoops_k=<k>.txt".
+#' @param verbose (optional) Default is TRUE. Set to FALSE to hide messages.
 #' @references \itemize{
 #' \item{
 #' Reference?
 #' }
 #' }
-#' @details
 #' @return No returned value, writes .txt file to working directory.
 #' @export
 dfs <- function(AM, k = NULL, output = NULL, verbose = T){

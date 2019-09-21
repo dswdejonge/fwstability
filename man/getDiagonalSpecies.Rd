@@ -4,7 +4,7 @@
 \alias{getDiagonalSpecies}
 \title{Calculate diagonal value for species}
 \usage{
-getDiagonalSpecies(MR, BM)
+getDiagonalSpecies(MR, BM, index = NULL)
 }
 \arguments{
 \item{MR}{A named numeric vector with non-predatory mortality rates for all
