@@ -223,7 +223,23 @@ getCw <- function(FM) {
   return(Cw)
 }
 
-getLoopWeight <- function(IS, k, d = NULL) {
+#' Get loop weight.
+#'
+#' This function calculates the loop weight.
+#' @param IS (required) Numeric vector of length \code{k} with interaction strengths.
+#' @references \itemize{
+#' \item{
+#' van Altena, C., Hemerik, L., de Ruiter, P.C., 2016. Food web stability and weighted
+#' connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
+#' https://doi.org/10.1007/s12080-015-0291-7
+#' }
+#' }
+#' @details Cw can vary between 0 and 1. Larger values of Cw indicate a more even distribution
+#' of fluxes.
+#' @return Returns a double.
+#' @export
+getLoopWeight <- function(IS, d = NULL) {
+  k <- length(IS)
   if(is.null(d)) {
     LW <- abs(prod(IS)) ^ (1 / k)
   } else {
@@ -269,7 +285,7 @@ assessFeedback <- function(JM, MR = NULL, compnames = NULL,
       ncol = 2, nrow = length(pathway)-1)
     IS <- JM[coords]
     result$fdb[i] <- getFeedback(IS)
-    result$mlw[i] <- getLoopWeight(IS, k = length(pathway)-1, d = MR)
+    result$mlw[i] <- getLoopWeight(IS, d = MR)
   }
   if(verbose) {message("Done.")}
   return(result)

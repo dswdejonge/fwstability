@@ -50,7 +50,7 @@ test_that("getFeedback works", {
 })
 
 test_that("getLoopWeight works", {
-  expect_equal(getLoopWeight(IS, k), abs(prod(IS)) ^ (1 / k))
-  expect_equal(getLoopWeight(IS, k, MR), abs(prod(IS) / prod(MR)) ^ (1 / k))
+  expect_equal(getLoopWeight(IS), abs(prod(IS)) ^ (1 / k))
+  expect_equal(getLoopWeight(IS, MR), abs(prod(IS) / prod(MR)) ^ (1 / k))
 })
 
