@@ -223,8 +223,12 @@ getCw <- function(FM) {
   return(Cw)
 }
 
-getLoopWeight <- function(IS, d, k) {
-  LW <- abs(prod(IS) / prod(d)) ^ (1/k)
+getLoopWeight <- function(IS, k, d = NULL) {
+  if(is.null(d)) {
+    LW <- abs(prod(IS)) ^ (1 / k)
+  } else {
+    LW <- abs(prod(IS) / prod(d)) ^ (1 / k)
+  }
   return(LW)
 }
 
@@ -233,34 +237,40 @@ getFeedback <- function(IS) {
   return(fdb)
 }
 
-assessFeedback <- function(JM, findLoops = T, k = NULL,
+# MR should be in t-1 (same unit as JM)
+assessFeedback <- function(JM, MR = NULL, compnames = NULL,
+                           findLoops = F, k = NULL,
                            path = getwd(), file = "allLoops.txt",
                            assess = c("fdb", "mlw"), verbose = T) {
   if(findLoops) {
+    if(verbose) {message("Finding all loops in network...")}
     AM <- abs(JM)
-    AM[which(AM) > 0] <- 1
+    AM[which(AM > 0)] <- 1
     dfs(AM, k, output = paste0(path,"/",file), verbose)
   }
 
-  # read cycle data
+  if(verbose) {message("Read loop data...")}
   allLoops <- readLines(paste0(path,"/",file))
   allLoops <- strsplit(allLoops, " ")
   allLoops <- lapply(allLoops, function(x) as.numeric(x))
 
-  # create storage matrix with compname -> compname -> compname fdw mlw
-  result <- matrix(nrow = dim(allLoops)[1], ncol = length(assess))
-  colnames(result) <- assess
-
-  # find fdb and mlw
-  for(i in 1:dim(allLoops)[1]){
-    pathway <- allLoops[i,]
+  if(verbose) {message("Find feedback and/or maximum loop weight...")}
+  if(is.null(compnames)) {
+    loopnames <- unlist(lapply(allLoops, function(x) paste(x, collapse = "->")))
+  } else {
+    loopnames <- lapply(allLoops, function(x) fwnames[x])
+    loopnames <- unlist(lapply(loopnames, function(x) paste(x, collapse = "->")))
+  }
+  result <- data.frame(loop = loopnames, fdb = NA, mlw = NA)
+  for(i in 1:length(loopnames)){
+    pathway <- allLoops[[i]]
     coords <- matrix(
       data = c(pathway[1:length(pathway)-1], pathway[2:length(pathway)]),
       ncol = 2, nrow = length(pathway)-1)
     IS <- JM[coords]
-    result[i, "fdb"] <- getFeedback(IS)
-    result[i, "mlw"] <- getLoopWeight(IS, d, k)
+    result$fdb[i] <- getFeedback(IS)
+    result$mlw[i] <- getLoopWeight(IS, k = length(pathway)-1, d = MR)
   }
-  allLoops <- cbind(allLoops, result)
-  return(allLoops)
+  if(verbose) {message("Done.")}
+  return(result)
 }

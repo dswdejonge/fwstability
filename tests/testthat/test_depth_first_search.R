@@ -13,19 +13,27 @@ AM <- matrix(c(
 ), byrow = T, nrow = 8, ncol = 8)
 AM1 <- AM ; AM1[3] <- 5
 
+#dfs(AM)
+#dfs(AM, k = 3)
+
+fwnames <- LETTERS[1:dim(AM)[1]]
 FM <- AM
 FM[which(FM == 1)] <- runif(length(which(FM == 1)), min = 0.01, max = 10)
+BM <- runif(dim(FM)[1], min = 5, max = 25)
+AE <- runif(dim(FM)[1], min = 0, max = 1)
+GE <- runif(dim(FM)[1], min = 0, max = 1)
+MR <- runif(dim(FM)[1], min = 0, max = 2)
+rownames(FM) <- fwnames ; colnames(FM) <- fwnames
+names(BM) <- fwnames ; names(AE) <- fwnames ; names(GE) <- fwnames
 model <- list(
   type = "EF",
   FM = FM,
-  BM = runif(dim(FM)[1], min = 5, max = 25),
-  AE = runif(dim(FM)[1], min = 0, max = 1),
-  GE = runif(dim(FM)[1], min = 0, max = 1),
-  dead = list(names = c(1,2)),
-  i = T
+  BM = BM,
+  AE = AE,
+  GE = GE,
+  dead = list(names = c("A", "B"))
 )
-
-
+JM <- getJacobian(model)
 
 test_that("the function only executes with right data input", {
   expect_error(dfs(AM[,1:4]), "Adjacency matrix must be square.")
@@ -34,6 +42,15 @@ test_that("the function only executes with right data input", {
   expect_error(dfs(AM, output = 3), "output should contain string with filename for output.")
   expect_error(dfs())
 })
+k <- 3
+IS <- JM[which(JM != 0)][1:k]
 
-#dfs(AM)
-#dfs(AM, k = 3)
+test_that("getFeedback works", {
+  expect_equal(getFeedback(IS), prod(IS))
+})
+
+test_that("getLoopWeight works", {
+  expect_equal(getLoopWeight(IS, k), abs(prod(IS)) ^ (1 / k))
+  expect_equal(getLoopWeight(IS, k, MR), abs(prod(IS) / prod(MR)) ^ (1 / k))
+})
+

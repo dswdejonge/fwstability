@@ -44,24 +44,24 @@
 #' @return This function returns a matrix containing the effects of the consumers (rows) on the
 #' resources (columns).
 #' @export
-effectOnResource <- function(FM, BM, AE, dead = NULL, i = NULL){
+effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
   # As a matrix is by default divided by row (which now contain the sources,
   # but we want to divide by consumer), the matrix must be transposed first.
   result <- -(t(FM) / BM)
 
   if(!is.null(dead)){
-    if(is.null(i)) {
+    if(is.null(index)) {
       dead_i <- which(rownames(FM) %in% dead$names)
     } else {
       dead_i <- dead$names
     }
-    if(is.null(i)) {
+    if(is.null(index)) {
       dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
     } else {
       dead_interaction <- expand.grid((1:dim(FM)[1])[-dead_i], (1:dim(FM)[1])[-dead_i])
     }
     for(i in 1:dim(dead_interactions)[1]){
-      if(is.null(i)) {
+      if(is.null(index)) {
         consumer <- as.character(dead_interactions[i,1])
         resource <- as.character(dead_interactions[i,2])
       } else {
@@ -143,9 +143,9 @@ effectOnConsumer <- function(FM, BM, AE, GE) {
   return(result)
 }
 
-removeExternals <- function(externals, FM, i = NULL) {
+removeExternals <- function(externals, FM, index = NULL) {
   if(!is.null(externals)) {
-    if(is.null(i)) {
+    if(is.null(index)) {
       if((FALSE %in% (externals %in% rownames(FM))) |
          (FALSE %in% (externals %in% colnames(FM)))) {
         stop("the names of the external compartments are unknown")
@@ -155,8 +155,8 @@ removeExternals <- function(externals, FM, i = NULL) {
         FM <- FM[internals, internals]
       }
     } else {
-      if(!is.numeric(i)) {
-        stop("i must be integer vector with external indices")
+      if(!is.numeric(index)) {
+        stop("index must be integer vector with external indices")
       } else {
         FM <- FM[-externals, -externals]
       }
@@ -165,9 +165,9 @@ removeExternals <- function(externals, FM, i = NULL) {
   return(FM)
 }
 
-adjustDeadInput <- function(dead, i = NULL) {
+adjustDeadInput <- function(dead, index = NULL) {
   if(!is.null(dead)) {
-    if((!is.list(dead) | is.null(names(dead))) & is.null(i)) {
+    if((!is.list(dead) | is.null(names(dead))) & is.null(index)) {
       stop("argument \"dead\" must be a named list")
     } else if(is.null(dead$names)) {
       stop("\"names\" element is required in the \"dead\" list")
@@ -261,10 +261,10 @@ adjustDeadInput <- function(dead, i = NULL) {
 #' @export
 getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
                         dead = NULL, externals = NULL, MR = NULL,
-                        i = NULL, verbose = T) {
+                        index = NULL, verbose = T) {
 
-  FM <- removeExternals(externals, FM, i)
-  dead <- adjustDeadInput(dead, i)
+  FM <- removeExternals(externals, FM, index)
+  dead <- adjustDeadInput(dead, index)
   if(is.null(diagonal)) {
     diagonal <- 0
     if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
@@ -273,21 +273,21 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   # Do checks for required data formats: throws errors
   if(dim(FM)[1] != dim(FM)[2]) {
     stop("flow matrix is not square")
-  } else if(!is.null(i) & !is.logical(i)) {
-    stop("i must be NULL or boolean")
+  } else if(!is.null(index) & !is.logical(index)) {
+    stop("index must be NULL or boolean")
   } else if((is.null(rownames(FM)) | is.null(colnames(FM)) |
             is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE)))
-            & is.null(i)) {
+            & is.null(index)) {
     stop("all required vectors and matrices must be named")
-  } else if((!all(rownames(FM) == colnames(FM))) & is.null(i)) {
+  } else if((!all(rownames(FM) == colnames(FM))) & is.null(index)) {
     stop("row names and column names of flow matrix do not match")
   } else if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
     stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
   } else if((!all(names(BM) == rownames(FM)) | !all(names(BM) == colnames(FM)) |
             !all(names(BM) == names(AE))    | !all(names(BM) == names(GE)))
-            & is.null(i)){
+            & is.null(index)){
     stop("the names and their order must be equal in all named vectors and matrices")
-  } else if((FALSE %in% (dead$names %in% names(BM))) & is.null(i)) {
+  } else if((FALSE %in% (dead$names %in% names(BM))) & is.null(index)) {
     stop("the names of the dead compartments are unknown")
   } else if(!is.numeric(diagonal) & all(diagonal != "model")) {
     stop("given diagonal not numeric or set to \"model\"")
@@ -306,7 +306,7 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
 
   # Get interaction strengths
   eff.on.consumer <- effectOnConsumer(FM, BM, AE, GE)
-  eff.on.resource <- effectOnResource(FM, BM, AE, dead, i)
+  eff.on.resource <- effectOnResource(FM, BM, AE, dead, index)
 
   # Set interaction strength to 0 if NA
   a <- which(is.na(eff.on.consumer))
@@ -322,9 +322,9 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   JM <- eff.on.consumer + eff.on.resource
   if(all(diagonal == "model")) {
     if(is.null(dead)) {
-      diagonal <- getDiagonal(MR, BM, i = i)
+      diagonal <- getDiagonal(MR, BM, index = index)
     } else {
-      diagonal <- getDiagonal(MR, BM, dead$names, FM, AE, i)
+      diagonal <- getDiagonal(MR, BM, dead$names, FM, AE, index)
     }
   }
   diag(JM) <- diagonal
@@ -472,7 +472,7 @@ getJacobian <- function(model = stop("Model input required")) {
       dead = model$dead,
       externals = model$externals,
       MR = model$MR,
-      i = model$i)
+      index = model$index)
   } else if(model$type == "LIM") {
     if(is.null(model$setup)) {
       model$setup <- Setup(model$LIM)

@@ -17,14 +17,14 @@
 #' input data. If MR is biomass per unit time then BM must be just biomass. If MR is
 #' biomass per unit time per surface area then BM must be biomass per surface area.
 #' @export
-getDiagonalSpecies <- function(MR, BM, i = NULL) {
+getDiagonalSpecies <- function(MR, BM, index = NULL) {
   if(length(MR) != length(BM)) {
     stop("input vectors have unequal lengths")
   } else if(!is.numeric(MR) | !is.numeric(BM)) {
     stop("input vectors must be numeric")
-  } else if((is.null(names(MR)) | is.null(names(BM))) & is.null(i)) {
+  } else if((is.null(names(MR)) | is.null(names(BM))) & is.null(index)) {
     stop("input vectors must be named")
-  } else if((!all(names(MR) == names(BM))) & is.null(i)) {
+  } else if((!all(names(MR) == names(BM))) & is.null(index)) {
     stop("names of vectors do not match")
   }
 
@@ -55,8 +55,8 @@ getDiagonalSpecies <- function(MR, BM, i = NULL) {
 #' detritus compartments in the food web (per unit time). It is important to review the units of the
 #' input data. If the FM is biomass per unit time then BM must be just biomass. If FM is
 #' biomass per unit time per surface area then BM must be biomass per surface area.
-getDiagonalDetritus <- function(FM, BM, AE, dead, i = NULL){
-  if(is.null(i)) {
+getDiagonalDetritus <- function(FM, BM, AE, dead, index = NULL){
+  if(is.null(index)) {
     dead_i <- which(rownames(FM) %in% dead)
   } else {
     dead_i <- dead
@@ -101,7 +101,7 @@ getDiagonalDetritus <- function(FM, BM, AE, dead, i = NULL){
 #' input data. If MR is biomass per unit time then BM must be just biomass. If MR is
 #' biomass per unit time per surface area then BM must be biomass per surface area.
 #' @export
-getDiagonal <- function(MR, BM, dead = NULL, FM = NULL, AE = NULL, i = NULL) {
+getDiagonal <- function(MR, BM, dead = NULL, FM = NULL, AE = NULL, index = NULL) {
 
   if(!is.null(dead) & is.null(FM) | is.null(AE)) {
     stop("please provide all required data to calculate dead diagonal values")
@@ -110,13 +110,13 @@ getDiagonal <- function(MR, BM, dead = NULL, FM = NULL, AE = NULL, i = NULL) {
   # Get diagonal, and find detritus values if necessary
   if(!is.null(dead)) {
     diagonal <- diag(FM)
-    add <- getDiagonalDetritus(FM, BM, AE, dead, i)
+    add <- getDiagonalDetritus(FM, BM, AE, dead, index)
   } else {
     diagonal <- MR
   }
 
   # Find species values and add to diagonal
-  aii <- getDiagonalSpecies(MR = MR, BM = BM, i = i)
+  aii <- getDiagonalSpecies(MR = MR, BM = BM, index = index)
   diagonal[names(aii)] <- aii
   # Add detritus values to diagonal if necessary
   if(!is.null(dead)) {
