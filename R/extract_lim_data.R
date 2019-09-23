@@ -64,6 +64,12 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL) {
   return(flowmatrix)
 }
 
+getNettoFM <- function(FM) {
+  FM <- FM - t(FM)
+  FM[which(FM < 0)] <- 0
+  return(FM)
+}
+
 #' Calculate value of LIM variables from flow solutions.
 #'
 #' This function calculates the value of variables as defined in the LIM from the flow solutions.
@@ -141,7 +147,7 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
   names(GE) <- toupper(lim$Components$name)
   AP <- getTag(vars = vars, tag = aTag)
   ### TEMPORARY CODE - start ###
-  #AP["BAC"] <- sum(FM[,"BAC"], na.rm = TRUE)
+  AP["BAC"] <- sum(FM[,"BAC"], na.rm = TRUE)
   ### TEMPORARY CODE - stop ###
   GP <- getTag(vars = vars, tag = gTag)
   inAE <- names(AE) %in% names(AP)
@@ -151,9 +157,9 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
   ii <- sort(names(GE)[inGE])
   GE[ii] <- GP[ii] / AP[ii]
   ### TEMPORARY CODE - start ###
-  #temp <- AE
-  #temp <- GE[names(AE)]
-  #GE <- temp
+  temp <- AE
+  temp <- GE[names(AE)]
+  GE <- temp
   ### TEMPORARY CODE - stop ###
   CE <- list(AE = AE, GE = GE)
   return(CE)
@@ -280,6 +286,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
 #' \item \code{diagonal} (optional) Either a single value, a numeric vector or the string "model".
 #' Default is an all-zero diagonal. The string "model" calculates the diagonal values from flux values.
 #' If diagonal is set to "model" mortality must be explicity included in the LIM.
+#' \item \code{netto} (optional) TRUE or FALSE. Use netto FM?
 #' }
 #' @details In order for this function to work, the LIM must be set-up in a specific way.
 #' The flows and variables representing assimilation, growth, defecation, and mortality of an organism
@@ -293,23 +300,26 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
 #' @export
 extractLIMdata <- function(model) {
   FM <- getFlowMatrix(readLIM = model$LIM, web = model$web, lim = model$setup)
+  if(!is.null(model$netto) & model$netto){
+    FM <- getNettoFM(FM)
+  }
 
   BM <- model$LIM$comp[,"val"]
   names(BM) <- toupper(model$LIM$comp[,"name"])
   ### TEMPORARY CODE - start ###
-  #if(model$site == "dist") {
-  #  BM["DOCPHYTO_S"] <- 0.28
-  #  BM["DOCOTHER_S"] <- 6.91
-  #  BM["CARC"] <- sum(FM[,"CARC"])
-  #} else if(model$site == "undist") {
-  #  BM["DOCPHYTO_S"] <- 0.28
-  #  BM["DOCPHYTO_S"] <- 4.46
-  #  BM["CARC"] <- sum(FM[,"CARC"])
-  #} else if(model$site == "ref") {
-  #  BM["DOCPHYTO_S"] <- 0.65
-  #  BM["DOCPHYTO_S"] <- 9.47
-  #  BM["CARC"] <- sum(FM[,"CARC"])
-  #} else {stop("Error! Unknown site.")}
+  if(model$site == "dist") {
+    BM["DOCPHYTO_S"] <- 0.28
+    BM["DOCOTHER_S"] <- 6.91
+    BM["CARC"] <- sum(FM[,"CARC"])
+  } else if(model$site == "undist") {
+    BM["DOCPHYTO_S"] <- 0.28
+    BM["DOCPHYTO_S"] <- 4.46
+    BM["CARC"] <- sum(FM[,"CARC"])
+  } else if(model$site == "ref") {
+    BM["DOCPHYTO_S"] <- 0.65
+    BM["DOCPHYTO_S"] <- 9.47
+    BM["CARC"] <- sum(FM[,"CARC"])
+  } else {stop("Error! Unknown site.")}
   ### TEMPORARY CODE - stop ###
 
   vars <- getVariables(model$LIM, model$web)
@@ -329,11 +339,11 @@ extractLIMdata <- function(model) {
     if(is.null(model$deadTag)) {
       deadTag <- "dead"
       message("fwstab: Default tag \"dead\" is used to search model for dead compartments.")}
-    model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)])) #
+    #model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)])) #
     ### TEMPORARY CODE - start ###
-    #deadnames = c("PHYTO_S", "PHYTO_W", "SLAB_S", "SLAB_W", "REFRAC",
-    #          "DOCPHYTO_S", "DOCOTHER_S", "CARC")
-    #model$dead <- list(names = deadnames)
+    deadnames = c("PHYTO_S", "PHYTO_W", "SLAB_S", "SLAB_W", "REFRAC",
+              "DOCPHYTO_S", "DOCOTHER_S", "CARC")
+    model$dead <- list(names = deadnames)
     ### TEMPORARY CODE - stop ###
   }
   dead <- getDeadInfo(
