@@ -369,7 +369,9 @@ assessFeedback <- function(JM, MR = NULL, compnames = NULL,
   # path = getwd(), file = "allLoops.txt"
   if(findLoops) {
     maxL <- maxNrLoops(dim(JM)[1], k)
-    if(verbose) {message(paste0("Finding all ",maxL," loops in network..."))}
+    if(verbose) {message(paste0(
+      "Assuming full connectance, there are at most ",maxL," loops.\n
+      Finding all loops in specified network..."))}
     AM <- abs(JM)
     AM[which(AM > 0)] <- 1
     # paste0(path,"/",file)
