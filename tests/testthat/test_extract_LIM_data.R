@@ -7,6 +7,11 @@ model <- list(
   type = "LIM",
   LIM = readLIM
 )
+model1 <- list(
+  type = "LIM",
+  LIM = readLIM,
+  netto = TRUE
+)
 
 # Expected answers
 lim <- Setup(readLIM)
@@ -52,7 +57,7 @@ GE <- c(NA, NA,
 names(AE) <- lim$Components$name ; names(GE) <- lim$Components$name
 
 BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames[1:4]
-DM <- matrix(1, nrow = 4, ncol = 4)
+DM <- matrix(0, nrow = 4, ncol = 4)
 rownames(DM) <- fwnames[1:4]
 colnames(DM) <- fwnames[1:4]
 DM["MEIO", "DEADLABILE"] <- lim_solved$X["meioDefLab"] / FM["MEIO", "DEADLABILE"]

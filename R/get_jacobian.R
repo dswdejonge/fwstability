@@ -92,7 +92,7 @@ effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
         d <- sum(DFM[predators, resource], na.rm = T) /
              sum(DFM[predators, defecation_compartments],  na.rm = T)
         if(is.na(d)) {
-          d <- 1
+          d <- 0
         }
       } else {
         d <- 1
@@ -484,8 +484,13 @@ getJacobian <- function(model = stop("Model input required")) {
       stop("Model solutions in \"web\" must be named numeric vector.")
     }
     extracted_data <- extractLIMdata(model)
+    if(!is.null(model$netto) && model$netto){
+      FM <- getNettoFM(FM)
+    } else {
+      FM <- extracted_data$FM
+    }
     JM <- getJacobianEnergyFlux(
-      FM = extracted_data$FM,
+      FM = FM,
       BM = extracted_data$BM,
       AE = extracted_data$AE,
       GE = extracted_data$GE,

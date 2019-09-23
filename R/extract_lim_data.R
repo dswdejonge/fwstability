@@ -238,7 +238,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
   defComps <- getTag(allSinks, defTag)
   dead$def[dead$names %in% readLIM$compnames[defComps]] <- "Def"
 
-  DM <- matrix(1, nrow = length(readLIM$compnames), ncol = length(readLIM$compnames))
+  DM <- matrix(0, nrow = length(readLIM$compnames), ncol = length(readLIM$compnames))
   rownames(DM) <- readLIM$compnames
   colnames(DM) <- readLIM$compnames
   flows <- readLIM$flows[,1:2]
@@ -300,9 +300,6 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
 #' @export
 extractLIMdata <- function(model) {
   FM <- getFlowMatrix(readLIM = model$LIM, web = model$web, lim = model$setup)
-  if(!is.null(model$netto) && model$netto){
-    FM <- getNettoFM(FM)
-  }
 
   BM <- model$LIM$comp[,"val"]
   names(BM) <- toupper(model$LIM$comp[,"name"])
