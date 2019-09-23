@@ -1,7 +1,7 @@
 context("Assessing stabilizing characteristics")
 require(ineq)
 
-# Example matrix
+# Example data and answers
 fwnames <- c("DET", "BAC", "FUN", "ENCH")
 FM <- matrix(c(
   0, 1606, 40.8, 11.1,
@@ -78,6 +78,7 @@ gini <- (abs(FM[1,2] - FM[1,3]) +
   abs(FM[3,4] - FM[1,4]) +
   abs(FM[3,4] - FM[2,4]))/X
 
+# Tests
 test_that("The getWConn functions provide correct answers.", {
   expect_equal(fluxSizeDiversity(FM), H)
   expect_equal(averageMutualInfo(FM), A)
@@ -85,7 +86,18 @@ test_that("The getWConn functions provide correct answers.", {
   expect_equal(Gini(as.vector(FM[which(FM > 0)])), gini)
 })
 
-FM[which(FM > 0)]
+s_ini <- max(Re(eigen(JM)$values))
+s_new <- max(Re(eigen(JM[-1, -1])$values))
+test_that("assessComps provides correct dataframe", {
+  expect_equal(ncol(assessComps(JM)), 5)
+  expect_equal(nrow(assessComps(JM)), dim(JM)[1])
+  expect_equal(as.character(assessComps(JM)[1,1]), rownames(JM)[1])
+  expect_equal(assessComps(JM)[1,2], s_ini)
+  expect_equal(assessComps(JM)[1,3], s_new)
+  expect_equal(assessComps(JM)[1,4], s_new - s_ini)
+  expect_equal(assessComps(JM)[1,5], (s_new - s_ini)/s_ini)
+
+})
 
 test_that("The total number of possible loops is calculated correctly", {
   expect_equal(maxNrLoops(4), 60)
