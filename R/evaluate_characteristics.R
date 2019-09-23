@@ -281,6 +281,26 @@ getFeedback <- function(IS) {
   return(fdb)
 }
 
+#' Maximum number of loops
+#'
+#' This function calculates the maximum number of loops, assuming full connectance.
+#' @param n (required) Integer. Number of network compartments.
+#' @param k (optional) Integer. Length of loop. Default NULL searches of loops of all length
+#' (k=2 to k = n).
+#' @details A fully connected network is assumed. The total number of loops of length k
+#' can be found as n! / (n - k)!. If k is not given the total number of possible loops (i.e.
+#' of length k = 2 to k = n) is found.
+#' @return Returns the maximum number of possible loops.
+#' @export
+maxNrLoops <- function(n, k = NULL) {
+  if(is.null(k)) {
+    x <- factorial(n) * sum(1/factorial(0:(n-2)))
+  } else {
+    x <- factorial(n) / factorial(n - k)
+  }
+  return(x)
+}
+
 # MR should be in t-1 (same unit as JM)
 #' Assess feedback characteristics of network
 #'
@@ -350,7 +370,8 @@ assessFeedback <- function(JM, MR = NULL, compnames = NULL,
                            path = getwd(), file = "allLoops.txt",
                            verbose = T) {
   if(findLoops) {
-    if(verbose) {message("Finding all loops in network...")}
+    maxL <- maxNrLoops(dim(JM)[1], k)
+    if(verbose) {message(paste0("Finding all ",maxL," loops in network..."))}
     AM <- abs(JM)
     AM[which(AM > 0)] <- 1
     dfs(AM, k, output = paste0(path,"/",file), verbose)
@@ -365,7 +386,7 @@ assessFeedback <- function(JM, MR = NULL, compnames = NULL,
   if(is.null(compnames)) {
     loopnames <- unlist(lapply(allLoops, function(x) paste(x, collapse = "->")))
   } else {
-    loopnames <- lapply(allLoops, function(x) fwnames[x])
+    loopnames <- lapply(allLoops, function(x) componames[x])
     loopnames <- unlist(lapply(loopnames, function(x) paste(x, collapse = "->")))
   }
   result <- data.frame(loop = loopnames, fdb = NA, lw = NA)

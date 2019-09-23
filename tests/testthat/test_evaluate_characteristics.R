@@ -86,3 +86,10 @@ test_that("The getWConn functions provide correct answers.", {
 })
 
 FM[which(FM > 0)]
+
+test_that("The total number of possible loops is calculated correctly", {
+  expect_equal(maxNrLoops(4), 60)
+  expect_equal(maxNrLoops(5), 320)
+  expect_equal(maxNrLoops(5, 5), 120)
+  expect_equal(maxNrLoops(5, 2), 20)
+})
