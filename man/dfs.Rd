@@ -17,7 +17,7 @@ or "allLoops_k=<k>.txt".}
 \item{verbose}{(optional) Default is TRUE. Set to FALSE to hide messages.}
 }
 \value{
-No returned value, writes .txt file to working directory.
+Returns file name.
 }
 \description{
 This function is a wrapper for two recursive Depth-First-Search functions.
