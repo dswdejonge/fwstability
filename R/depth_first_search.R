@@ -106,7 +106,7 @@ dfsk <- function(AM, node, visited, pathway, k, started, output, start){
 #' Reference?
 #' }
 #' }
-#' @return No returned value, writes .txt file to working directory.
+#' @return Returns file name.
 #' @export
 dfs <- function(AM, k = NULL, output = NULL, verbose = T){
   if(dim(AM)[1] != dim(AM)[2]){
@@ -146,4 +146,5 @@ dfs <- function(AM, k = NULL, output = NULL, verbose = T){
       started[startnode] <- TRUE
     }
   }
+  return(output)
 }
