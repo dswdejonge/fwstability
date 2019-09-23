@@ -319,10 +319,8 @@ maxNrLoops <- function(n, k = NULL) {
 #' of length k (see function \code{dfs()}.
 #' @param k (optional) Integer. Can be used if findLoops is TRUE,
 #' and indicates that you only want to search for loops of length k.
-#' @param path (optional) Default is getwd(). Is the path were to look
-#' for the text file with the indices of all loops.
 #' @param file (optional) Default is "allLoops.txt". Is the text file
-#' with indices of all loops. Should be present in the \code{path}.
+#' with indices of all loops. Should be present in the working directory.
 #' @param verbose (optional) Default is TRUE.
 #' Set to FALSE if you don't want messages printed.
 #' @references \itemize{
@@ -367,15 +365,15 @@ maxNrLoops <- function(n, k = NULL) {
 #' @export
 assessFeedback <- function(JM, MR = NULL, compnames = NULL,
                            findLoops = F, k = NULL,
-                           path = getwd(), file = "allLoops.txt",
-                           verbose = T) {
+                           file = NULL, verbose = T) {
+  # path = getwd(), file = "allLoops.txt"
   if(findLoops) {
     maxL <- maxNrLoops(dim(JM)[1], k)
     if(verbose) {message(paste0("Finding all ",maxL," loops in network..."))}
     AM <- abs(JM)
     AM[which(AM > 0)] <- 1
-    dfs(AM, k, output = paste0(path,"/",file), verbose)
-    if(verbose) {message(paste0("Loops stored as ",path,"/",file))}
+    # paste0(path,"/",file)
+    dfs(AM, k, output = file, verbose)
   }
   if(verbose) {message("Read loop data...")}
   allLoops <- readLines(paste0(path,"/",file))
@@ -386,7 +384,7 @@ assessFeedback <- function(JM, MR = NULL, compnames = NULL,
   if(is.null(compnames)) {
     loopnames <- unlist(lapply(allLoops, function(x) paste(x, collapse = "->")))
   } else {
-    loopnames <- lapply(allLoops, function(x) componames[x])
+    loopnames <- lapply(allLoops, function(x) compnames[x])
     loopnames <- unlist(lapply(loopnames, function(x) paste(x, collapse = "->")))
   }
   result <- data.frame(loop = loopnames, fdb = NA, lw = NA)

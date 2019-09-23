@@ -5,7 +5,7 @@
 \title{Assess feedback characteristics of network}
 \usage{
 assessFeedback(JM, MR = NULL, compnames = NULL, findLoops = F,
-  k = NULL, path = getwd(), file = "allLoops.txt", verbose = T)
+  k = NULL, file = NULL, verbose = T)
 }
 \arguments{
 \item{JM}{(required) Jacobian matrix with interaction strengths.}
@@ -26,11 +26,8 @@ of length k (see function \code{dfs()}.}
 \item{k}{(optional) Integer. Can be used if findLoops is TRUE,
 and indicates that you only want to search for loops of length k.}
 
-\item{path}{(optional) Default is getwd(). Is the path were to look
-for the text file with the indices of all loops.}
-
 \item{file}{(optional) Default is "allLoops.txt". Is the text file
-with indices of all loops. Should be present in the \code{path}.}
+with indices of all loops. Should be present in the working directory.}
 
 \item{verbose}{(optional) Default is TRUE.
 Set to FALSE if you don't want messages printed.}

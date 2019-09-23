@@ -130,7 +130,9 @@ dfs <- function(AM, k = NULL, output = NULL, verbose = T){
   }
 
   if(file.exists(output)) {
-    stop("file already exists. Rename or remove to avoid overwriting.")
+    stop(paste0("file ",output," already exists. Rename or remove to avoid overwriting."))
+  } else if(verbose) {
+    message(paste0("Loops stored as ",output))
   }
 
   if(is.null(k)) {
