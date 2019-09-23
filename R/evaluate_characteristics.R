@@ -376,7 +376,7 @@ assessFeedback <- function(JM, MR = NULL, compnames = NULL,
     dfs(AM, k, output = file, verbose)
   }
   if(verbose) {message("Read loop data...")}
-  allLoops <- readLines(paste0(path,"/",file))
+  allLoops <- readLines(paste0(file))
   allLoops <- strsplit(allLoops, " ")
   allLoops <- lapply(allLoops, function(x) as.numeric(x))
 
