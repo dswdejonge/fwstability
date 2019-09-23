@@ -23,6 +23,8 @@ FM <- matrix(c(
 0,      0,     0, 0, 0, 0
 ), nrow = nC, ncol = nC, byrow = TRUE)
 rownames(FM) <- fwnames ; colnames(FM) <- fwnames
+FM1 <- FM - t(FM)
+FM1[which(FM1 < 0)] <- 0
 
 variables <- c(lim_solved$X["meioDefLab"] + lim_solved$X["meioDefRefrac"],
                lim_solved$X["macroDefLab"] + lim_solved$X["macroDefRefrac"],
@@ -80,7 +82,6 @@ JM <- matrix(c(0,
 rownames(JM) <- fwnames[1:4] ; colnames(JM) <- fwnames[1:4]
 
 
-
 # Tests
 test_that("the Flowmatrix function works with parallel flows", {
   #expect_equal(Flowmatrix(lim, web = lim_solved$X), FM)
@@ -88,8 +89,6 @@ test_that("the Flowmatrix function works with parallel flows", {
   expect_equal(getFlowMatrix(readLIM, web = lim_solved$X), FM)
 })
 
-FM1 <- FM - t(FM)
-FM1[which(FM1 < 0)] <- 0
 test_that("the getNettoFM provides correct answer", {
   expect_equal(getNettoFM(FM), FM1)
 })
