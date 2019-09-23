@@ -395,7 +395,7 @@ assessFeedback <- function(JM, MR = NULL, compnames = NULL,
       ncol = 2, nrow = length(pathway)-1)
     IS <- JM[coords]
     result$fdb[i] <- getFeedback(IS)
-    result$mlw[i] <- getLoopWeight(IS, d = MR)
+    result$lw[i] <- getLoopWeight(IS, d = MR)
   }
   if(verbose) {message("Done.")}
   return(result)
