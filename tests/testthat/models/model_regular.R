@@ -1,5 +1,3 @@
-context("Jacobian matrix creation with no optional arguments")
-
 #### Model without optional arguments
 # Plants are eaten by worms.
 # Worms are eaten by ants, and ants are eaten by worms.
@@ -34,14 +32,22 @@ JM <- matrix(c(0,
 ), nrow = 3, ncol = 3)
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 
-FM1 <- FM - t(FM)
-FM1[which(FM1 < 0)] <- 0
-model1 <- list(
-  type = "EF", FM = FM1, BM = BM, AE = AE, GE = GE
-)
 
-# Test
-test_that("the function works without optional arguments", {
-  expect_equal(getJacobian(model),
-               JM)
-})
+### Use netto FM ###
+FM1 <- getNettoFM(FM, deadnames = NULL)
+JM1 <- matrix(c(0,
+               -FM1[1,2] / BM[2],
+               AE[1] * GE[1] * FM1[3,1] / BM[3],
+
+               AE[2] * GE[2] * FM1[1,2] / BM[1],
+               0,
+               -FM1[2,3] / BM[3],
+
+               -FM1[3,1] / BM[1],
+               AE[3] * GE[3] * FM1[2,3] / BM[2],
+               0
+), nrow = 3, ncol = 3)
+rownames(JM1) <- fwnames ; colnames(JM1) <- fwnames
+model1 <- model
+model1$netto <- T
+###

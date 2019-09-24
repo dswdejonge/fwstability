@@ -44,21 +44,23 @@
 #' @return This function returns a matrix containing the effects of the consumers (rows) on the
 #' resources (columns).
 #' @export
-effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
+effectOnResource <- function(FMs, BM, AE, dead = NULL, index = NULL){
   # As a matrix is by default divided by row (which now contain the sources,
   # but we want to divide by consumer), the matrix must be transposed first.
-  result <- -(t(FM) / BM)
+  result <- -(t(FMs$netto) / BM)
 
   if(!is.null(dead)){
     if(is.null(index)) {
-      dead_i <- which(rownames(FM) %in% dead$names)
+      dead_i <- which(rownames(FMs$netto) %in% dead$names)
     } else {
       dead_i <- dead$names
     }
     if(is.null(index)) {
-      dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
+      #dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
+      dead_interactions <- expand.grid(rownames(FMs$netto), rownames(FMs$netto)[dead_i])
     } else {
-      dead_interaction <- expand.grid((1:dim(FM)[1])[-dead_i], (1:dim(FM)[1])[-dead_i])
+      #dead_interaction <- expand.grid((1:dim(FM)[1])[-dead_i], (1:dim(FM)[1])[-dead_i])
+      dead_interaction <- expand.grid((1:dim(FMs$netto)[1]), (1:dim(FMs$netto)[1])[dead_i])
     }
     for(i in 1:dim(dead_interactions)[1]){
       if(is.null(index)) {
@@ -74,31 +76,38 @@ effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
         is_defecation_compartment <- dead$def[which(dead$names == resource)] == "Def"
       }
 
-      a <- FM[consumer, resource]
-      b <- FM[resource,consumer]
+      a <- FMs$netto[consumer, resource]
+      b <- FMs$netto[resource,consumer]
       if(is_defecation_compartment) {
-        c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
+        #c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
+        c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
+        c <- c[which(c > 0)]
       } else {
         c <- 0
       }
       if(!is.null(dead$frac)) {
-        DFM <- FM * dead$frac
+        DFM <- FMs$netto * dead$frac
       }else {
-        DFM <- FM
+        DFM <- FMs$netto
       }
       if(length(which(dead$def == "Def")) > 1) {
         defecation_compartments <- dead$names[which(dead$def == "Def")]
-        predators <- which(FM[consumer,] > 0)[-dead_i]
-        d <- sum(DFM[predators, resource], na.rm = T) /
-             sum(DFM[predators, defecation_compartments],  na.rm = T)
-        if(is.na(d)) {
-          d <- 1
-        }
+        #predators <- which(FM[consumer,] > 0)[-dead_i]
+        predators <- names(which(FMs$original[consumer,-dead_i] > 0))
+        #d <- sum(DFM[predators, resource], na.rm = T) /
+        #     sum(DFM[predators, defecation_compartments],  na.rm = T)
+        d <- DFM[predators, resource] /
+               rowSums(DFM[predators, defecation_compartments,drop=F],  na.rm = T)
+        #if(is.na(d) | length(d) == 0) {
+        #  d <- 0
+        #}
       } else {
-        d <- 1
+        #d <- 1
+        d <- rep(1, length(c))
       }
 
-      result[consumer, resource] <- (a - b + c * d) / BM[consumer]
+      #result[consumer, resource] <- (a - b + c * d) / BM[consumer]
+      result[consumer, resource] <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
 
       # Consumer of detritus is not a resource if it deposits detritus.
       result[resource, consumer] <- NA
@@ -261,9 +270,18 @@ adjustDeadInput <- function(dead, index = NULL) {
 #' @export
 getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
                         dead = NULL, externals = NULL, MR = NULL,
-                        index = NULL, verbose = T) {
+                        index = NULL, verbose = T, netto = NULL) {
 
   FM <- removeExternals(externals, FM, index)
+  FMs <- list()
+  if(!is.null(netto) && netto){
+    FMs$original <- FM
+    FMs$netto <- getNettoFM(FM, dead$names)
+  } else {
+    FMs$original <- FM
+    FMs$netto <- FM
+  }
+
   dead <- adjustDeadInput(dead, index)
   if(is.null(diagonal)) {
     diagonal <- 0
@@ -271,19 +289,19 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   }
 
   # Do checks for required data formats: throws errors
-  if(dim(FM)[1] != dim(FM)[2]) {
+  if(dim(FMs$original)[1] != dim(FMs$original)[2]) {
     stop("flow matrix is not square")
   } else if(!is.null(index) & !is.logical(index)) {
     stop("index must be NULL or boolean")
-  } else if((is.null(rownames(FM)) | is.null(colnames(FM)) |
+  } else if((is.null(rownames(FMs$original)) | is.null(colnames(FMs$original)) |
             is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE)))
             & is.null(index)) {
     stop("all required vectors and matrices must be named")
-  } else if((!all(rownames(FM) == colnames(FM))) & is.null(index)) {
+  } else if((!all(rownames(FMs$original) == colnames(FMs$original))) & is.null(index)) {
     stop("row names and column names of flow matrix do not match")
   } else if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
     stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
-  } else if((!all(names(BM) == rownames(FM)) | !all(names(BM) == colnames(FM)) |
+  } else if((!all(names(BM) == rownames(FMs$original)) | !all(names(BM) == colnames(FMs$original)) |
             !all(names(BM) == names(AE))    | !all(names(BM) == names(GE)))
             & is.null(index)){
     stop("the names and their order must be equal in all named vectors and matrices")
@@ -305,8 +323,8 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   }
 
   # Get interaction strengths
-  eff.on.consumer <- effectOnConsumer(FM, BM, AE, GE)
-  eff.on.resource <- effectOnResource(FM, BM, AE, dead, index)
+  eff.on.consumer <- effectOnConsumer(FMs$netto, BM, AE, GE)
+  eff.on.resource <- effectOnResource(FMs, BM, AE, dead, index)
 
   # Set interaction strength to 0 if NA
   a <- which(is.na(eff.on.consumer))
@@ -324,7 +342,7 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     if(is.null(dead)) {
       diagonal <- getDiagonal(MR, BM, index = index)
     } else {
-      diagonal <- getDiagonal(MR, BM, dead$names, FM, AE, index)
+      diagonal <- getDiagonal(MR, BM, dead$names, FMs$netto, AE, index)
     }
   }
   diag(JM) <- diagonal
@@ -342,6 +360,16 @@ getJacobianODE <- function(y, func, parms) {
   JM <- rootSolve::jacobian.full(y = y, func = func, parms = parms)
   rownames(JM) <- colnames(JM)
   return(JM)
+}
+
+getNettoFM <- function(FM, deadnames) {
+  netto <- FM - t(FM)
+  netto[which(netto < 0)] <- 0
+  if(!is.null(deadnames)){
+    netto[deadnames,] <- FM[deadnames,]
+    netto[,deadnames] <- FM[,deadnames]
+  }
+  return(netto)
 }
 
 #' Jacobian matrix from a food web model
@@ -456,7 +484,8 @@ getJacobianODE <- function(y, func, parms) {
 #' \item{\code{\link{LIM}} package, Soetaert & van Oevelen 2015.}
 #' }
 #' @export
-getJacobian <- function(model = stop("Model input required")) {
+getJacobian <- function(model = stop("Model input required"),
+                        verbose = T) {
   if(model$type == "ODE") {
     JM <- getJacobianODE(
       y = model$y,
@@ -472,13 +501,16 @@ getJacobian <- function(model = stop("Model input required")) {
       dead = model$dead,
       externals = model$externals,
       MR = model$MR,
-      index = model$index)
+      index = model$index,
+      netto = model$netto)
   } else if(model$type == "LIM") {
     if(is.null(model$setup)) {
       model$setup <- Setup(model$LIM)
     }
     if(is.null(model$web)) {
-      message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+      if(verbose) {
+        message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+      }
       model$web <- Ldei(model$setup)$X
     } else if(!is.numeric(model$web) | is.null(names(model$web))) {
       stop("Model solutions in \"web\" must be named numeric vector.")
@@ -492,7 +524,8 @@ getJacobian <- function(model = stop("Model input required")) {
       dead = extracted_data$dead,
       externals = extracted_data$externals,
       MR = extracted_data$MR,
-      diagonal = model$diagonal
+      diagonal = model$diagonal,
+      netto = model$netto
     )
   } else {
     stop("Unknown model input")

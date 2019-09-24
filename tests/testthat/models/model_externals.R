@@ -1,4 +1,3 @@
-context("Jacobian matrix creation with externals")
 # Model including externals
 # Plants take up CO2.
 # Plants are eaten by worms.
@@ -38,8 +37,3 @@ JM <- matrix(c(0,
 ), nrow = 3, ncol = 3)
 rownames(JM) <- fwnames[1:3]
 colnames(JM) <- fwnames[1:3]
-
-test_that("the function works with external compartments", {
-  expect_equal(getJacobian(model),
-               JM)
-})

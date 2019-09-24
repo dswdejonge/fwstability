@@ -4,7 +4,8 @@
 \alias{getDeadInfo}
 \title{Gets list with information on dead comparments.}
 \usage{
-getDeadInfo(dead, readLIM, web, FM = NULL, defTag = NULL)
+getDeadInfo(dead, readLIM, web, FM = NULL, defTag = NULL,
+  verbose = T)
 }
 \arguments{
 \item{dead}{(required) A list with the element "names" that contains a character vector with

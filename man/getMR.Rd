@@ -4,7 +4,7 @@
 \alias{getMR}
 \title{Get mortality rates from a LIM.}
 \usage{
-getMR(BM, web, vars, mTag = NULL)
+getMR(BM, web, vars, mTag = NULL, verbose = T)
 }
 \arguments{
 \item{BM}{(required) A named numeric vector containing biomasses of all LIM components.}

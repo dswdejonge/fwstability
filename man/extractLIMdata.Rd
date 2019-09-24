@@ -4,7 +4,7 @@
 \alias{extractLIMdata}
 \title{Extract data from formatted LIM.}
 \usage{
-extractLIMdata(model)
+extractLIMdata(model, verbose = T)
 }
 \arguments{
 \item{model}{(required) A named list containing elements with food web model data.

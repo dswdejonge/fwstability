@@ -4,7 +4,7 @@
 \alias{getVariables}
 \title{Calculate value of LIM variables from flow solutions.}
 \usage{
-getVariables(readLIM, web = NULL)
+getVariables(readLIM, web = NULL, verbose = T)
 }
 \arguments{
 \item{readLIM}{(required) A linear inverse model read into the R environment with the R-package LIM.
