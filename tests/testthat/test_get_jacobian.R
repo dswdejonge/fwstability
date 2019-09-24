@@ -1,5 +1,11 @@
 context("Jacobian matrix creation")
 
+source("models/model_regular.R")
+test_that("the function works without optional arguments", {
+  expect_equal(getJacobian(model),
+               JM)
+})
+
 source("models/model_dead.R")
 test_that("correct JM created with dead compartments", {
   expect_equal(getJacobian(model),
@@ -12,6 +18,12 @@ test_that("getJacobian incorporates vector diagonal correctly", {
 test_that("getJacobian calculates the diagonal from flux values", {
   expect_equal(getJacobian(model3),
                JM3)
+})
+
+source("models/model_externals.R")
+test_that("correct JM created with external compartments", {
+  expect_equal(getJacobian(model),
+               JM)
 })
 
 source("models/model_dead_externals.R")
@@ -36,4 +48,15 @@ source("models/model_multiple_def.R")
 test_that("correct JM created with multiple dead and defecation compartments", {
   expect_equal(getJacobian(model),
                JM)
+})
+
+source("models/model_deRuiter1995.R")
+test_that("correct JM created with data from De Ruiter et al. 1995", {
+  expect_equal(getJacobian(model),
+               JM)
+})
+
+source("models/model_Lotka_Volterra.R")
+test_that("The package works with a dynamic LV function", {
+  expect_equal(getStability(getJacobian(model)), answer)
 })

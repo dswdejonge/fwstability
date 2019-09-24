@@ -1,5 +1,3 @@
-context("Jacobian matrix creation with no optional arguments")
-
 #### Model without optional arguments
 # Plants are eaten by worms.
 # Worms are eaten by ants, and ants are eaten by worms.
@@ -33,15 +31,3 @@ JM <- matrix(c(0,
                0
 ), nrow = 3, ncol = 3)
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
-
-FM1 <- FM - t(FM)
-FM1[which(FM1 < 0)] <- 0
-model1 <- list(
-  type = "EF", FM = FM1, BM = BM, AE = AE, GE = GE
-)
-
-# Test
-test_that("the function works without optional arguments", {
-  expect_equal(getJacobian(model),
-               JM)
-})

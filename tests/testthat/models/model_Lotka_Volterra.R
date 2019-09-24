@@ -1,4 +1,3 @@
-context("The package works with a dynamic LV model.")
 # Lotka-Volterra model
 # https://www.r-bloggers.com/lotka-volterra-model%C2%A0%C2%A0intro/
 LotVmod <- function (Time, State, Pars) {
@@ -20,8 +19,3 @@ model <- list(
 )
 answer <- max(Re(eigen(rootSolve::jacobian.full(y=State, func=LotVmod, parms = Pars)
 )$value))
-
-
-test_that("The package works with a dynamic LV function", {
-  expect_equal(getStability(getJacobian(model)), answer)
-})

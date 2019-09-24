@@ -1,5 +1,3 @@
-context("Jacobian matrix creation with data from De Ruiter et al. 1995")
-
 # Proper data format, from De Ruiter et al. 1995
 # Bacteria, Fungi and Enchytraeids take up detritus.
 # Enchytraeids also feed on Fungi and Bacteria.
@@ -47,8 +45,3 @@ JM <- matrix(c(0,
                0
 ), nrow = 4, ncol = 4)
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
-
-test_that("the function works with data from literature", {
-  expect_equal(getJacobian(model),
-               JM)
-})

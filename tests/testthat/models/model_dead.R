@@ -46,13 +46,11 @@ MR <- c(NA, 10, 5) ; names(MR) <- fwnames
 model3 <- model
 model3$diagonal <- "model"
 model3$MR <- MR
-#model <- list(
-#  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE,
-#  dead = dead, diagonal = "model", MR = MR
-#)
 JM3 <- JM
 JM3[c(1,5,9)] <- c(
   -1/BM[1] * (AE[2] * FM[1,2] + AE[3] * FM[1,3]),
   -MR[2] / BM[2],
   -MR[3] / BM[3]
 )
+###
+
