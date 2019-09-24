@@ -44,23 +44,23 @@
 #' @return This function returns a matrix containing the effects of the consumers (rows) on the
 #' resources (columns).
 #' @export
-effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
+effectOnResource <- function(FMs, BM, AE, dead = NULL, index = NULL){
   # As a matrix is by default divided by row (which now contain the sources,
   # but we want to divide by consumer), the matrix must be transposed first.
-  result <- -(t(FM) / BM)
+  result <- -(t(FMs$netto) / BM)
 
   if(!is.null(dead)){
     if(is.null(index)) {
-      dead_i <- which(rownames(FM) %in% dead$names)
+      dead_i <- which(rownames(FMs$netto) %in% dead$names)
     } else {
       dead_i <- dead$names
     }
     if(is.null(index)) {
       #dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
-      dead_interactions <- expand.grid(rownames(FM), rownames(FM)[dead_i])
+      dead_interactions <- expand.grid(rownames(FMs$netto), rownames(FMs$netto)[dead_i])
     } else {
       #dead_interaction <- expand.grid((1:dim(FM)[1])[-dead_i], (1:dim(FM)[1])[-dead_i])
-      dead_interaction <- expand.grid((1:dim(FM)[1]), (1:dim(FM)[1])[dead_i])
+      dead_interaction <- expand.grid((1:dim(FMs$netto)[1]), (1:dim(FMs$netto)[1])[dead_i])
     }
     for(i in 1:dim(dead_interactions)[1]){
       if(is.null(index)) {
@@ -76,24 +76,24 @@ effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
         is_defecation_compartment <- dead$def[which(dead$names == resource)] == "Def"
       }
 
-      a <- FM[consumer, resource]
-      b <- FM[resource,consumer]
+      a <- FMs$netto[consumer, resource]
+      b <- FMs$netto[resource,consumer]
       if(is_defecation_compartment) {
         #c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
-        c <- FM[consumer,-dead_i]*(1-AE[-dead_i])
+        c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
         c <- c[which(c > 0)]
       } else {
         c <- 0
       }
       if(!is.null(dead$frac)) {
-        DFM <- FM * dead$frac
+        DFM <- FMs$netto * dead$frac
       }else {
-        DFM <- FM
+        DFM <- FMs$netto
       }
       if(length(which(dead$def == "Def")) > 1) {
         defecation_compartments <- dead$names[which(dead$def == "Def")]
         #predators <- which(FM[consumer,] > 0)[-dead_i]
-        predators <- names(which(FM[consumer,-dead_i] > 0))
+        predators <- names(which(FMs$original[consumer,-dead_i] > 0))
         #d <- sum(DFM[predators, resource], na.rm = T) /
         #     sum(DFM[predators, defecation_compartments],  na.rm = T)
         d <- DFM[predators, resource] /
@@ -273,8 +273,13 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
                         index = NULL, verbose = T, netto = NULL) {
 
   FM <- removeExternals(externals, FM, index)
+  FMs <- list()
   if(!is.null(netto) && netto){
-    FM <- getNettoFM(FM, dead$names)
+    FMs$original <- FM
+    FMs$netto <- getNettoFM(FM, dead$names)
+  } else {
+    FMs$original <- FM
+    FMs$netto <- FM
   }
 
   dead <- adjustDeadInput(dead, index)
@@ -284,19 +289,19 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   }
 
   # Do checks for required data formats: throws errors
-  if(dim(FM)[1] != dim(FM)[2]) {
+  if(dim(FMs$original)[1] != dim(FMs$original)[2]) {
     stop("flow matrix is not square")
   } else if(!is.null(index) & !is.logical(index)) {
     stop("index must be NULL or boolean")
-  } else if((is.null(rownames(FM)) | is.null(colnames(FM)) |
+  } else if((is.null(rownames(FMs$original)) | is.null(colnames(FMs$original)) |
             is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE)))
             & is.null(index)) {
     stop("all required vectors and matrices must be named")
-  } else if((!all(rownames(FM) == colnames(FM))) & is.null(index)) {
+  } else if((!all(rownames(FMs$original) == colnames(FMs$original))) & is.null(index)) {
     stop("row names and column names of flow matrix do not match")
   } else if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
     stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
-  } else if((!all(names(BM) == rownames(FM)) | !all(names(BM) == colnames(FM)) |
+  } else if((!all(names(BM) == rownames(FMs$original)) | !all(names(BM) == colnames(FMs$original)) |
             !all(names(BM) == names(AE))    | !all(names(BM) == names(GE)))
             & is.null(index)){
     stop("the names and their order must be equal in all named vectors and matrices")
@@ -318,8 +323,8 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   }
 
   # Get interaction strengths
-  eff.on.consumer <- effectOnConsumer(FM, BM, AE, GE)
-  eff.on.resource <- effectOnResource(FM, BM, AE, dead, index)
+  eff.on.consumer <- effectOnConsumer(FMs$netto, BM, AE, GE)
+  eff.on.resource <- effectOnResource(FMs, BM, AE, dead, index)
 
   # Set interaction strength to 0 if NA
   a <- which(is.na(eff.on.consumer))
@@ -337,7 +342,7 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     if(is.null(dead)) {
       diagonal <- getDiagonal(MR, BM, index = index)
     } else {
-      diagonal <- getDiagonal(MR, BM, dead$names, FM, AE, index)
+      diagonal <- getDiagonal(MR, BM, dead$names, FMs$netto, AE, index)
     }
   }
   diag(JM) <- diagonal
