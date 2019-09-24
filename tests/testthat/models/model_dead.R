@@ -32,7 +32,6 @@ JM <- matrix(c(0,
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 ####
 
-
 ### Inclusion of diagonal ###
 DIAG <- c(-1,-2,-3)
 model2 <- model
@@ -54,3 +53,21 @@ JM3[c(1,5,9)] <- c(
 )
 ###
 
+
+### Netto FM
+FM4 <- getNettoFM(FM, deadnames = "DETRITUS")
+JM4 <- matrix(c(0,
+               (FM4[2,1] - FM4[1,2] + FM[2,3]*(1-AE[3])) / BM[2],
+               (FM[3,1] - FM[1,3]) / BM[3],
+
+               AE[2] * GE[2] * FM[1,2] / BM[1],
+               0,
+               -FM4[2,3] / BM[3],
+
+               AE[3] * GE[3] * FM[1,3] / BM[1],
+               AE[3] * GE[3] * FM4[2,3] / BM[2],
+               0
+), nrow = 3, ncol = 3)
+rownames(JM4) <- fwnames ; colnames(JM4) <- fwnames
+model4 <- model
+model4$FM <- FM4

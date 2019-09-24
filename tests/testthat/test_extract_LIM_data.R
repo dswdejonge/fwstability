@@ -8,7 +8,7 @@ test_that("the Flowmatrix function works with parallel flows", {
 })
 
 test_that("the getNettoFM provides correct answer", {
-  expect_equal(getNettoFM(FM), FM1)
+  expect_equal(getNettoFM(FM, c("DEADLABILE", "DEADREFRAC")), FM1)
 })
 
 test_that("the getVariables function gives right answer", {

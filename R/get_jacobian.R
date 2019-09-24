@@ -262,9 +262,13 @@ adjustDeadInput <- function(dead, index = NULL) {
 #' @export
 getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
                         dead = NULL, externals = NULL, MR = NULL,
-                        index = NULL, verbose = T) {
+                        index = NULL, verbose = T, netto = NULL) {
 
   FM <- removeExternals(externals, FM, index)
+  if(!is.null(netto) && netto){
+    FM <- getNettoFM(FM, dead$names)
+  }
+
   dead <- adjustDeadInput(dead, index)
   if(is.null(diagonal)) {
     diagonal <- 0
@@ -343,6 +347,16 @@ getJacobianODE <- function(y, func, parms) {
   JM <- rootSolve::jacobian.full(y = y, func = func, parms = parms)
   rownames(JM) <- colnames(JM)
   return(JM)
+}
+
+getNettoFM <- function(FM, deadnames) {
+  netto <- FM - t(FM)
+  netto[which(netto < 0)] <- 0
+  if(!is.null(deadnames)){
+    netto[deadnames,] <- FM[deadnames,]
+    netto[,deadnames] <- FM[,deadnames]
+  }
+  return(netto)
 }
 
 #' Jacobian matrix from a food web model
@@ -474,7 +488,8 @@ getJacobian <- function(model = stop("Model input required"),
       dead = model$dead,
       externals = model$externals,
       MR = model$MR,
-      index = model$index)
+      index = model$index,
+      netto = model$netto)
   } else if(model$type == "LIM") {
     if(is.null(model$setup)) {
       model$setup <- Setup(model$LIM)
@@ -488,20 +503,16 @@ getJacobian <- function(model = stop("Model input required"),
       stop("Model solutions in \"web\" must be named numeric vector.")
     }
     extracted_data <- extractLIMdata(model)
-    if(!is.null(model$netto) && model$netto){
-      FM <- getNettoFM(FM)
-    } else {
-      FM <- extracted_data$FM
-    }
     JM <- getJacobianEnergyFlux(
-      FM = FM,
+      FM = extracted_data$FM,
       BM = extracted_data$BM,
       AE = extracted_data$AE,
       GE = extracted_data$GE,
       dead = extracted_data$dead,
       externals = extracted_data$externals,
       MR = extracted_data$MR,
-      diagonal = model$diagonal
+      diagonal = model$diagonal,
+      netto = model$netto
     )
   } else {
     stop("Unknown model input")

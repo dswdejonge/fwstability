@@ -6,12 +6,6 @@ model <- list(
   type = "LIM",
   LIM = readLIM
 )
-# Use netto FM
-model1 <- list(
-  type = "LIM",
-  LIM = readLIM,
-  netto = TRUE
-)
 
 ### Expected answers ###
 lim <- Setup(readLIM)
@@ -28,9 +22,6 @@ FM <- matrix(c(
   0,      0,     0, 0, 0, 0
 ), nrow = nC, ncol = nC, byrow = TRUE)
 rownames(FM) <- fwnames ; colnames(FM) <- fwnames
-# Use netto FM
-FM1 <- FM - t(FM)
-FM1[which(FM1 < 0)] <- 0
 
 variables <- c(lim_solved$X["meioDefLab"] + lim_solved$X["meioDefRefrac"],
                lim_solved$X["macroDefLab"] + lim_solved$X["macroDefRefrac"],
@@ -86,7 +77,18 @@ JM <- matrix(c(0,
                0
 ), nrow = 4, ncol = 4)
 rownames(JM) <- fwnames[1:4] ; colnames(JM) <- fwnames[1:4]
+
+
 # Use netto FM
+model1 <- list(
+  type = "LIM",
+  LIM = readLIM,
+  netto = TRUE
+)
+FM1 <- FM - t(FM)
+FM1[which(FM1 < 0)] <- 0
+FM1[1:2,] <- FM[1:2,]
+FM1[,1:2] <- FM[,1:2]
 JM1 <- matrix(c(0,
                0,
                (FM1[3,1] - FM1[1,3] + FM[3,4]*(1-AE[4])*(FDM[4,1]/(FDM[4,1]+FDM[4,2]))) / BM[3],
@@ -97,13 +99,13 @@ JM1 <- matrix(c(0,
                (FM1[3,2] - FM1[2,3] + FM[3,4]*(1-AE[4])*(FDM[4,2]/(FDM[4,1]+FDM[4,2]))) / BM[3],
                (FM1[4,2] - FM1[2,4]) / BM[4],
 
-               AE[3] * GE[3] * FM1[1,3] / BM[1],
-               AE[3] * GE[3] * FM1[2,3] / BM[2],
+               AE[3] * GE[3] * FM[1,3] / BM[1],
+               AE[3] * GE[3] * FM[2,3] / BM[2],
                0,
                -FM1[3,4] / BM[4],
 
-               AE[4] * GE[4] * FM1[1,4] / BM[1],
-               AE[4] * GE[4] * FM1[2,4] / BM[2],
+               AE[4] * GE[4] * FM[1,4] / BM[1],
+               AE[4] * GE[4] * FM[2,4] / BM[2],
                AE[4] * GE[4] * FM1[3,4] / BM[3],
                0
 ), nrow = 4, ncol = 4)

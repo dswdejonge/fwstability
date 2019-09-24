@@ -66,12 +66,6 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
   return(flowmatrix)
 }
 
-getNettoFM <- function(FM) {
-  FM <- FM - t(FM)
-  FM[which(FM < 0)] <- 0
-  return(FM)
-}
-
 #' Calculate value of LIM variables from flow solutions.
 #'
 #' This function calculates the value of variables as defined in the LIM from the flow solutions.
