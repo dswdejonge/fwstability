@@ -30,14 +30,16 @@ getTag <- function(vars, tag) {
 #' between the same two compartments.
 #' @return Returns a named numeric matrix.
 #' @export
-getFlowMatrix <- function(readLIM, web = NULL, lim = NULL) {
+getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
   if(is.null(lim)) {
     lim <- Setup(readLIM)
   }
   flows <- readLIM$flows[,1:2]
   flowmatrix <- lim$Flowmatrix
   if(is.null(web)) {
-    message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+    if(verbose) {
+      message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+    }
     if(!is.null(lim$Cost) || !is.null(lim$Profit)) {
       web <- Linp(lim)$X
     } else {
@@ -82,13 +84,15 @@ getNettoFM <- function(FM) {
 #' This function calculates the value of these variables based on the flow solutions and LIM parameters.
 #' @return Returns a named vector with all variables.
 #' @export
-getVariables <- function(readLIM, web = NULL) {
+getVariables <- function(readLIM, web = NULL, verbose = T) {
   lim <- Setup(readLIM)
   vars <- numeric(lim$NVariables)
   pars <- readLIM$pars$val
   vareq <- readLIM$vars
   if(is.null(web)) {
-    message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+    if(verbose) {
+      message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+    }
     if(!is.null(lim$Cost) || !is.null(lim$Profit)) {
       web <- Linp(lim)$X
     } else {
@@ -134,13 +138,19 @@ getVariables <- function(readLIM, web = NULL) {
 #' @return Returns a list with element "AE" (named vector with assimilation efficiencies) and element
 #' "GE" (named vector with growth efficiencies).
 #' @export
-getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
+getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = T) {
   if(is.null(aTag)) {
     aTag <- "ass"
-    message("fwstab: Default tag \"ass\" is used to search model for assimilation.")}
+    if(verbose) {
+      message("fwstab: Default tag \"ass\" is used to search model for assimilation.")
+    }
+  }
   if(is.null(gTag)) {
     gTag <- "growth"
-    message("fwstab: Default tag \"growth\" is used to search model for secondary production.")}
+    if(verbose) {
+      message("fwstab: Default tag \"growth\" is used to search model for secondary production.")
+    }
+  }
   AE <- rep(NA, length = lim$NComponents)
   names(AE) <- toupper(lim$Components$name)
   GE <- rep(NA, length = lim$NComponents)
@@ -181,10 +191,13 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL) {
 #' @return Returns a named vector with mortality rates (per unit time).
 #' @seealso \code{getVariables}
 #' @export
-getMR <- function(BM, web, vars, mTag = NULL) {
+getMR <- function(BM, web, vars, mTag = NULL, verbose = T) {
   if(is.null(mTag)) {
     mTag <- "mort"
-    message("fwstab: Default tag \"mort\" is used to search model for mortality.")}
+    if(verbose) {
+      message("fwstab: Default tag \"mort\" is used to search model for mortality.")
+    }
+  }
   names(BM) <- toupper(names(BM))
   MR <- rep(NA, length = length(BM))
   names(MR) <- names(BM)
@@ -222,13 +235,16 @@ getMR <- function(BM, web, vars, mTag = NULL) {
 #' }
 #' @seealso \code{getFlowMatrix}
 #' @export
-getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
+getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = T) {
   if(is.null(FM)) {
     FM <- getFlowMatrix(readLIM, web)
   }
   if(is.null(defTag)) {
     defTag <- "def"
-    message("fwstab: Default tag \"def\" used to search model for defecation.")}
+    if(verbose) {
+      message("fwstab: Default tag \"def\" used to search model for defecation.")
+    }
+  }
 
   dead <- adjustDeadInput(dead)
 
@@ -298,7 +314,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL) {
 #' compartments \code{dead}, and mortality rates \code{MR}.
 #' @seealso \code{getJacobian}
 #' @export
-extractLIMdata <- function(model) {
+extractLIMdata <- function(model, verbose = T) {
   FM <- getFlowMatrix(readLIM = model$LIM, web = model$web, lim = model$setup)
 
   BM <- model$LIM$comp[,"val"]
@@ -335,7 +351,10 @@ extractLIMdata <- function(model) {
     fwnames <- toupper(model$LIM$compnames)
     if(is.null(model$deadTag)) {
       deadTag <- "dead"
-      message("fwstab: Default tag \"dead\" is used to search model for dead compartments.")}
+      if(verbose) {
+        message("fwstab: Default tag \"dead\" is used to search model for dead compartments.")
+      }
+    }
     model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)])) #
     ### TEMPORARY CODE - start ###
     #deadnames = c("PHYTO_S", "PHYTO_W", "SLAB_S", "SLAB_W", "REFRAC",
@@ -351,7 +370,9 @@ extractLIMdata <- function(model) {
 
   remove <- which(BM == 0)
   if(length(remove) > 0) {
-    message("fwstab: Internal components with biomass of zero are removed.")
+    if(verbose) {
+      message("fwstab: Internal components with biomass of zero are removed.")
+    }
     FM <- FM[-remove, -remove]
     BM <- BM[-remove]
     CE$AE <- CE$AE[-remove]

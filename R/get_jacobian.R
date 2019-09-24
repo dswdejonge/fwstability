@@ -480,7 +480,9 @@ getJacobian <- function(model = stop("Model input required"),
       model$setup <- Setup(model$LIM)
     }
     if(is.null(model$web)) {
-      message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+      if(verbose) {
+        message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
+      }
       model$web <- Ldei(model$setup)$X
     } else if(!is.numeric(model$web) | is.null(names(model$web))) {
       stop("Model solutions in \"web\" must be named numeric vector.")

@@ -1,5 +1,4 @@
 context("Extracting data from a LIM")
-
 source("LIM_model.R")
 
 test_that("the Flowmatrix function works with parallel flows", {
