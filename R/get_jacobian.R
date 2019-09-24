@@ -79,7 +79,9 @@ effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
       a <- FM[consumer, resource]
       b <- FM[resource,consumer]
       if(is_defecation_compartment) {
-        c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
+        #c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
+        c <- FM[consumer,-dead_i]*(1-AE[-dead_i])
+        c <- c[which(c > 0)]
       } else {
         c <- 0
       }
@@ -92,16 +94,20 @@ effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
         defecation_compartments <- dead$names[which(dead$def == "Def")]
         #predators <- which(FM[consumer,] > 0)[-dead_i]
         predators <- names(which(FM[consumer,-dead_i] > 0))
-        d <- sum(DFM[predators, resource], na.rm = T) /
-             sum(DFM[predators, defecation_compartments],  na.rm = T)
-        if(is.na(d)) {
-          d <- 0
-        }
+        #d <- sum(DFM[predators, resource], na.rm = T) /
+        #     sum(DFM[predators, defecation_compartments],  na.rm = T)
+        d <- DFM[predators, resource] /
+               rowSums(DFM[predators, defecation_compartments,drop=F],  na.rm = T)
+        #if(is.na(d) | length(d) == 0) {
+        #  d <- 0
+        #}
       } else {
-        d <- 1
+        #d <- 1
+        d <- rep(1, length(c))
       }
 
-      result[consumer, resource] <- (a - b + c * d) / BM[consumer]
+      #result[consumer, resource] <- (a - b + c * d) / BM[consumer]
+      result[consumer, resource] <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
 
       # Consumer of detritus is not a resource if it deposits detritus.
       result[resource, consumer] <- NA

@@ -38,6 +38,7 @@ rlab <- FM[,2] / rowSums(FM[,1:2]) ; rlab <- rlab[3:length(fwnames)]
 ## Expected answer
 FMn <- FM - t(FM)
 FMn[which(FMn < 0)] <- 0
+FMn[1:2,] <- FM[1:2,] ; FMn[,1:2] <- FM[,1:2]
 JM <- matrix(c(
   # LAB
   0,
