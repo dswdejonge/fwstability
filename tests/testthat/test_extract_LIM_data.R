@@ -1,5 +1,5 @@
 context("Extracting data from a LIM")
-source("model_LIM.R")
+source("models/model_LIM.R")
 
 test_that("the Flowmatrix function works with parallel flows", {
   #expect_equal(Flowmatrix(lim, web = lim_solved$X), FM)

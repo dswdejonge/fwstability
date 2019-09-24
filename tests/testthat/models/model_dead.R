@@ -1,4 +1,3 @@
-context("Jacobian matrix creation with dead compartments")
 # Dead compartment, no externals
 # Plants and animals both take up detritus and deposit into detritus.
 # Animals also eat plants.
@@ -31,38 +30,29 @@ JM <- matrix(c(0,
                0
 ), nrow = 3, ncol = 3)
 rownames(JM) <- fwnames ; colnames(JM) <- fwnames
+####
 
-test_that("the function works with dead compartments", {
-  expect_equal(getJacobian(model),
-               JM)
-})
 
-# Proper data format, include vector diagonal
+### Inclusion of diagonal ###
 DIAG <- c(-1,-2,-3)
-model <- list(
-  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE,
-  dead = dead, diagonal = DIAG
-)
-# Expected answer
+model2 <- model
+model2$diagonal <- DIAG
 JM2 <- JM; JM2[c(1,5,9)] <- DIAG
+###
 
-test_that("the function incorporates vector diagonal correctly", {
-  expect_equal(getJacobian(model),
-               JM2)
-})
 
-# Proper data format, include vector calculated from model
+### Inclusion of diagonal calculated from model ###
 MR <- c(NA, 10, 5) ; names(MR) <- fwnames
-model <- list(
-  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE,
-  dead = dead, diagonal = "model", MR = MR
+model3 <- model
+model3$diagonal <- "model"
+model3$MR <- MR
+#model <- list(
+#  type = "EF", FM = FM, BM = BM, AE = AE, GE = GE,
+#  dead = dead, diagonal = "model", MR = MR
+#)
+JM3 <- JM
+JM3[c(1,5,9)] <- c(
+  -1/BM[1] * (AE[2] * FM[1,2] + AE[3] * FM[1,3]),
+  -MR[2] / BM[2],
+  -MR[3] / BM[3]
 )
-# Expected answer
-JM3 <- JM; JM3[c(1,5,9)] <- c(-1/BM[1] * (AE[2] * FM[1,2] + AE[3] * FM[1,3]),
-                              -MR[2] / BM[2],
-                              -MR[3] / BM[3]
-)
-test_that("the function calculates the diagonal from flux values", {
-  expect_equal(getJacobian(model),
-               JM3)
-})
