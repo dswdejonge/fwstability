@@ -56,9 +56,11 @@ effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
       dead_i <- dead$names
     }
     if(is.null(index)) {
-      dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
+      #dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
+      dead_interactions <- expand.grid(rownames(FM), rownames(FM)[dead_i])
     } else {
-      dead_interaction <- expand.grid((1:dim(FM)[1])[-dead_i], (1:dim(FM)[1])[-dead_i])
+      #dead_interaction <- expand.grid((1:dim(FM)[1])[-dead_i], (1:dim(FM)[1])[-dead_i])
+      dead_interaction <- expand.grid((1:dim(FM)[1]), (1:dim(FM)[1])[dead_i])
     }
     for(i in 1:dim(dead_interactions)[1]){
       if(is.null(index)) {
