@@ -4,7 +4,7 @@
 \alias{getJacobian}
 \title{Jacobian matrix from a food web model}
 \usage{
-getJacobian(model = stop("Model input required"))
+getJacobian(model = stop("Model input required"), verbose = T)
 }
 \arguments{
 \item{model}{(required) A named list containing elements with food web model data.

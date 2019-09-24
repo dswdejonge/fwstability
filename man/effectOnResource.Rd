@@ -4,12 +4,9 @@
 \alias{effectOnResource}
 \title{Per capita effect on resource population.}
 \usage{
-effectOnResource(FM, BM, AE, dead = NULL, index = NULL)
+effectOnResource(FMs, BM, AE, dead = NULL, index = NULL)
 }
 \arguments{
-\item{FM}{(required) A square flowmatrix, source compartments as rows,
-sink compartments as columns.}
-
 \item{BM}{(required) Numeric vector with biomasses of all compartments,
 must be in the same order as the flow matrix.}
 
@@ -33,6 +30,9 @@ as the \code{FM} matrix with the fraction of each flow that is defecation.
 This information is only needed if there are multiple parallel flows between two compartments of
 which only one reflects actual defecation, and the rest is for example mortality.
 }}
+
+\item{FM}{(required) A square flowmatrix, source compartments as rows,
+sink compartments as columns.}
 }
 \value{
 This function returns a matrix containing the effects of the consumers (rows) on the

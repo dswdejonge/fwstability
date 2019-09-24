@@ -29,6 +29,7 @@ test_that("the right conversion efficiencies are extracted", {
 
 test_that("the right Jacobian matrix is produced from the LIM", {
   expect_equal(getJacobian(model), JM)
+  # Use netto FM
   expect_equal(getJacobian(model1), JM1)
 })
 
