@@ -88,7 +88,8 @@ effectOnResource <- function(FM, BM, AE, dead = NULL, index = NULL){
       }
       if(length(which(dead$def == "Def")) > 1) {
         defecation_compartments <- dead$names[which(dead$def == "Def")]
-        predators <- which(FM[consumer,] > 0)[-dead_i]
+        #predators <- which(FM[consumer,] > 0)[-dead_i]
+        predators <- names(which(FM[consumer,-dead_i] > 0))
         d <- sum(DFM[predators, resource], na.rm = T) /
              sum(DFM[predators, defecation_compartments],  na.rm = T)
         if(is.na(d)) {
@@ -456,7 +457,8 @@ getJacobianODE <- function(y, func, parms) {
 #' \item{\code{\link{LIM}} package, Soetaert & van Oevelen 2015.}
 #' }
 #' @export
-getJacobian <- function(model = stop("Model input required")) {
+getJacobian <- function(model = stop("Model input required"),
+                        verbose = T) {
   if(model$type == "ODE") {
     JM <- getJacobianODE(
       y = model$y,
