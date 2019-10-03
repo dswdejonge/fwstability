@@ -18,8 +18,20 @@
 #' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 #' 651–661. https://doi.org/10.1111/ele.12266
 #' }
-#' @param FM (required) A square flowmatrix, source compartments as rows,
-#' sink compartments as columns.
+#' @param FMs (required) A list with two elements \code{original} and \code{netto}, both
+#' containing a square flowmatrix, with source compartments as rows, sink compartments as columns.
+#' \itemize{
+#' \item{
+#' the list element \code{original} should contain the original flow matrix as can be obtained
+#' with the function \code{getFlowMatrix},
+#' i.e. can contain a flow from A to B, and a flow from B to A.
+#' }
+#' \item{
+#' the list element \code{netto} should contain an adjusted version of the original matrix with only
+#' netto flows, which can be obtained with the function \code{getNettoFM},
+#' i.e. a netto flow is the absolute result of flow A to B minus flow B to A.
+#' }
+#' }
 #' @param BM (required) Numeric vector with biomasses of all compartments,
 #' must be in the same order as the flow matrix.
 #' @param AE (required) Numeric vector with assimilation efficiencies of all
@@ -56,10 +68,8 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL, index = NULL){
       dead_i <- dead$names
     }
     if(is.null(index)) {
-      #dead_interactions <- expand.grid(rownames(FM)[-dead_i], rownames(FM)[dead_i])
       dead_interactions <- expand.grid(rownames(FMs$netto), rownames(FMs$netto)[dead_i])
     } else {
-      #dead_interaction <- expand.grid((1:dim(FM)[1])[-dead_i], (1:dim(FM)[1])[-dead_i])
       dead_interaction <- expand.grid((1:dim(FMs$netto)[1]), (1:dim(FMs$netto)[1])[dead_i])
     }
     for(i in 1:dim(dead_interactions)[1]){
@@ -79,7 +89,6 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL, index = NULL){
       a <- FMs$netto[consumer, resource]
       b <- FMs$netto[resource,consumer]
       if(is_defecation_compartment) {
-        #c <- sum(FM[consumer,-dead_i]*(1-AE[-dead_i]), na.rm = T)
         c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
         c <- c[which(c > 0)]
       } else {
@@ -92,21 +101,13 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL, index = NULL){
       }
       if(length(which(dead$def == "Def")) > 1) {
         defecation_compartments <- dead$names[which(dead$def == "Def")]
-        #predators <- which(FM[consumer,] > 0)[-dead_i]
         predators <- names(which(FMs$original[consumer,-dead_i] > 0))
-        #d <- sum(DFM[predators, resource], na.rm = T) /
-        #     sum(DFM[predators, defecation_compartments],  na.rm = T)
         d <- DFM[predators, resource] /
                rowSums(DFM[predators, defecation_compartments,drop=F],  na.rm = T)
-        #if(is.na(d) | length(d) == 0) {
-        #  d <- 0
-        #}
       } else {
-        #d <- 1
         d <- rep(1, length(c))
       }
 
-      #result[consumer, resource] <- (a - b + c * d) / BM[consumer]
       result[consumer, resource] <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
 
       # Consumer of detritus is not a resource if it deposits detritus.
@@ -260,6 +261,10 @@ adjustDeadInput <- function(dead, index = NULL) {
 #' @param MR (required when \code{diagonal} is set to \emph{model})
 #' A named numeric vector with non-predatory mortality rates for all
 #' compartments (same units as the flow matrix \code{FM}).
+#' @param verbose (optional) Default is TRUE. Wether or not to print messages.
+#' @param netto (optional) Boolean. Default is NULL. If TRUE, the netto Flowmatrix is used
+#' to calculate interaction strengths. This is only relevant if there are two food web compartments
+#' which act both as prey and predators to one another.
 #' @details \code{MR} can sometimes be extracted from the food web model, for example when
 #' natural death results in a flux from the faunal compartment to a carcass compartment.
 #' It can also be calculated as the inverse of the natural lifespan of the species
