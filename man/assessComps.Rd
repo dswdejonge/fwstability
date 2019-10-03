@@ -2,25 +2,49 @@
 % Please edit documentation in R/evaluate_characteristics.R
 \name{assessComps}
 \alias{assessComps}
-\title{Assess stabiliy effect of each compartment.}
+\title{Assess stability effect of each compartment.}
 \usage{
-assessComps(JM)
+assessComps(JM, method = "eigenvalue", mortalities = NULL,
+  dead = NULL)
 }
 \arguments{
-\item{JM}{(required) A Jacobian matrix.}
+\item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
+on another compartment (columns).}
+
+\item{method}{(required) Either "eigenvalue" (default) or "scalar".
+\itemize{
+\item{
+The method "eigenvalue" finds stability as the maximum real part of the eigenvalues
+calculated from the Jacobian matrix.
+}
+\item{
+The "scalar" method finds stability as the scalar of natural mortality
+rates needed to acquire a stable matrix.
+}
+}}
+
+\item{mortalities}{(required if method is "scalar")
+A named numeric vector containing mortality of the faunal compartments
+(per unit time). The values and names must be in the same
+order as the Jacobian matrix, and the values for dead compartments should be
+set to NA.}
+
+\item{dead}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
+compartments (everything that is not fauna).}
 }
 \value{
 Returns a dataframe with absolute and relative changes in stability for removal
 of each food web compartment from the Jacobian matrix.
 }
 \description{
-This function assesses the affect on stability of removing one compartment from
+This function assesses the affect on stability of removing individual compartments from
 the Jacobian matrix.
 }
 \details{
 If the change in stability (delta) is negative, the system becomes more stable if
 the respective food web compartment is removed from the Jacobian matrix. The opposite
-is true if delta is positive.
+is true if delta is positive. \cr
+The 'scalar' method might be somewhat slower than the default 'eigenvalue' method.
 }
 \references{
 \itemize{

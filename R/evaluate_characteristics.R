@@ -7,11 +7,11 @@ checkJMformat <- function(JM) {
   }
 }
 
-#' Assess stabiliy effect of each compartment.
+#' Assess stability effect of each compartment.
 #'
-#' This function assesses the affect on stability of removing one compartment from
+#' This function assesses the affect on stability of removing individual compartments from
 #' the Jacobian matrix.
-#' @param JM (required) A Jacobian matrix.
+#' @inheritParams getStability
 #' @references \itemize{
 #' \item{
 #' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles and
@@ -23,11 +23,13 @@ checkJMformat <- function(JM) {
 #' of each food web compartment from the Jacobian matrix.
 #' @details If the change in stability (delta) is negative, the system becomes more stable if
 #' the respective food web compartment is removed from the Jacobian matrix. The opposite
-#' is true if delta is positive.
+#' is true if delta is positive. \cr
+#' The 'scalar' method might be somewhat slower than the default 'eigenvalue' method.
 #' @export
-assessComps <- function(JM) {
+assessComps <- function(JM, method = "eigenvalue",
+                        mortalities = NULL, dead = NULL) {
   checkJMformat(JM)
-  ini_s <- getStability(JM)
+  ini_s <- getStability(JM, method, mortalities, dead)
   df <- data.frame(
     removed_comp = rownames(JM),
     ini_s = ini_s,
@@ -35,7 +37,7 @@ assessComps <- function(JM) {
 
   for(i in 1:dim(JM)[1]){
     m <- JM[-i,-i]
-    df$new_s[i] <- getStability(m)
+    df$new_s[i] <- getStability(m, method, mortalities, dead)
   }
   df$delta <- df$new_s - df$ini_s
   df$delta_frac <- df$delta / df$ini_s
