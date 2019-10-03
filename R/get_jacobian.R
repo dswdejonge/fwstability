@@ -507,7 +507,8 @@ getJacobian <- function(model = stop("Model input required"),
       externals = model$externals,
       MR = model$MR,
       index = model$index,
-      netto = model$netto)
+      netto = model$netto,
+      verbose = verbose)
   } else if(model$type == "LIM") {
     if(is.null(model$setup)) {
       model$setup <- Setup(model$LIM)
@@ -530,7 +531,8 @@ getJacobian <- function(model = stop("Model input required"),
       externals = extracted_data$externals,
       MR = extracted_data$MR,
       diagonal = model$diagonal,
-      netto = model$netto
+      netto = model$netto,
+      verbose = verbose
     )
   } else {
     stop("Unknown model input")
