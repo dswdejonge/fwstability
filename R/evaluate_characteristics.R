@@ -44,18 +44,12 @@ assessComps <- function(JM, method = "eigenvalue",
   return(df)
 }
 
-# if delta is negative, the system becomes more stable.
-# if delta is positive, the system becomes less stable.
-# show in vignette that doubling small interaction strength can have larger
-# effect on stability than doubling large interaction strengths, thus a
-# function + 10 would be more difficult to interpret in stead of relative change.
-# per link (not per link pair) also intraspecific interaction.
 
 #' Assess stabiliy effect of a fixed link alteration
 #'
 #' This function assesses the effect on stability of altering each interaction strength
 #' in a Jacobian matrix according to a fixed function.
-#' @param JM (required) A Jacobian matrix.
+#' @inheritParams getStability
 #' @param func (required) Function describing how to alter each interaction strength to
 #' assess the effect on stability of the respective link. Default is doubling each
 #' interaction strength.
@@ -70,13 +64,15 @@ assessComps <- function(JM, method = "eigenvalue",
 #' of each interaction strength in the Jacobian matrix.
 #' @details If the change in stability (delta) is negative, the system becomes more stable if
 #' the respective food web compartment is removed from the Jacobian matrix. The opposite
-#' is true if delta is positive.
+#' is true if delta is positive. \cr
+#' Using the method 'scalar' might be somewhat slower than the method 'eigenvalue'.
 #' @export
-assessLinksFixed <- function(JM,
-                        func = function(x) {return(x * 2)}) {
+assessLinksFixed <- function(JM, method = "eigenvalue",
+                             mortalities = NULL, dead = NULL,
+                             func = function(x) {return(x * 2)}) {
   checkJMformat(JM)
   eg <- expand.grid(rownames(JM), colnames(JM))
-  ini_s <- getStability(JM)
+  ini_s <- getStability(JM, method, mortalities, dead)
   df <- data.frame(
     eff.of = eg$Var1,
     eff.on = eg$Var2,
@@ -85,7 +81,7 @@ assessLinksFixed <- function(JM,
   for(i in 1:length(JM)) {
     m <- JM
     m[i] <- func(JM[i])
-    df$new_s[i] <- getStability(m)
+    df$new_s[i] <- getStability(m, method, mortalities, dead)
   }
   df$delta <- df$new_s - df$ini_s
   df$delta_frac <- df$delta / df$ini_s
@@ -93,15 +89,37 @@ assessLinksFixed <- function(JM,
   return(df)
 }
 
-# Vary the values of one pair between 0 and Xaij a number of times,
-# and calculate the probability that the food web becomes unstable.
-# Method in deruiter1995: 0 - 2ij, 1% below threshold
-# Set the diagonal so that the mean is 1% below the
-# critical values (so that it is just stable).
-# critical diagonal found by substracting I*maxEV from the original matrix
-# per pair. no intraspecific interaction.
-# allow choice of min and max (now 0 to 2ij)
-assessLinksPerm <- function(JM,
+#' Assess probability of destabilizing system per interaction
+#'
+#' This function determines the probability that a system becomes unstable if the
+#' strengths in an interaction are varied.
+#' @inheritParams getStability
+#' @param perms (required) Default is 100. Number of times a pair of interaction strengths
+#' is varied.
+#' @param threshold (required) Default is 0.01. The Jacobian matrix is set at this fraction below
+#' the stability threshold before starting permutations.
+#' @param seed (required) Default is 1. Set seed to allow reproducability of results.
+#' @references \itemize{
+#' \item{
+#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction
+#' Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260.
+#' https://doi.org/10.1126/science.269.5228.1257
+#' }
+#' }
+#' @return Returns a dataframe with the probability (0 to 1) of destabilizing the system for each
+#' pair of trophic interactions.
+#' @details First, the diagonal of the Jacobian matrix is altered so that the matrix is
+#' just stable. This is done by subtracting the maximum real part of the eigenvalues from the
+#' diagonal values, and subsequently reducing the diagonal values by a fraction
+#' (in argument \code{threshold}). The default threshold of 0.01 is used in De Ruiter et al. (1995).
+#' Every pair of interaction strengths is then randomly varied between 0 and 2aij a certain
+#' number of times. The probability that the food web becomes unstable is the total count of
+#' unstable matrices divided by the total number of permutations. \cr
+#' Using the method 'scalar' to asses stablity might be somewhat slower than the method 'eigenvalue'.
+#' @seealso \code{getStability}
+#' @export
+assessLinksPerm <- function(JM, method = "eigenvalue",
+                            mortalities = NULL, dead = NULL,
                             perms = 100, threshold = 0.01, seed = 1) {
   set.seed(seed)
   checkJMformat(JM)
@@ -111,7 +129,7 @@ assessLinksPerm <- function(JM,
   diag(cJM) <- diag(cJM) - getStability(JM)
   diag(cJM) <- diag(cJM) - abs(diag(cJM)) * threshold
 
-  if(getStability(cJM) > 0) {
+  if(getStability(cJM, method, mortalities, dead) > 0) {
     stop("Initial stability needs to be negative in order for this test to work.")
   }
 
@@ -123,7 +141,7 @@ assessLinksPerm <- function(JM,
       m <- cJM
       m[x,y] <- runif(1, min=0, max=2*abs(m[x,y]))*sign(m[x,y])
       m[y,x] <- runif(1, min=0, max=2*abs(m[x,y]))*sign(m[y,x])
-      if(getStability(m) > 0) {
+      if(getStability(m, method, mortalities, dead) > 0) {
         counter <- counter+1
       }
     }
@@ -133,20 +151,6 @@ assessLinksPerm <- function(JM,
     comp1 = rownames(JM)[pairs[,1]],
     comp2 = colnames(JM)[pairs[,2]],
     Pinstability = probs)
-  return(df)
-}
-
-# wrapper function assesslinks
-# method = "default"
-# method = "permutations"
-assessLinks <- function(JM, method = "default") {
-  if(method == "default") {
-    df <- assessLinksFixed(JM)
-  } else if(method == "permutations") {
-    df <- assessLinksPerm(JM)
-  } else {
-    stop("Unknown method.")
-  }
   return(df)
 }
 
