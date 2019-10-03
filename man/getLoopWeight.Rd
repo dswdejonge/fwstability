@@ -9,8 +9,8 @@ getLoopWeight(IS, d = NULL)
 \arguments{
 \item{IS}{(required) Numeric vector of length \code{k} with interaction strengths.}
 
-\item{d}{(optional) Natural death rates in same unit as IS. Required to
-replicate method cited in reference.}
+\item{d}{(optional) Numeric vector of length \code{k} with natural death rates in
+the same unit as IS.}
 }
 \value{
 Returns a double.

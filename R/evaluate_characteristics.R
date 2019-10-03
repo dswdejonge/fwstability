@@ -154,7 +154,27 @@ assessLinksPerm <- function(JM, method = "eigenvalue",
   return(df)
 }
 
-# i = j works
+#' Get flux size diversity.
+
+#' Calculates the diversity in flux weights.
+#' @param FM (required) A square flow matrix with flows from source in rows to sink in columns.
+#' @references \itemize{
+#' \item{
+#' van Altena, C., Hemerik, L., de Ruiter, P.C., 2016. Food web stability and weighted
+#' connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
+#' https://doi.org/10.1007/s12080-015-0291-7
+#' }
+#' \item{
+#' Boit, A.; Gaedke, U., 2014. Benchmarking successional progress in a quantitative food web.
+#' Plos One 9(2):e90404. doi:10.1371/journal.pone.0090404
+#' }
+#' \item{Ulanowicz, R.E., 1997. Limitations on the connectivity of ecosystem flow networks. In:
+#' Rinaldo, A.; Marani, A. (eds) Biological models. Instituto Veneto de Scienze, Lettre ed Arti,
+#' Venica, pp 125-143.}
+#' }
+#' @details Cannibalistic flows (from i to i) are included in calculations.
+#' @return Returns a double.
+#' @export
 fluxSizeDiversity <- function(FM){
   FMsum <- sum(FM)
   m <- FM / FMsum * log(FM / FMsum)
@@ -162,7 +182,28 @@ fluxSizeDiversity <- function(FM){
   return(H)
 }
 
-# i cannot equal j
+
+#' Get averague mutual information.
+#'
+#' Calculates average mutual information.
+#' @param FM (required) A square flow matrix with flows from source in rows to sink in columns.
+#' @references \itemize{
+#' \item{
+#' van Altena, C., Hemerik, L., de Ruiter, P.C., 2016. Food web stability and weighted
+#' connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
+#' https://doi.org/10.1007/s12080-015-0291-7
+#' }
+#' \item{
+#' Boit, A.; Gaedke, U., 2014. Benchmarking successional progress in a quantitative food web.
+#' Plos One 9(2):e90404. doi:10.1371/journal.pone.0090404
+#' }
+#' \item{Ulanowicz, R.E., 1997. Limitations on the connectivity of ecosystem flow networks. In:
+#' Rinaldo, A.; Marani, A. (eds) Biological models. Instituto Veneto de Scienze, Lettre ed Arti,
+#' Venica, pp 125-143.}
+#' }
+#' @details Cannibalistic flows (from i to i) are not included in calculations.
+#' @return Returns a double.
+#' @export
 averageMutualInfo <- function(FM){
   FMsum <- sum(FM)
   outgoingSum <- rowSums(FM)
@@ -192,7 +233,9 @@ averageMutualInfo <- function(FM){
 #' connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
 #' https://doi.org/10.1007/s12080-015-0291-7
 #' }
-#' \item{Ulanowicz 1997.}
+#' \item{Ulanowicz, R.E., 1997. Limitations on the connectivity of ecosystem flo networks. In:
+#' Rinaldo, A.; Marani, A. (eds) Biological models. Instituto Veneto de Scienze, Lettre ed Arti,
+#' Venica, pp 125-143.}
 #' }
 #' @return Returns a double.
 #' @export
@@ -206,7 +249,8 @@ getConnPerNode <- function(FM, type = c("eff", "topo")) {
 
 #' Get weighted connectance.
 #'
-#' This function calculates weighted connectance, capturing the skewness of flows.
+#' This function calculates weighted connectance, capturing system complexity and
+#' the skewness of flows.
 #' @param FM (required) A flow matrix with flows from source in rows to sink in columns.
 #' @references \itemize{
 #' \item{
@@ -214,17 +258,20 @@ getConnPerNode <- function(FM, type = c("eff", "topo")) {
 #' connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
 #' https://doi.org/10.1007/s12080-015-0291-7
 #' }
+#' \item{
+#' Boit, A.; Gaedke, U., 2014. Benchmarking successional progress in a quantitative food web.
+#' Plos One 9(2):e90404. doi:10.1371/journal.pone.0090404
 #' }
-#' @details Cw can vary between 0 and 1. Larger values of Cw indicate a more even distribution
-#' of fluxes.
+#' }
+#' @details Cw can vary between 1/number of trophic groups and 1. Larger values of Cw indicate a more even distribution
+#' of fluxes. Cw is used as a measure of system complexity.
 #' @return Returns a double.
 #' @export
 getCw <- function(FM) {
   m <- getConnPerNode(FM)
   Cw <- m / length(FM[,1])
-  #Cw <- exp((fluxSizeDiversity(FM) - averageMutualInfo(FM)) / 2) / length(FM[,1])
-  if(Cw < 0 | Cw > 1) {
-    stop("Something is wrong. Cw should vary within 0 to 1.")
+  if(Cw < 1/dim(FM)[1] | Cw > 1) {
+    stop("Something is wrong. Cw should lie between 1/S to 1, where S is number of network nodes.")
   }
   return(Cw)
 }
@@ -233,8 +280,8 @@ getCw <- function(FM) {
 #'
 #' This function calculates the loop weight.
 #' @param IS (required) Numeric vector of length \code{k} with interaction strengths.
-#' @param d (optional) Natural death rates in same unit as IS. Required to
-#' replicate method cited in reference.
+#' @param d (optional) Numeric vector of length \code{k} with natural death rates in
+#' the same unit as IS.
 #' @references \itemize{
 #' \item{
 #' Neutel, A.M., Heesterbeek, J.A.P., Van De Koppel, J., Hoenderboom, G.,
@@ -269,7 +316,7 @@ getLoopWeight <- function(IS, d = NULL) {
 #' Get loop feedback
 #'
 #' This function calculates the feedback of a loop.
-#' @param IS (required) Numeric vector of length \code{k} with interaction strengths.
+#' @param IS (required) Numeric vector with interaction strengths in a loop.
 #' @references \itemize{
 #' \item{
 #' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced
@@ -307,7 +354,6 @@ maxNrLoops <- function(n, k = NULL) {
   return(x)
 }
 
-# MR should be in t-1 (same unit as JM)
 #' Assess feedback characteristics of network
 #'
 #' This function can find all loops or loops of a specific length, and consequently

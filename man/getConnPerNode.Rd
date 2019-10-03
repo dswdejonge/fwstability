@@ -29,6 +29,8 @@ van Altena, C., Hemerik, L., de Ruiter, P.C., 2016. Food web stability and weigh
 connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58.
 https://doi.org/10.1007/s12080-015-0291-7
 }
-\item{Ulanowicz 1997.}
+\item{Ulanowicz, R.E., 1997. Limitations on the connectivity of ecosystem flo networks. In:
+Rinaldo, A.; Marani, A. (eds) Biological models. Instituto Veneto de Scienze, Lettre ed Arti,
+Venica, pp 125-143.}
 }
 }

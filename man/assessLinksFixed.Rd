@@ -4,10 +4,33 @@
 \alias{assessLinksFixed}
 \title{Assess stabiliy effect of a fixed link alteration}
 \usage{
-assessLinksFixed(JM, func = function(x) {     return(x * 2) })
+assessLinksFixed(JM, method = "eigenvalue", mortalities = NULL,
+  dead = NULL, func = function(x) {     return(x * 2) })
 }
 \arguments{
-\item{JM}{(required) A Jacobian matrix.}
+\item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
+on another compartment (columns).}
+
+\item{method}{(required) Either "eigenvalue" (default) or "scalar".
+\itemize{
+\item{
+The method "eigenvalue" finds stability as the maximum real part of the eigenvalues
+calculated from the Jacobian matrix.
+}
+\item{
+The "scalar" method finds stability as the scalar of natural mortality
+rates needed to acquire a stable matrix.
+}
+}}
+
+\item{mortalities}{(required if method is "scalar")
+A named numeric vector containing mortality of the faunal compartments
+(per unit time). The values and names must be in the same
+order as the Jacobian matrix, and the values for dead compartments should be
+set to NA.}
+
+\item{dead}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
+compartments (everything that is not fauna).}
 
 \item{func}{(required) Function describing how to alter each interaction strength to
 assess the effect on stability of the respective link. Default is doubling each
@@ -24,7 +47,8 @@ in a Jacobian matrix according to a fixed function.
 \details{
 If the change in stability (delta) is negative, the system becomes more stable if
 the respective food web compartment is removed from the Jacobian matrix. The opposite
-is true if delta is positive.
+is true if delta is positive. \cr
+Using the method 'scalar' might be somewhat slower than the method 'eigenvalue'.
 }
 \references{
 \itemize{

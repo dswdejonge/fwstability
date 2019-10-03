@@ -7,7 +7,7 @@
 getFeedback(IS)
 }
 \arguments{
-\item{IS}{(required) Numeric vector of length \code{k} with interaction strengths.}
+\item{IS}{(required) Numeric vector with interaction strengths in a loop.}
 }
 \value{
 Returns a double.
