@@ -8,34 +8,29 @@ getStability(JM, method = "eigenvalue", mortalities = NULL,
   dead = NULL)
 }
 \arguments{
-\item{JM}{A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
-on another compartment (columns). (required)}
+\item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
+on another compartment (columns).}
 
-\item{method}{Either "eigenvalue" (default) or "scalar". The method "eigenvalue" finds
-stability as the maximum real part of the eigenvalues calculated from the Jacobian
-matrix. The "eigenvalue" method relies on the quantification of the diagonal in the
-Jacobian matrix. The "scalar" method finds stability as the scalar of natural mortality
-rates needed to acquire a stable matrix. A critical matrix i.e. a matrix that is on the
-stability threshold is calculated by setting the diagonal to the given mortality values
-and subtracting the maximum real part of the eigenvalues from each diagonal value.
-A stepsize is determined by estimating the scalars needed to acquire the critical matrix from
-the given mortality values, and dividing the largest scalar by 100.
-Subsequently, the provided natural mortality is iteratively scaled with the determined
-stepsize until the matrix becomes stable, i.e. the maximum real part of the eigenvalues
-is negative. If dead compartments exist, their diagonal values are
-not scaled, because dead compartments do not have mortality rates. Therefore, the diagonal
-values of dead compartments in the Jacobian matrix should be quantified correctly,
-or set to zero (assuming there is no intracompartmental feedback). (required)}
+\item{method}{(required) Either "eigenvalue" (default) or "scalar".
+\itemize{
+\item{
+The method "eigenvalue" finds stability as the maximum real part of the eigenvalues
+calculated from the Jacobian matrix.
+}
+\item{
+The "scalar" method finds stability as the scalar of natural mortality
+rates needed to acquire a stable matrix.
+}
+}}
 
-\item{mortalities}{A named numeric vector containing mortality of the faunal compartments
-(per unit time). Can be for example be calculated as mortality rate as biomass
-per surface area per unit time divided by the biomass per surface area, or as the
-inverse of the natural lifespan of the species. The values and names must be in the same
+\item{mortalities}{(required if method is "scalar")
+A named numeric vector containing mortality of the faunal compartments
+(per unit time). The values and names must be in the same
 order as the Jacobian matrix, and the values for dead compartments should be
-set to NA. (required if method is "scalar")}
+set to NA.}
 
-\item{dead}{Character vector with all names of detritus and nutrient
-compartments (everything that is not fauna). (optional if method is "scalar")}
+\item{dead}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
+compartments (everything that is not fauna).}
 }
 \value{
 This function returns a numeric value. For the "eigenvalue" method
@@ -48,6 +43,29 @@ finding the maximum value of the real part of its eigenvalues (requires a quanti
 diagonal) or as the scalar of natural mortality rates that results in a stable matrix
 (requires mortality rate estimates).
 }
+\details{
+The interpretation of the "eigenvalue" method relies on the quantification of the diagonal in the
+Jacobian matrix. If there has been no thought on the quantification of the diagonal, the
+"eigenvalue" method might not be informative. \cr
+The "scalar" method relies on the estimation of natural mortality rates.
+A critical matrix, i.e. a matrix that is on the stability threshold, is calculated by setting the
+diagonal to the given mortality values and subtracting the maximum real part of the eigenvalues
+from each diagonal value.
+A stepsize is then determined by estimating the scalars needed to acquire the critical matrix from
+the given mortality values, and dividing the largest scalar by 100.
+Subsequently, the provided natural mortality is iteratively scaled with the determined
+stepsize until the matrix becomes stable, i.e. the maximum real part of the eigenvalues
+is negative.
+If dead compartments exist, their diagonal values are not scaled, because dead compartments do not
+have mortality rates. Therefore, the diagonal values of dead compartments in the Jacobian matrix should
+be quantified correctly, or set to zero (assuming there is no intracompartmental feedback). \cr
+Mortality rates per unit time can for example be calculated as as biomass
+per surface area per unit time divided by the biomass per surface area, or as the
+inverse of the natural lifespan of the species.
+}
 \examples{
 getStability(JM)
+}
+\seealso{
+\code{getStability}
 }

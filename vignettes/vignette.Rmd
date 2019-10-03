@@ -412,6 +412,10 @@ In this case, the diagonal value for detritus is calculated from the model (see 
 
 
 # 4. Analysize food web for (de)stabilizing characteristics
+show in vignette that doubling small interaction strength can have larger
+effect on stability than doubling large interaction strengths, thus a
+function + 10 would be more difficult to interpret in stead of relative change.
+per link (not per link pair) also intraspecific interaction.
 
 # 5. Examples from literature
 

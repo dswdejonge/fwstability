@@ -4,7 +4,7 @@
 \alias{extractLIMdata}
 \title{Extract data from formatted LIM.}
 \usage{
-extractLIMdata(model)
+extractLIMdata(model, verbose = T)
 }
 \arguments{
 \item{model}{(required) A named list containing elements with food web model data.
@@ -27,6 +27,7 @@ thereby potentially saving time.
 \item \code{diagonal} (optional) Either a single value, a numeric vector or the string "model".
 Default is an all-zero diagonal. The string "model" calculates the diagonal values from flux values.
 If diagonal is set to "model" mortality must be explicity included in the LIM.
+\item \code{netto} (optional) TRUE or FALSE. Use netto FM?
 }}
 }
 \value{

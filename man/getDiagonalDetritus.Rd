@@ -4,7 +4,7 @@
 \alias{getDiagonalDetritus}
 \title{Calculate diagonal for dead (detritus) compartments}
 \usage{
-getDiagonalDetritus(FM, BM, AE, dead)
+getDiagonalDetritus(FM, BM, AE, dead, index = NULL)
 }
 \arguments{
 \item{FM}{A named square flowmatrix, source compartments as rows,

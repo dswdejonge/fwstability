@@ -5,7 +5,8 @@
 \title{Jacobian matrix with interaction strengths}
 \usage{
 getJacobianEnergyFlux(FM, BM, AE, GE, diagonal = NULL, dead = NULL,
-  externals = NULL, MR = NULL)
+  externals = NULL, MR = NULL, index = NULL, verbose = T,
+  netto = NULL)
 }
 \arguments{
 \item{FM}{(required) A named square flowmatrix, source compartments as rows,
@@ -58,6 +59,12 @@ the flow matrix before calculations.}
 \item{MR}{(required when \code{diagonal} is set to \emph{model})
 A named numeric vector with non-predatory mortality rates for all
 compartments (same units as the flow matrix \code{FM}).}
+
+\item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
+
+\item{netto}{(optional) Boolean. Default is NULL. If TRUE, the netto Flowmatrix is used
+to calculate interaction strengths. This is only relevant if there are two food web compartments
+which act both as prey and predators to one another.}
 }
 \value{
 This function returns a matrix containing interaction strengths, i.e. the

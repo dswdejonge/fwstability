@@ -1,4 +1,3 @@
-context("Jacobian matrix creation with dead and external compartments")
 ### Both dead compartments and externals.
 # Detritus takes up CO2.
 # Plants and animals take up detritus.
@@ -37,8 +36,3 @@ JM <- matrix(c(0,
 ), nrow = 3, ncol = 3)
 rownames(JM) <- fwnames[1:3]
 colnames(JM) <- fwnames[1:3]
-
-test_that("the function works correctly with both dead and external arguments", {
-  expect_equal(getJacobian(model),
-               JM)
-})
