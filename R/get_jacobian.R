@@ -294,9 +294,9 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   }
 
   # Do checks for required data formats: throws errors
-  if(dim(FMs$original)[1] != dim(FMs$original)[2]) {
-    stop("flow matrix is not square")
-  } else if(!is.null(index) & !is.logical(index)) {
+  checkMformat(FMs$original)
+  checkMformat(FMs$netto)
+  if(!is.null(index) & !is.logical(index)) {
     stop("index must be NULL or boolean")
   } else if((is.null(rownames(FMs$original)) | is.null(colnames(FMs$original)) |
             is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE)))

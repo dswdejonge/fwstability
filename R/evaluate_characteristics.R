@@ -1,12 +1,3 @@
-# Check data format of JM
-checkJMformat <- function(JM) {
-  if(is.null(colnames(JM)) | is.null(rownames(JM))) {
-    stop("Jacobian matrix must have named rows and columns.")
-  } else if(!all(colnames(JM) == rownames(JM))) {
-    stop("Jacobian matrix must have same names in rows and columns.")
-  }
-}
-
 #' Assess stability effect of each compartment.
 #'
 #' This function assesses the affect on stability of removing individual compartments from
@@ -28,7 +19,7 @@ checkJMformat <- function(JM) {
 #' @export
 assessComps <- function(JM, method = "eigenvalue",
                         mortalities = NULL, dead = NULL) {
-  checkJMformat(JM)
+  checkMformat(JM)
   ini_s <- getStability(JM, method, mortalities, dead)
   df <- data.frame(
     removed_comp = rownames(JM),
@@ -70,7 +61,7 @@ assessComps <- function(JM, method = "eigenvalue",
 assessLinksFixed <- function(JM, method = "eigenvalue",
                              mortalities = NULL, dead = NULL,
                              func = function(x) {return(x * 2)}) {
-  checkJMformat(JM)
+  checkMformat(JM)
   eg <- expand.grid(rownames(JM), colnames(JM))
   ini_s <- getStability(JM, method, mortalities, dead)
   df <- data.frame(
@@ -122,7 +113,7 @@ assessLinksPerm <- function(JM, method = "eigenvalue",
                             mortalities = NULL, dead = NULL,
                             perms = 100, threshold = 0.01, seed = 1) {
   set.seed(seed)
-  checkJMformat(JM)
+  checkMformat(JM)
   pairs <- which(lower.tri(JM), arr.ind = TRUE)
 
   cJM <- JM

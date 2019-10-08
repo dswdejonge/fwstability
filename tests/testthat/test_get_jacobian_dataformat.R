@@ -82,7 +82,7 @@ test_that("the function throws an error if not all required data is given", {
 # Error: the flowmatrix is not squared
 test_that("the function only executes with a square matrix", {
   expect_error(getJacobianEnergyFlux(FM[,1:2], BM, AE, GE, dead = dead),
-               "flow matrix is not square")
+               "Input matrix is not square")
 })
 
 # Error: the flow matrix and vectors are not named
@@ -95,11 +95,11 @@ GE2 <- GE; names(GE2) <- NULL
 
 test_that("the function only executes when all vectors and matrices are named", {
   expect_error(getJacobianEnergyFlux(FM = FM2, BM = BM, AE = AE, GE = GE, dead = dead),
-               "all required vectors and matrices must be named")
+               "Input matrix must have named rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM3, BM = BM, AE = AE, GE = GE, dead = dead),
-               "all required vectors and matrices must be named")
+               "Input matrix must have named rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM4, BM = BM, AE = AE, GE = GE, dead = dead),
-               "all required vectors and matrices must be named")
+               "Input matrix must have named rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM2, AE = AE, GE = GE, dead = dead, externals = "CO2"),
                "all required vectors and matrices must be named")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE2, GE = GE, dead = dead, externals = "CO2"),
@@ -121,9 +121,9 @@ test_that("all vectors and matrices have the same names", {
   expect_error(getJacobianEnergyFlux(FM = FM5, BM = BM, AE = AE, GE = GE, dead = dead),
                "the names and their order must be equal in all named vectors and matrices")
   expect_error(getJacobianEnergyFlux(FM = FM6, BM = BM, AE = AE, GE = GE, dead = dead),
-               "row names and column names of flow matrix do not match")
+               "Input matrix must have same names in rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM7, BM = BM, AE = AE, GE = GE, dead = dead),
-               "row names and column names of flow matrix do not match")
+               "Input matrix must have same names in rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM4, AE = AE, GE = GE, dead = dead, externals = "CO2"),
                "the names and their order must be equal in all named vectors and matrices")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM5, AE = AE, GE = GE, dead = dead, externals = "CO2"),
