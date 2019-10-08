@@ -179,3 +179,113 @@ test_that("the list \"dead\" format gets checked correctly", {
   expect_error(checkDeadFormat(list(names = c("DET", "NUT"), def = c("foo", "noDef"))),
                "the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
 })
+
+### Stability
+# ***********
+# Example matrix
+JM <- matrix(c(1,3,6,-3,-5,-6,3,3,4),
+             nrow = 3, ncol = 3)
+rownames(JM) <- c("DETRITUS", "PLANT", "ANIMAL")
+colnames(JM) <- c("DETRITUS", "PLANT", "ANIMAL")
+MR <- c(1, 1, 1)
+names(MR) <- c("DETRITUS", "PLANT", "ANIMAL")
+
+# Error: the JM is not square, numeric, or named
+JM1 <- JM[1:2,]
+JM2 <- matrix(c("a","b","c","d"), nrow = 2, ncol = 2)
+rownames(JM2) <- c("DETRITUS", "PLANT")
+colnames(JM2) <- c("DETRITUS", "PLANT")
+JM3 <- JM ; rownames(JM3) <- NULL
+JM4 <- JM ; colnames(JM4) <- NULL
+JM5 <- JM ; rownames(JM5) <- NULL ; colnames(JM5) <- NULL
+JM6 <- JM ; rownames(JM6) <- rownames(JM6)[c(2,1,3)]
+JM8 <- JM ; rownames(JM8)[1] <- "nonexistent"
+test_that("the function only executes with a square, numeric, and correctly named JM", {
+  expect_error(getStability(JM1),
+               "Input matrix is not square")
+  expect_error(getStability(JM2),
+               "Input matrix must be numeric")
+  expect_error(getStability(JM3),
+               "Input matrix must have named rows and columns.")
+  expect_error(getStability(JM4),
+               "Input matrix must have named rows and columns.")
+  expect_error(getStability(JM5),
+               "Input matrix must have named rows and columns.")
+  expect_error(getStability(JM6),
+               "Input matrix must have same names in rows and columns.")
+  expect_error(getStability(JM8),
+               "Input matrix must have same names in rows and columns.")
+})
+
+# Error: the chosen method is unknown
+test_that("the function only executes with available methods", {
+  expect_error(getStability(JM, method = "nonexistent"),
+               "unknown method chosen")
+})
+
+# Error: the diagonal contains NAs
+JM7 <- JM ; diag(JM7)[1] <- NA
+test_that("the eigenvalue method doesn't execute with diagonal NAs", {
+  expect_error(getStability(JM7),
+               "for the eigenvalue method the diagonal cannot contain NAs")
+})
+
+# Warning: mortalities and/or dead compartments are given, which is irrelevant for the
+# eigenvalue method
+mortalities <- c(1, 1, 1) ; names(mortalities) <- c("DETRITUS", "PLANT", "ANIMAL")
+test_that("a warning is produced when data irrelevant to the method is given", {
+  expect_warning(getStability(JM, method = "eigenvalue", mortalities),
+                 "given mortality values or dead compartments are irrelevant for the eigenvalue method")
+  expect_warning(getStability(JM, method = "eigenvalue", dead = "DETRITUS"),
+                 "given mortality values or dead compartments are irrelevant for the eigenvalue method")
+  expect_warning(getStability(JM, method = "eigenvalue", mortalities, dead = "DETRITUS"),
+                 "given mortality values or dead compartments are irrelevant for the eigenvalue method")
+})
+
+# Error: the MR vector is not numeric, named correctly, or has <=0 values
+mort <- c("a", "b", "c") ; names(mort) <- names(MR)
+mort2 <- MR[1:2]
+mort3 <- MR ; names(mort3) <- NULL
+mort4 <- MR ; names(mort4) <- names(MR)[c(2,3,1)]
+mort5 <- MR ; names(mort5)[1] <- "nonexistent"
+mort7 <- c(1,1,0) ; names(mort7) <- names(MR)
+mort8 <- c(-1,-1,-1) ; names(mort8) <- names(MR)
+
+test_that("the scalar method only works with a correct mortality vector", {
+  expect_error(getStability(JM, method = "scalar", MR = mort),
+               "the MR vector contains values equal or smaller than zero, or is non-numeric")
+  expect_error(getStability(JM, method = "scalar", MR = mort7),
+               "the MR vector contains values equal or smaller than zero, or is non-numeric")
+  expect_error(getStability(JM, method = "scalar", MR = mort8),
+               "the MR vector contains values equal or smaller than zero, or is non-numeric")
+  expect_error(getStability(JM, method = "scalar", MR = mort2),
+               "The names and their order must be equal in all named vectors and matrices.")
+  expect_error(getStability(JM, method = "scalar", MR = mort3),
+               "All required vectors must be named.")
+  expect_error(getStability(JM, method = "scalar", MR = mort4),
+               "The names and their order must be equal in all named vectors and matrices.")
+  expect_error(getStability(JM, method = "scalar", MR = mort5),
+               "The names and their order must be equal in all named vectors and matrices.")
+})
+
+# Error: the name of dead compartment is non-existent
+test_that("the scalar method only works with an existing dead compartment", {
+  expect_error(getStability(JM, method = "scalar", MR, dead = "foo"),
+               "the names of the dead compartments are unknown")
+})
+
+# Error: the NA values in the mortality vactor are of non-dead compartment
+mort6 <- MR ; mort6[2] <- NA
+test_that("non-dead compartments cannot have NA MR with scalar method", {
+  expect_error(getStability(JM, method = "scalar",
+                            MR = mort6, dead = "DETRITUS"),
+               "Mortality rates of non-dead compartments cannot be NA.")
+})
+
+# Error: the method is scalar, but there is no input
+test_that("the scalar method asks for the correct input", {
+  expect_error(getStability(JM, method = "scalar"),
+               "MR vector required for the scalar method")
+  expect_error(getStability(JM, method = "scalar", dead = "DETRITUS"),
+               "MR vector required for the scalar method")
+})

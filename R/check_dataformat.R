@@ -6,6 +6,8 @@ checkMformat <- function(M) {
     stop("Input matrix must have named rows and columns.")
   } else if(!all(colnames(M) == rownames(M))) {
     stop("Input matrix must have same names in rows and columns.")
+  } else if(!is.numeric(M)) {
+    stop("Input matrix must be numeric")
   }
 }
 
@@ -20,6 +22,7 @@ checkExternalsFormat <- function(externals, M) {
 checkNamingFormat <- function(matrices = NULL, vectors = NULL) {
   n <- names(vectors[[1]])
   for(m in matrices) {
+    if(is.null(m)) {next}
     if(is.null(rownames(m)) | is.null(colnames(m))){
       stop("All required matrices must be named.")
     }
@@ -28,6 +31,7 @@ checkNamingFormat <- function(matrices = NULL, vectors = NULL) {
     }
   }
   for(v in vectors) {
+    if(is.null(v)) {next}
     if(is.null(names(v))) {
       stop("All required vectors must be named.")
     }
@@ -77,5 +81,25 @@ checkDeadFormat <- function(dead, correct_names) {
     } else if(!is.null(dead$frac)) {
       checkMformat(dead$frac)
     }
+  }
+}
+
+checkMortalityFormat <- function(MR, dead) {
+  if(!is.null(MR)) {
+    if(TRUE %in% is.na(MR) && (is.null(dead) | !all(names(which(is.na(MR))) %in% dead))) {
+      stop("Mortality rates of non-dead compartments cannot be NA.")
+    } else if(min(MR, na.rm = T) <= 0 | !is.numeric(MR)) {
+      stop("the MR vector contains values equal or smaller than zero, or is non-numeric")
+    }
+  }
+}
+
+checkStabilityMethod <- function(method, JM, MR) {
+  if(method != "eigenvalue" & method != "scalar") {
+    stop("unknown method chosen")
+  } else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
+    stop("for the eigenvalue method the diagonal cannot contain NAs")
+  } else if(method == "scalar" & is.null(MR)) {
+    stop("MR vector required for the scalar method")
   }
 }
