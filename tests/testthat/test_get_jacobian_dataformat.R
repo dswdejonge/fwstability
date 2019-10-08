@@ -101,11 +101,11 @@ test_that("the function only executes when all vectors and matrices are named", 
   expect_error(getJacobianEnergyFlux(FM = FM4, BM = BM, AE = AE, GE = GE, dead = dead),
                "Input matrix must have named rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM2, AE = AE, GE = GE, dead = dead, externals = "CO2"),
-               "all required vectors and matrices must be named")
+               "All required vectors must be named.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE2, GE = GE, dead = dead, externals = "CO2"),
-               "all required vectors and matrices must be named")
+               "All required vectors must be named.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE2, dead = dead, externals = "CO2"),
-               "all required vectors and matrices must be named")
+               "All required vectors must be named.")
 })
 
 # Error: Names of some vectors are different or in wrong order

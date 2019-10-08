@@ -143,16 +143,8 @@ effectOnConsumer <- function(FM, BM, AE, GE) {
 }
 
 removeExternals <- function(externals, FM) {
-  if(!is.null(externals)) {
-     if((FALSE %in% (externals %in% rownames(FM))) |
-        (FALSE %in% (externals %in% colnames(FM)))) {
-       stop("the names of the external compartments are unknown")
-     } else {
-       # Remove external compartments, keep internals
-       internals <- !(rownames(FM) %in% externals)
-       FM <- FM[internals, internals]
-     }
-   }
+  internals <- !(rownames(FM) %in% externals)
+  FM <- FM[internals, internals]
   return(FM)
 }
 
@@ -258,7 +250,11 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
                         dead = NULL, externals = NULL, MR = NULL,
                         verbose = T, netto = NULL) {
 
-  FM <- removeExternals(externals, FM)
+  if(!is.null(externals)) {
+    checkExternalsFormat(externals, FM)
+    FM <- removeExternals(externals, FM)
+    }
+
   FMs <- list()
   if(!is.null(netto) && netto){
     FMs$original <- FM
@@ -277,11 +273,15 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   # Do checks for required data formats: throws errors
   checkMformat(FMs$original)
   checkMformat(FMs$netto)
-  if((is.null(rownames(FMs$original)) | is.null(colnames(FMs$original)) |
-            is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE)))
-            ) {
-    stop("all required vectors and matrices must be named")
-  } else if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
+  checkNamingFormat(
+    matrices = list(FMs$original, FMs$netto),
+    vectors = list(BM, AE, GE))
+  #if((is.null(rownames(FMs$original)) | is.null(colnames(FMs$original)) |
+  #          is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE)))
+  #          ) {
+  #  stop("all required vectors and matrices must be named")
+  #} else
+  if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
     stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
   } else if((!all(names(BM) == rownames(FMs$original)) | !all(names(BM) == colnames(FMs$original)) |
             !all(names(BM) == names(AE))    | !all(names(BM) == names(GE)))){
