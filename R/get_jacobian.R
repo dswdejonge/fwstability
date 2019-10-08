@@ -148,32 +148,6 @@ removeExternals <- function(externals, FM) {
   return(FM)
 }
 
-adjustDeadInput <- function(dead) {
-  if(!is.null(dead)) {
-    if(!is.list(dead) | is.null(names(dead))) {
-      stop("argument \"dead\" must be a named list")
-    } else if(is.null(dead$names)) {
-      stop("\"names\" element is required in the \"dead\" list")
-    }
-    names <- c("names", "def", "frac")
-    missing <- c(1:length(names))[-which(names %in% names(dead))]
-    if(length(dead) < length(names)) {
-      newnames <- c(names(dead), names[missing])
-      dead <- c(dead, vector(
-        mode = "list", length = length(names) - length(dead)))
-      names(dead) <- newnames
-    } else if(length(dead) > length(names)) {
-      stop(paste("the list \"dead\" should have",length(names),"elements at most"))
-    }
-    if(!is.null(dead$def) &&
-       length(dead$names) !=
-              length(which(dead$def == "Def" | dead$def == "noDef"))) {
-      stop("the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
-    }
-  }
-  return(dead)
-}
-
 #' Jacobian matrix with interaction strengths
 #'
 #' This functions calculates interaction strengths from a resolved energy-flux
@@ -264,14 +238,13 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     FMs$original <- FM
     FMs$netto <- FM
   }
-  # Create correct dead input format
-  dead <- adjustDeadInput(dead)
   # Message for default all-zero diagonal
   if(is.null(diagonal)) {
     diagonal <- 0
     if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
   }
   # Do checks for required data formats
+  checkDeadFormat(dead)
   checkMformat(FMs$original)
   checkMformat(FMs$netto)
   checkNamingFormat(
