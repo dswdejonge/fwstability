@@ -1,6 +1,10 @@
 # Output is t-1
-getMortalityRates <- function(FM, AE, GE, BM) {
-  m <- AE*GE*Q - Predation
+getMortalityRates <- function(FM, AE, GE, BM, dead) {
+  dead_i <- which(rownames(FM) %in% dead)
+  production <- AE*GE*colSums(FM, na.rm = T)
+  predation <- rowSums(FM[,-dead_i], na.rm = T)
+  m <- production - predation
+  return(m)
 }
 
 #' Calculate diagonal for dead (detritus) compartments
@@ -88,7 +92,7 @@ getDiagonal <- function(MR, dead = NULL, BM = NULL, FM = NULL, AE = NULL) {
     if(is.null(BM) | is.null(FM) | is.null(AE)) {
       stop("please provide all required data to calculate dead diagonal values")
     }
-    add <- getDiagonalDetritus(FM, BM, AE, dead)
+    add <- getDiagonalDetritus(FM = FM, BM = BM, AE = AE, dead = dead)
     aii[names(add)] <- add
   }
   return(aii)

@@ -280,11 +280,10 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   # Combine matrices and add diagonal
   JM <- eff.on.consumer + eff.on.resource
   if(all(diagonal == "model")) {
-    if(is.null(dead)) {
-      diagonal <- getDiagonal(MR = MR, BM = BM)
-    } else {
-      diagonal <- getDiagonal(MR, BM = BM, dead = dead$names, FM = FMs$original, AE = AE)
+    if(is.null(MR)){
+      MR <- getMortalityRates(FM = FM, AE = AE, GE = GE, BM = BM, dead = dead$names)
     }
+    diagonal <- getDiagonal(MR = MR, BM = BM, dead = dead$names, FM = FMs$original, AE = AE)
   }
   diag(JM) <- diagonal
 
