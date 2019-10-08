@@ -165,3 +165,17 @@ test_that("the function only executes if all AE and GE are 0-1.", {
   expect_error(getJacobianEnergyFlux(FM, BM = BM, AE, GE2, dead = dead, externals = "CO2"),
                "assimilation and growth efficiencies must lie between 0 and 1")
 })
+
+# Error: dead is wrong data format
+test_that("the list \"dead\" format gets checked correctly", {
+  expect_error(checkDeadFormat("DET"),
+               "argument \"dead\" must be a named list")
+  expect_error(checkDeadFormat(list("DET")),
+               "argument \"dead\" must be a named list")
+  expect_error(checkDeadFormat(list(def = "noDef")),
+               "\"names\" element is required in the \"dead\" list")
+  expect_error(checkDeadFormat(list(names = "DET", def = "Def", frac = 0, extra = 0)),
+               "the list \"dead\" should have 3 elements at most")
+  expect_error(checkDeadFormat(list(names = c("DET", "NUT"), def = c("foo", "noDef"))),
+               "the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
+})

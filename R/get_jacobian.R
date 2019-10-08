@@ -244,7 +244,6 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
   }
   # Do checks for required data formats
-  checkDeadFormat(dead)
   checkMformat(FMs$original)
   checkMformat(FMs$netto)
   checkNamingFormat(
@@ -253,9 +252,9 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   checkBMformat(BM)
   checkDiagonalFormat(diagonal, correct_length = length(BM))
   checkCEformat(CE = list(AE, GE))
-  if(FALSE %in% (dead$names %in% names(BM))) {
-    stop("the names of the dead compartments are unknown")
-  } else if(!is.null(dead)) {
+  checkDeadFormat(dead, correct_names = names(BM))
+  # Set AE and GE to NA for dead compartments if necessary
+  if(!is.null(dead)) {
     if(!all(is.na(AE[dead$names])) |
        !all(is.na(GE[dead$names]))) {
       AE[dead$names] <- NA

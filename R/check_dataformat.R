@@ -60,7 +60,7 @@ checkCEformat <- function(CE) {
   }
 }
 
-checkDeadFormat <- function(dead) {
+checkDeadFormat <- function(dead, correct_names) {
   if(!is.null(dead)) {
     if(!is.list(dead) | is.null(names(dead))) {
       stop("argument \"dead\" must be a named list")
@@ -72,6 +72,10 @@ checkDeadFormat <- function(dead) {
               length(dead$names) !=
               length(which(dead$def == "Def" | dead$def == "noDef"))) {
       stop("the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
+    } else if(FALSE %in% (dead$names %in% correct_names)) {
+      stop("the names of the dead compartments are unknown")
+    } else if(!is.null(dead$frac)) {
+      checkMformat(dead$frac)
     }
   }
 }
