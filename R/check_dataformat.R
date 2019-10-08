@@ -50,3 +50,12 @@ checkDiagonalFormat <- function(diagonal, correct_length) {
     stop("given diagonal has incorrect length")
   }
 }
+
+# input is list
+checkCEformat <- function(CE) {
+  for(e in CE) {
+    if(any(e > 1 | e < 0, na.rm = TRUE)) {
+      stop("assimilation and growth efficiencies must lie between 0 and 1")
+    }
+  }
+}

@@ -279,10 +279,9 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     vectors = list(BM, AE, GE))
   checkBMformat(BM)
   checkDiagonalFormat(diagonal, correct_length = length(BM))
+  checkCEformat(CE = list(AE, GE))
   if(FALSE %in% (dead$names %in% names(BM))) {
     stop("the names of the dead compartments are unknown")
-  } else if(any(AE > 1 | AE < 0 | GE > 1 | GE < 0, na.rm = TRUE)) {
-    stop("assimilation and growth efficiencies must lie between 0 and 1")
   } else if(!is.null(dead)) {
     if(!all(is.na(AE[dead$names])) |
        !all(is.na(GE[dead$names]))) {
