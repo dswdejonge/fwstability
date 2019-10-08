@@ -4,7 +4,7 @@
 \alias{effectOnResource}
 \title{Per capita effect on resource population.}
 \usage{
-effectOnResource(FMs, BM, AE, dead = NULL, index = NULL)
+effectOnResource(FMs, BM, AE, dead = NULL)
 }
 \arguments{
 \item{FMs}{(required) A list with two elements \code{original} and \code{netto}, both
