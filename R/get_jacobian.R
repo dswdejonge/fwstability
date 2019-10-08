@@ -250,11 +250,12 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
                         dead = NULL, externals = NULL, MR = NULL,
                         verbose = T, netto = NULL) {
 
+  # Remove externals
   if(!is.null(externals)) {
     checkExternalsFormat(externals, FM)
     FM <- removeExternals(externals, FM)
     }
-
+  # Use netto FM if necessary
   FMs <- list()
   if(!is.null(netto) && netto){
     FMs$original <- FM
@@ -263,35 +264,23 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     FMs$original <- FM
     FMs$netto <- FM
   }
-
+  # Create correct dead input format
   dead <- adjustDeadInput(dead)
+  # Message for default all-zero diagonal
   if(is.null(diagonal)) {
     diagonal <- 0
     if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
   }
-
-  # Do checks for required data formats: throws errors
+  # Do checks for required data formats
   checkMformat(FMs$original)
   checkMformat(FMs$netto)
   checkNamingFormat(
     matrices = list(FMs$original, FMs$netto),
     vectors = list(BM, AE, GE))
-  #if((is.null(rownames(FMs$original)) | is.null(colnames(FMs$original)) |
-  #          is.null(names(BM)) | is.null(names(AE)) | is.null(names(GE)))
-  #          ) {
-  #  stop("all required vectors and matrices must be named")
-  #} else
-  if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
-    stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
-  } else if((!all(names(BM) == rownames(FMs$original)) | !all(names(BM) == colnames(FMs$original)) |
-            !all(names(BM) == names(AE))    | !all(names(BM) == names(GE)))){
-    stop("the names and their order must be equal in all named vectors and matrices")
-  } else if(FALSE %in% (dead$names %in% names(BM))) {
+  checkBMformat(BM)
+  checkDiagonalFormat(diagonal, correct_length = length(BM))
+  if(FALSE %in% (dead$names %in% names(BM))) {
     stop("the names of the dead compartments are unknown")
-  } else if(!is.numeric(diagonal) & all(diagonal != "model")) {
-    stop("given diagonal not numeric or set to \"model\"")
-  } else if(length(diagonal) != 1 & length(diagonal) != length(BM)) {
-    stop("given diagonal has incorrect length")
   } else if(any(AE > 1 | AE < 0 | GE > 1 | GE < 0, na.rm = TRUE)) {
     stop("assimilation and growth efficiencies must lie between 0 and 1")
   } else if(!is.null(dead)) {

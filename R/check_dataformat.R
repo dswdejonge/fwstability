@@ -17,15 +17,36 @@ checkExternalsFormat <- function(externals, M) {
 }
 
 # input is list
-checkNamingFormat <- function(matrices, vectors) {
+checkNamingFormat <- function(matrices = NULL, vectors = NULL) {
+  n <- names(vectors[[1]])
   for(m in matrices) {
     if(is.null(rownames(m)) | is.null(colnames(m))){
       stop("All required matrices must be named.")
+    }
+    if(!all(n == rownames(m)) | !all(n == colnames(m))) {
+      stop("The names and their order must be equal in all named vectors and matrices.")
     }
   }
   for(v in vectors) {
     if(is.null(names(v))) {
       stop("All required vectors must be named.")
     }
+    if(!all(n == names(v))) {
+      stop("The names and their order must be equal in all named vectors and matrices.")
+    }
+  }
+}
+
+checkBMformat <- function(BM) {
+  if((TRUE %in% is.na(BM)) | (TRUE %in% (BM <= 0)) | (!is.numeric(BM))) {
+    stop("biomass vector contains NA, values equal or smaller than zero, or is non-numeric")
+  }
+}
+
+checkDiagonalFormat <- function(diagonal, correct_length) {
+  if(!is.numeric(diagonal) & all(diagonal != "model")) {
+    stop("given diagonal not numeric or set to \"model\"")
+  } else if(length(diagonal) != 1 & length(diagonal) != correct_length) {
+    stop("given diagonal has incorrect length")
   }
 }

@@ -119,19 +119,19 @@ GE3 <- GE; names(GE3) <- c("A", "B", "C")
 
 test_that("all vectors and matrices have the same names", {
   expect_error(getJacobianEnergyFlux(FM = FM5, BM = BM, AE = AE, GE = GE, dead = dead),
-               "the names and their order must be equal in all named vectors and matrices")
+               "The names and their order must be equal in all named vectors and matrices.")
   expect_error(getJacobianEnergyFlux(FM = FM6, BM = BM, AE = AE, GE = GE, dead = dead),
                "Input matrix must have same names in rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM7, BM = BM, AE = AE, GE = GE, dead = dead),
                "Input matrix must have same names in rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM4, AE = AE, GE = GE, dead = dead, externals = "CO2"),
-               "the names and their order must be equal in all named vectors and matrices")
+               "The names and their order must be equal in all named vectors and matrices.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM5, AE = AE, GE = GE, dead = dead, externals = "CO2"),
-               "the names and their order must be equal in all named vectors and matrices")
+               "The names and their order must be equal in all named vectors and matrices.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE3, GE = GE, dead = dead, externals = "CO2"),
-               "the names and their order must be equal in all named vectors and matrices")
+               "The names and their order must be equal in all named vectors and matrices.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE3, dead = dead, externals = "CO2"),
-               "the names and their order must be equal in all named vectors and matrices")
+               "The names and their order must be equal in all named vectors and matrices.")
 })
 
 # Error: biomasses have incorrect values
