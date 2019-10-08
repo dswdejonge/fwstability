@@ -57,7 +57,7 @@ the flow matrix before calculations.}
 
 \item{MR}{(required when \code{diagonal} is set to \emph{model})
 A named numeric vector with non-predatory mortality rates for all
-compartments (same units as the flow matrix \code{FM}).}
+compartments per unit time (t-1)).}
 
 \item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
 

@@ -207,7 +207,7 @@ removeExternals <- function(externals, FM) {
 #' the flow matrix before calculations.
 #' @param MR (required when \code{diagonal} is set to \emph{model})
 #' A named numeric vector with non-predatory mortality rates for all
-#' compartments (same units as the flow matrix \code{FM}).
+#' compartments per unit time (t-1)).
 #' @param verbose (optional) Default is TRUE. Wether or not to print messages.
 #' @param netto (optional) Boolean. Default is NULL. If TRUE, the netto Flowmatrix is used
 #' to calculate interaction strengths. This is only relevant if there are two food web compartments
@@ -378,8 +378,8 @@ getNettoFM <- function(FM, deadnames) {
 #' of each flow comprises defecation (matrix similar to \code{FM}, only required with parallel flows).}
 #' \item{\code{externals} (optional) is a character vector with any compartments that should not be
 #' considered in the calculations}.
-#' \item{\code{MR} (required if \code{diagonal} is set to "model") is a named numeric with non-predatory
-#' mortality rates in the same units as the flows.}
+#' \item{\code{MR} (required if \code{diagonal} is set to "model")
+#' is a named numeric with non-predatory mortality rates per unit time (t-1).}
 #' }
 #' More detailed information about argument requirements see \code{?getJacobianEnergyFlux}.
 #' @section Linear Inverse models:

@@ -18,9 +18,9 @@
 #' The 'scalar' method might be somewhat slower than the default 'eigenvalue' method.
 #' @export
 assessComps <- function(JM, method = "eigenvalue",
-                        mortalities = NULL, dead = NULL) {
+                        MR = NULL, dead = NULL) {
   checkMformat(JM)
-  ini_s <- getStability(JM, method, mortalities, dead)
+  ini_s <- getStability(JM, method, MR, dead)
   df <- data.frame(
     removed_comp = rownames(JM),
     ini_s = ini_s,
@@ -28,7 +28,7 @@ assessComps <- function(JM, method = "eigenvalue",
 
   for(i in 1:dim(JM)[1]){
     m <- JM[-i,-i]
-    df$new_s[i] <- getStability(m, method, mortalities, dead)
+    df$new_s[i] <- getStability(m, method, MR, dead)
   }
   df$delta <- df$new_s - df$ini_s
   df$delta_frac <- df$delta / df$ini_s
@@ -59,11 +59,11 @@ assessComps <- function(JM, method = "eigenvalue",
 #' Using the method 'scalar' might be somewhat slower than the method 'eigenvalue'.
 #' @export
 assessLinksFixed <- function(JM, method = "eigenvalue",
-                             mortalities = NULL, dead = NULL,
+                             MR = NULL, dead = NULL,
                              func = function(x) {return(x * 2)}) {
   checkMformat(JM)
   eg <- expand.grid(rownames(JM), colnames(JM))
-  ini_s <- getStability(JM, method, mortalities, dead)
+  ini_s <- getStability(JM, method, MR, dead)
   df <- data.frame(
     eff.of = eg$Var1,
     eff.on = eg$Var2,
@@ -72,7 +72,7 @@ assessLinksFixed <- function(JM, method = "eigenvalue",
   for(i in 1:length(JM)) {
     m <- JM
     m[i] <- func(JM[i])
-    df$new_s[i] <- getStability(m, method, mortalities, dead)
+    df$new_s[i] <- getStability(m, method, MR, dead)
   }
   df$delta <- df$new_s - df$ini_s
   df$delta_frac <- df$delta / df$ini_s
@@ -110,7 +110,7 @@ assessLinksFixed <- function(JM, method = "eigenvalue",
 #' @seealso \code{getStability}
 #' @export
 assessLinksPerm <- function(JM, method = "eigenvalue",
-                            mortalities = NULL, dead = NULL,
+                            MR = NULL, dead = NULL,
                             perms = 100, threshold = 0.01, seed = 1) {
   set.seed(seed)
   checkMformat(JM)
@@ -120,7 +120,7 @@ assessLinksPerm <- function(JM, method = "eigenvalue",
   diag(cJM) <- diag(cJM) - getStability(JM)
   diag(cJM) <- diag(cJM) - abs(diag(cJM)) * threshold
 
-  if(getStability(cJM, method, mortalities, dead) > 0) {
+  if(getStability(cJM, method, MR, dead) > 0) {
     stop("Initial stability needs to be negative in order for this test to work.")
   }
 
@@ -132,7 +132,7 @@ assessLinksPerm <- function(JM, method = "eigenvalue",
       m <- cJM
       m[x,y] <- runif(1, min=0, max=2*abs(m[x,y]))*sign(m[x,y])
       m[y,x] <- runif(1, min=0, max=2*abs(m[x,y]))*sign(m[y,x])
-      if(getStability(m, method, mortalities, dead) > 0) {
+      if(getStability(m, method, MR, dead) > 0) {
         counter <- counter+1
       }
     }
