@@ -4,8 +4,8 @@
 \alias{assessLinksPerm}
 \title{Assess probability of destabilizing system per interaction}
 \usage{
-assessLinksPerm(JM, method = "eigenvalue", mortalities = NULL,
-  dead = NULL, perms = 100, threshold = 0.01, seed = 1)
+assessLinksPerm(JM, method = "eigenvalue", MR = NULL, dead = NULL,
+  perms = 100, threshold = 0.01, seed = 1)
 }
 \arguments{
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
@@ -22,6 +22,12 @@ The "scalar" method finds stability as the scalar of natural mortality
 rates needed to acquire a stable matrix.
 }
 }}
+
+\item{MR}{(required if method is "scalar")
+A named numeric vector containing mortality of the faunal compartments
+(per unit time, t-1). The values and names must be in the same
+order as the Jacobian matrix, and the values for dead compartments should be
+set to NA.}
 
 \item{dead}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
 compartments (everything that is not fauna).}
