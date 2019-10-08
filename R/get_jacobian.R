@@ -281,9 +281,9 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   JM <- eff.on.consumer + eff.on.resource
   if(all(diagonal == "model")) {
     if(is.null(dead)) {
-      diagonal <- getDiagonal(MR, BM)
+      diagonal <- getDiagonal(MR = MR, BM = BM)
     } else {
-      diagonal <- getDiagonal(MR, BM, dead$names, FMs$netto, AE)
+      diagonal <- getDiagonal(MR, BM = BM, dead = dead$names, FM = FMs$original, AE = AE)
     }
   }
   diag(JM) <- diagonal

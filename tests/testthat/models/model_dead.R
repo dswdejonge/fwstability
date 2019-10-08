@@ -41,15 +41,15 @@ JM2 <- JM; JM2[c(1,5,9)] <- DIAG
 
 
 ### Inclusion of diagonal calculated from model ###
-MR <- c(NA, 10, 5) ; names(MR) <- fwnames
+MR <- c(NA, 10/BM[2], 5/BM[3]) ; names(MR) <- fwnames
 model3 <- model
 model3$diagonal <- "model"
 model3$MR <- MR
 JM3 <- JM
 JM3[c(1,5,9)] <- c(
   -1/BM[1] * (AE[2] * FM[1,2] + AE[3] * FM[1,3]),
-  -MR[2] / BM[2],
-  -MR[3] / BM[3]
+  -MR[2],
+  -MR[3]
 )
 ###
 
