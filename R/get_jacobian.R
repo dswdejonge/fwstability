@@ -68,7 +68,7 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
     for(i in 1:dim(dead_interactions)[1]){
       consumer <- as.character(dead_interactions[i,1])
       resource <- as.character(dead_interactions[i,2])
-
+      if(consumer == resource) {next}
       if(is.null(dead$def)) {
         is_defecation_compartment <- FALSE
       } else {
@@ -97,7 +97,8 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
         d <- rep(1, length(c))
       }
 
-      result[consumer, resource] <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
+      value <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
+      result[consumer, resource] <- value
 
       # Consumer of detritus is not a resource if it deposits detritus.
       result[resource, consumer] <- NA
