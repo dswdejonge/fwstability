@@ -12,7 +12,7 @@ fwnames <- c("LABILE", "REFRAC", "MEIO", "MACRO")
 BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames
 AE <- c(NA, NA, 0.3, 0.3) ; names(AE) <- fwnames
 GE <- c(NA, NA, 0.3, 0.3) ; names(GE) <- fwnames
-MR <- c(1, 1, 0.8, 0.7) ; names(MR) <- fwnames
+MR <- c(NA, NA, 0.8, 0.7) ; names(MR) <- fwnames
 # Top down balancing
 Fd <- 0.5
 meiMort <- MR[3]*BM[3]
