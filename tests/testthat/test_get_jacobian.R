@@ -71,3 +71,8 @@ source("models/model_Lotka_Volterra.R")
 test_that("The package works with a dynamic LV function", {
   expect_equal(getStability(getJacobian(model)), answer)
 })
+
+source("models/model_use_diff_dead.R")
+test_that("correct JM if species deposit in different compartments", {
+  expect_equal(getJacobian(model), JM)
+})
