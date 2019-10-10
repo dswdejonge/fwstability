@@ -1,10 +1,17 @@
-# Output is t-1
-getMortalityRates <- function(FM, AE, GE, BM, dead) {
+# Output is same as flowmatrix
+getMortalityFlow <- function(FM, AE, GE, dead) {
   dead_i <- which(rownames(FM) %in% dead)
   production <- AE*GE*colSums(FM, na.rm = T)
   predation <- rowSums(FM[,-dead_i], na.rm = T)
   m <- production - predation
   return(m)
+}
+
+# Output is t-1
+getMortalityRates <- function(FM, AE, GE, BM, dead) {
+  m <- getMortalityFlow(FM, AE, GE, dead)
+  MR <- m / BM
+  return(MR)
 }
 
 #' Calculate diagonal for dead (detritus) compartments
