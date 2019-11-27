@@ -68,19 +68,14 @@ checkDeadFormat <- function(dead, correct_names) {
   if(!is.null(dead)) {
     if(!is.list(dead) | is.null(names(dead))) {
       stop("argument \"dead\" must be a named list")
-    } else if(is.null(dead$names)) {
-      stop("\"names\" element is required in the \"dead\" list")
-    } else if(length(dead) > 3) {
-      stop(paste("the list \"dead\" should have 3 elements at most"))
-    } else if(!is.null(dead$def) &&
-              length(dead$names) !=
-              length(which(dead$def == "Def" | dead$def == "noDef"))) {
-      stop("the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
+    } else if(is.null(dead$names) | is.null(dead$frac)) {
+      stop("\"names\" and \"frac\" elements are required in the \"dead\" list")
+    } else if(length(dead) > 2) {
+      stop(paste("the list \"dead\" should have 2 elements at most"))
     } else if(FALSE %in% (dead$names %in% correct_names)) {
       stop("the names of the dead compartments are unknown")
-    } else if(!is.null(dead$frac)) {
-      checkMformat(dead$frac)
     }
+    checkMformat(dead$frac)
   }
 }
 
