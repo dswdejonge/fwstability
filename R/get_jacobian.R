@@ -62,8 +62,8 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
   result <- -(t(FMs$netto) / BM)
 
   if(!is.null(dead)){
-    dead_i <- which(rownames(FMs$netto) %in% dead$names)
-    dead_interactions <- expand.grid(rownames(FMs$netto), rownames(FMs$netto)[dead_i])
+    dead_i <- which(rownames(FMs$original) %in% dead$names)
+    dead_interactions <- expand.grid(rownames(FMs$original), rownames(FMs$original)[dead_i])
 
     for(i in 1:dim(dead_interactions)[1]){
       consumer <- as.character(dead_interactions[i,1])
@@ -75,8 +75,8 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
         is_defecation_compartment <- dead$def[which(dead$names == resource)] == "Def"
       }
 
-      a <- FMs$netto[consumer, resource]
-      b <- FMs$netto[resource,consumer]
+      a <- FMs$original[consumer, resource]
+      b <- FMs$original[resource,consumer]
       if(is_defecation_compartment) {
         c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
         c <- c[which(c > 0)]
@@ -84,9 +84,9 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
         c <- 0
       }
       if(!is.null(dead$frac)) {
-        DFM <- FMs$netto * dead$frac
+        DFM <- FMs$original * dead$frac
       }else {
-        DFM <- FMs$netto
+        DFM <- FMs$original
       }
       if(length(which(dead$def == "Def")) > 1) {
         defecation_compartments <- dead$names[which(dead$def == "Def")]
