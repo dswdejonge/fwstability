@@ -21,11 +21,13 @@ colnames(FM) <- fwnames
 BM <- c(30, 20, 10, 5) ; names(BM) <- fwnames
 AE <- c(NA, NA, 0.3, 0.3) ; names(AE) <- fwnames
 GE <- c(NA, NA, 0.3, 0.3) ; names(GE) <- fwnames
-DM <- matrix(1, nrow = 4, ncol = 4)
+DM <- matrix(0, nrow = 4, ncol = 4)
 rownames(DM) <- fwnames
 colnames(DM) <- fwnames
 DM["MEIO", "LABILE"] <- 2/3
 DM["MACRO", "LABILE"] <- 1/2
+DM["MEIO", "REFRAC"] <- 1
+DM["MACRO", "REFRAC"] <- 1
 FDM <- FM * DM
 dead <- list(names = c("LABILE", "REFRAC"), def = c("Def", "Def"), frac = DM)
 model <- list(

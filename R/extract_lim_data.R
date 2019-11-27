@@ -240,8 +240,6 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
     }
   }
 
-  dead <- adjustDeadInput(dead)
-
   dead$def <- rep("noDef", length(dead$names))
   allSinks <- readLIM$flows[,"to"]
   names(allSinks) <- readLIM$flows[,"name"]

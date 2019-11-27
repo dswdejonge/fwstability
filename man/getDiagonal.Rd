@@ -4,42 +4,54 @@
 \alias{getDiagonal}
 \title{Calculate Jacobian diagonal from flux values}
 \usage{
-getDiagonal(MR, BM, dead = NULL, FM = NULL, AE = NULL,
-  index = NULL)
+getDiagonal(MR, dead = NULL, BM = NULL, FM = NULL, AE = NULL)
 }
 \arguments{
-\item{MR}{A named numeric vector with non-predatory mortality rates for all
-compartments (biomass per unit time or biomass per unit time per surface area).
-(required)}
+\item{MR}{(required) A named numeric vector with non-predatory mortality rates for all
+compartments (per unit time, t-1).
+If not provided, the input of \code{BM}, \code{FM}, \code{AE}, and \code{GE} are required.}
 
-\item{BM}{A named numeric vector with biomasses of all compartments
-(just biomass or biomass per unit area), must be in the same order as MR. (required)}
+\item{dead}{(optional) Character vector with all names of detritus and nutrient
+compartments.}
 
-\item{dead}{Character vector with all names of detritus and nutrient
-compartments (everything that is not fauna). (optional)}
+\item{BM}{(required when \code{MR} is NULL, and when dead compartments are included)
+A named numeric vector with biomasses of all compartments.
+Must be in the same order as MR.}
 
-\item{FM}{A named square flowmatrix, source compartments as rows,
-sink compartments as columns. Should NOT contain external compartments. Order of names
-must be equal to MR. (required when dead compartments are included)}
+\item{FM}{(required if \code{MR} is NULL and when dead compartments are included)
+A named square flowmatrix, source compartments as rows, sink compartments as columns.
+Should NOT contain external compartments.
+Order of names must be equal to MR.}
 
-\item{AE}{A named numeric vector with assimilation efficiencies of all
-compartments, must be in the same order as MR. Must be a fraction i.e. between 0 and 1.
-(required when dead compartments are included)}
+\item{AE}{(required if \code{MR} is NULL and when dead compartments are included)
+A named numeric vector with assimilation efficiencies of all compartments.
+Must be in the same order as MR.
+Must be a fraction i.e. between 0 and 1.}
+
+\item{GE}{(required if \code{MR} is NULL)
+A named numeric vector with growth (production) efficiencies of all compartments.
+Must be a fraction i.e. between 0 and 1.}
 }
 \value{
 This function returns a named numeric vector with diagonal values for the
-species in the food web (per unit time). It is important to review the units of the
-input data. If MR is biomass per unit time then BM must be just biomass. If MR is
-biomass per unit time per surface area then BM must be biomass per surface area.
+species in the food web (per unit time, t-1).
 }
 \description{
 This function finds diagonal values to be used in the Jacobian matrix based on flux
-values. Diagonal values for species depend on their non-predatory mortality rate and
-biomass. Diagonal values for dead (detritus) compartments are based on the total amount
+values.
+}
+\details{
+Diagonal values for species are equal to their natural death rate (unit t-1).
+Natural death rates can be provided directly as \code{MR},
+or assumed to be non-predatory mortality calculated from consumption rates and
+physiological parameters.
+Diagonal values for dead (detritus) compartments are based on the total amount
 of assimilated detritus in all consumers of detritus and the biomass of the detritus
 compartments. This function implements the equations from from Neutel & Thorne (2014).
-The input should be named according to the food web compartment names. \cr
-References: \cr
+The input should be named according to the food web compartment names.
+It is important to review the units of the input data.
+}
+\references{
 Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 651–661. https://doi.org/10.1111/ele.12266

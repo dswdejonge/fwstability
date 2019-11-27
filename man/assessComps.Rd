@@ -4,8 +4,7 @@
 \alias{assessComps}
 \title{Assess stability effect of each compartment.}
 \usage{
-assessComps(JM, method = "eigenvalue", mortalities = NULL,
-  dead = NULL)
+assessComps(JM, method = "eigenvalue", MR = NULL, dead = NULL)
 }
 \arguments{
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
@@ -23,9 +22,9 @@ rates needed to acquire a stable matrix.
 }
 }}
 
-\item{mortalities}{(required if method is "scalar")
+\item{MR}{(required if method is "scalar")
 A named numeric vector containing mortality of the faunal compartments
-(per unit time). The values and names must be in the same
+(per unit time, t-1). The values and names must be in the same
 order as the Jacobian matrix, and the values for dead compartments should be
 set to NA.}
 

@@ -5,8 +5,7 @@
 \title{Jacobian matrix with interaction strengths}
 \usage{
 getJacobianEnergyFlux(FM, BM, AE, GE, diagonal = NULL, dead = NULL,
-  externals = NULL, MR = NULL, index = NULL, verbose = T,
-  netto = NULL)
+  externals = NULL, MR = NULL, verbose = T, netto = NULL)
 }
 \arguments{
 \item{FM}{(required) A named square flowmatrix, source compartments as rows,
@@ -58,7 +57,7 @@ the flow matrix before calculations.}
 
 \item{MR}{(required when \code{diagonal} is set to \emph{model})
 A named numeric vector with non-predatory mortality rates for all
-compartments (same units as the flow matrix \code{FM}).}
+compartments per unit time (t-1)).}
 
 \item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
 
