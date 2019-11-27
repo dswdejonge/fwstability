@@ -64,38 +64,48 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
   if(!is.null(dead)){
     dead_i <- which(rownames(FMs$original) %in% dead$names)
     dead_interactions <- expand.grid(rownames(FMs$original), rownames(FMs$original)[dead_i])
+    defecation_compartments <- dead$names[which(colSums(dead$frac, na.rm = T) > 0)]
 
     for(i in 1:dim(dead_interactions)[1]){
       consumer <- as.character(dead_interactions[i,1])
       resource <- as.character(dead_interactions[i,2])
       if(consumer == resource) {next}
-      if(is.null(dead$def)) {
-        is_defecation_compartment <- FALSE
-      } else {
-        is_defecation_compartment <- dead$def[which(dead$names == resource)] == "Def"
-      }
+      #if(is.null(dead$def)) {
+      #  is_defecation_compartment <- FALSE
+      #} else {
+      #  is_defecation_compartment <- dead$def[which(dead$names == resource)] == "Def"
+      #}
 
+      # direct input to detritus by consumer
       a <- FMs$original[consumer, resource]
-      b <- FMs$original[resource,consumer]
-      if(is_defecation_compartment) {
-        c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
-        c <- c[which(c > 0)]
-      } else {
+      # uptake of detritus by consumer
+      b <- FMs$original[resource, consumer]
+      # consumer-based defecation by other compartments
+      c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
+      c <- c[which(c > 0)]
+      if(!(length(c) > 0)) {
         c <- 0
       }
-      if(!is.null(dead$frac)) {
+      #if(sum(dead$frac[,"resource"], na.rm = T) > 0) {
+      #if(is_defecation_compartment) {
+        #c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
+        #c <- c[which(c > 0)]
+      #} else {
+        #c <- 0
+      #}
+      #if(!is.null(dead$frac)) {
         DFM <- FMs$original * dead$frac
-      }else {
-        DFM <- FMs$original
-      }
-      if(length(which(dead$def == "Def")) > 1) {
-        defecation_compartments <- dead$names[which(dead$def == "Def")]
+      #}else {
+      #  DFM <- FMs$original
+      #}
+      #if(length(which(dead$def == "Def")) > 1) {
+        #defecation_compartments <- dead$names[which(dead$def == "Def")]
         predators <- names(which(FMs$original[consumer,-dead_i] > 0))
         d <- DFM[predators, resource] /
                rowSums(DFM[predators, defecation_compartments,drop=F],  na.rm = T)
-      } else {
-        d <- rep(1, length(c))
-      }
+      #} else {
+      #  d <- rep(1, length(c))
+      #}
 
       value <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
       result[consumer, resource] <- value
