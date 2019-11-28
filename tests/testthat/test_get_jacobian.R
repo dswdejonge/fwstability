@@ -51,11 +51,6 @@ test_that("correct JM created with reciprocal predation and detritus", {
   expect_equal(getJacobian(model), JM)
 })
 
-source("models/model_deRuiter1995small.R")
-test_that("correct JM created with data from De Ruiter et al. 1995", {
-  expect_equal(getJacobian(model), JM)
-})
-
 source("models/model_use_diff_dead.R")
 test_that("correct JM if species deposit in different compartments", {
   expect_equal(getJacobian(model), JM)
@@ -69,15 +64,4 @@ test_that("correct JM if species deposit in different compartments", {
 source("models/model_Lotka_Volterra.R")
 test_that("The package works with a dynamic LV function", {
   expect_equal(getStability(getJacobian(model)), answer)
-})
-
-# Take value visually from paper
-source("models/model_deRuiter1995.R")
-JM <- getJacobian(model)
-a1 <- JM["Predatory_collembola", "Predatory_mites"]
-a2 <- JM["Predatory_mites", "Predatory_collembola"]
-
-test_that("correct JM created with data from De Ruiter et al. 1995", {
-  expect_equal(a1 > 0.1 & a1 < 0.15, TRUE)
-  expect_equal(a2 < 0 & a2 > -1, TRUE)
 })

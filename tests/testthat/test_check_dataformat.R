@@ -8,7 +8,7 @@ colnames(FM) <- fwnames
 BM <- c(30, 20, 10) ; names(BM) <- fwnames[1:3]
 AE <- c(NA, 0.2, 0.3) ; names(AE) <- fwnames[1:3]
 GE <- c(NA, 0.2, 0.3) ; names(GE) <- fwnames[1:3]
-dead <- list(names = "DETRITUS", def = "Def")
+dead <- list(names = "DETRITUS")
 # Expected answer
 JM <- matrix(c(0,
                (FM[2,1] - FM[1,2] + FM[2,3]*(1-AE[3])) / BM[2],
@@ -59,9 +59,6 @@ AEe <- c(0.1, 0.2, 0.3) ; names(AEe) <- fwnames[1:3]
 GEe <- c(0.1, 0.2, 0.3) ; names(GEe) <- fwnames[1:3]
 
 test_that("dead compartments cannot have physiological values", {
-  expect_equal(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AEe, GE = GEe,
-                           dead = dead, externals = "CO2"),
-               JM)
   expect_warning(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AEe, GE = GEe,
                              dead = dead, externals = "CO2"),
                  "physiological values set to NA for dead compartments")
@@ -175,9 +172,9 @@ test_that("the list \"dead\" format gets checked correctly", {
   expect_error(checkDeadFormat(list(def = "noDef")),
                "\"names\" element is required in the \"dead\" list")
   expect_error(checkDeadFormat(list(names = "DET", def = "Def", frac = 0, extra = 0)),
-               "the list \"dead\" should have 3 elements at most")
-  expect_error(checkDeadFormat(list(names = c("DET", "NUT"), def = c("foo", "noDef"))),
-               "the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
+               "the list \"dead\" should have 2 elements at most")
+  expect_error(checkDeadFormat(list(names = c("DET", "NUT"))),
+               "the \"frac\" element is required in the \"dead\" list if there are multiple dead compartments")
 })
 
 ### Stability
@@ -227,7 +224,7 @@ test_that("the function only executes with available methods", {
 JM7 <- JM ; diag(JM7)[1] <- NA
 test_that("the eigenvalue method doesn't execute with diagonal NAs", {
   expect_error(getStability(JM7),
-               "for the eigenvalue method the diagonal cannot contain NAs")
+               "NAs and NaNs not allowed in matrix")
 })
 
 # Warning: mortalities and/or dead compartments are given, which is irrelevant for the
@@ -289,3 +286,4 @@ test_that("the scalar method asks for the correct input", {
   expect_error(getStability(JM, method = "scalar", dead = "DETRITUS"),
                "MR vector required for the scalar method")
 })
+

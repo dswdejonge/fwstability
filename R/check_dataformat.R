@@ -8,6 +8,8 @@ checkMformat <- function(M) {
     stop("Input matrix must have same names in rows and columns.")
   } else if(!is.numeric(M)) {
     stop("Input matrix must be numeric")
+  } else if(length(which(M %in% NaN | M %in% NA)) > 0) {
+    stop("NAs and NaNs not allowed in matrix")
   }
 }
 
@@ -69,16 +71,15 @@ checkDeadFormat <- function(dead, correct_names) {
     if(!is.list(dead) | is.null(names(dead))) {
       stop("argument \"dead\" must be a named list")
     } else if(is.null(dead$names)) {
-      stop("\"names\" element is required in the \"dead\" list")
-    } else if(length(dead) > 3) {
-      stop(paste("the list \"dead\" should have 3 elements at most"))
-    } else if(!is.null(dead$def) &&
-              length(dead$names) !=
-              length(which(dead$def == "Def" | dead$def == "noDef"))) {
-      stop("the second element of the list \"dead\" may only contain the strings \"Def\" and \"noDef\"")
+      stop("the \"names\" element is required in the \"dead\" list")
+    } else if(length(dead$names) > 1 & is.null(dead$frac)) {
+      stop("the \"frac\" element is required in the \"dead\" list if there are multiple dead compartments")
+    } else if(length(dead) > 2) {
+      stop(paste("the list \"dead\" should have 2 elements at most"))
     } else if(FALSE %in% (dead$names %in% correct_names)) {
       stop("the names of the dead compartments are unknown")
-    } else if(!is.null(dead$frac)) {
+    }
+    if(!is.null(dead$frac)) {
       checkMformat(dead$frac)
     }
   }
@@ -97,8 +98,8 @@ checkMortalityFormat <- function(MR, dead) {
 checkStabilityMethod <- function(method, JM, MR) {
   if(method != "eigenvalue" & method != "scalar") {
     stop("unknown method chosen")
-  } else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
-    stop("for the eigenvalue method the diagonal cannot contain NAs")
+  #} else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
+  #  stop("for the eigenvalue method the diagonal cannot contain NAs")
   } else if(method == "scalar" & is.null(MR)) {
     stop("MR vector required for the scalar method")
   }

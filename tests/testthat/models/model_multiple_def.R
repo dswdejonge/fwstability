@@ -42,7 +42,7 @@ frac <- matrix(c(
   nrow = 4, ncol = 4, byrow = T)
 rownames(frac) <- fwnames
 colnames(frac) <- fwnames
-dead <- list(names = c("LABILE", "REFRAC"), def = c("Def", "Def"), frac = frac)
+dead <- list(names = c("LABILE", "REFRAC"), frac = frac)
 model <- list(
   type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, dead = dead
 )

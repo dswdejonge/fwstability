@@ -8,13 +8,27 @@
 #
 ## Proper data format
 fwnames <- c("DETRITUS", "PLANT", "ANIMAL")
-FM <- matrix(c(0, 3, 8, 7, 0, 0, 4, 4, 0), nrow = 3, ncol = 3)
+FM <- matrix(c(0, 0, 0, 10, 0, 0, 4, 4, 0), nrow = 3, ncol = 3)
 rownames(FM) <- fwnames
 colnames(FM) <- fwnames
 BM <- c(30, 20, 10) ; names(BM) <- fwnames
-AE <- c(NA, 0.2, 0.3) ; names(AE) <- fwnames
-GE <- c(NA, 0.2, 0.3) ; names(GE) <- fwnames
-dead <- list(names = "DETRITUS", def = "Def")
+AE <- c(NA, 0.6, 0.3) ; names(AE) <- fwnames
+GE <- c(NA, 0.8, 0.3) ; names(GE) <- fwnames
+# Detritus feedback
+plant_defecation <- sum(FM[,"PLANT"])*(1-AE["PLANT"])
+animal_defecation <- sum(FM[,"ANIMAL"])*(1-AE["ANIMAL"])
+plant_mortality <- sum(FM[,"PLANT"])*AE["PLANT"]*GE["PLANT"] - sum(FM["PLANT",])
+animal_mortality <- sum(FM[,"ANIMAL"])*AE["ANIMAL"]*GE["ANIMAL"] - sum(FM["ANIMAL",])
+FM["PLANT","DETRITUS"] <- plant_defecation + plant_mortality
+FM["ANIMAL", "DETRITUS"] <- animal_defecation + animal_mortality
+# Get fraction matrix: fraction of flow that comprises defecation
+#frac <- matrix(
+#  c(0, plant_defecation/FM[2,1], animal_defecation/FM[3,1], rep(0, 6)),
+#  ncol = 3, nrow = 3)
+#rownames(frac) <- fwnames ; colnames(frac) <- fwnames
+#dead <- list(names = "DETRITUS", frac = frac)
+dead <- list(names = "DETRITUS")
+# Combine to model
 model <- list(
   type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, dead = dead
 )

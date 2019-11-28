@@ -220,12 +220,10 @@ getMR <- function(BM, web, vars, mTag = NULL, verbose = T) {
 #' The flows representing defecation of an organism must be named as:
 #' "compartmentTag" or "tagCompartment" (not case sensitive).
 #' For more information on setting up the LIM, please review the vignette.
-#' @return Returns a list with three elements:
+#' @return Returns a list with two elements:
 #' \itemize{
 #' \item{names: a character vector with names of dead compartments}
-#' \item{def: a character vector with either "Def" or "noDef" defining wether or not defecation occurs
-#' into the corresponding dead compartment}
-#' \item{frac: a matrix the same size as FM containing the fractor of each flow that is defecation}
+#' \item{frac: a matrix the same size as FM containing the fraction of each flow that is defecation}
 #' }
 #' @seealso \code{getFlowMatrix}
 #' @export
@@ -239,12 +237,6 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
       message("fwstab: Default tag \"def\" used to search model for defecation.")
     }
   }
-
-  dead$def <- rep("noDef", length(dead$names))
-  allSinks <- readLIM$flows[,"to"]
-  names(allSinks) <- readLIM$flows[,"name"]
-  defComps <- getTag(allSinks, defTag)
-  dead$def[dead$names %in% readLIM$compnames[defComps]] <- "Def"
 
   DM <- matrix(0, nrow = length(readLIM$compnames), ncol = length(readLIM$compnames))
   rownames(DM) <- readLIM$compnames
@@ -373,7 +365,6 @@ extractLIMdata <- function(model, verbose = T) {
     dead$frac <- dead$frac[-remove, -remove]
     l <- !(dead$names %in% names(BM)[remove])
     dead$names <- dead$names[l]
-    dead$def <- dead$def[l]
   }
 
   return(list(

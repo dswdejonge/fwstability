@@ -74,9 +74,8 @@ The list with model information should contain:
 \item{\code{GE} (required) is a named numeric with growth efficiencies for living compartments.}
 \item{\code{diagonal} (required) is by default an all-zero diagonal. Can also be set to other values
 or calculated from the model by setting it to "model".}
-\item{\code{dead} (optional) is a list with the elements \code{names}, \code{def}, \code{frac} that
-contains the names of dead compartments (character vector), wether or not defecation occurs into these
-dead compartments ("Def" or "noDef" in character vector in same order as names), and what fraction
+\item{\code{dead} (optional) is a list with the elements \code{names} and \code{frac} that
+contains the names of dead compartments (character vector) and what fraction
 of each flow comprises defecation (matrix similar to \code{FM}, only required with parallel flows).}
 \item{\code{externals} (optional) is a character vector with any compartments that should not be
 considered in the calculations}.

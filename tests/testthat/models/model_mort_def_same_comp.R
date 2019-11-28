@@ -29,7 +29,7 @@ DM["MACRO", "LABILE"] <- 1/2
 DM["MEIO", "REFRAC"] <- 1
 DM["MACRO", "REFRAC"] <- 1
 FDM <- FM * DM
-dead <- list(names = c("LABILE", "REFRAC"), def = c("Def", "Def"), frac = DM)
+dead <- list(names = c("LABILE", "REFRAC"), frac = DM)
 model <- list(
   type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, dead = dead
 )

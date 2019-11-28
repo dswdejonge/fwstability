@@ -33,22 +33,16 @@ Default is an all-zero diagonal.
 This requires the argument \code{MR}.
 }}
 
-\item{dead}{(optional) List with at most three elements named \emph{names}, \emph{def},
-and \emph{frac} containing information on all dead compartments (like detritus and nutrients).
+\item{dead}{(optional) List with at most two elements named \emph{names} and \emph{frac}
+containing information on all dead compartments (like detritus and nutrients).
 \itemize{
 \item The element \emph{names} is required and contains a character vector with all names of dead
 compartments.
-\item The element \emph{def} of the list is optional and can contain a character vector
-specifying for each dead compartment if defecation occurs into this compartment
-(\bold{Def}) or not (\bold{noDef}).
-If this element is omitted it is assumed no defecation occurs into all dead compartments.
-If there are multiple defecation compartments, the Flowmatrix is used to
+\item The element \emph{frac} is required if there are multiple dead compartments, and
+is a matrix the same size and order as the \code{FM} matrix with the fraction of each flow that is defecation.
+If there are multiple defecation compartments, the \code{FM} combined with \code{frac} is used to
 calculate the relative distribution of matter into the specified defecation
 compartments.
-\item The element \emph{frac} is optional and should contain a matrix the same size and order
-as the \code{FM} matrix with the fraction of each flow that is defecation.
-This information is only needed if there are multiple parallel flows between two compartments of
-which only one reflects actual defecation, and the rest is for example mortality.
 }}
 
 \item{externals}{(optional) Character vector with all names of external

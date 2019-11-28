@@ -36,7 +36,7 @@ frac <- matrix(c(
 rownames(frac) <- fwnames
 colnames(frac) <- fwnames
 
-dead <- list(names = c("D","R"), def = c("Def", "Def"), frac = frac)
+dead <- list(names = c("D","R"), frac = frac)
 model <- list(
   type = "EF", FM = FM, BM = BM, AE = AE, GE = GE,
   dead = dead
