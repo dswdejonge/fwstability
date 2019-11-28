@@ -96,7 +96,7 @@ checkMortalityFormat <- function(MR, dead) {
 }
 
 checkStabilityMethod <- function(method, JM, MR) {
-  if(method != "eigenvalue" & method != "scalar") {
+  if(method != "eigenvalue" & method != "scalar" & method != "initial") {
     stop("unknown method chosen")
   #} else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
   #  stop("for the eigenvalue method the diagonal cannot contain NAs")
