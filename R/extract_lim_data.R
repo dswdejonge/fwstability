@@ -240,12 +240,6 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
     }
   }
 
-  dead$def <- rep("noDef", length(dead$names))
-  allSinks <- readLIM$flows[,"to"]
-  names(allSinks) <- readLIM$flows[,"name"]
-  defComps <- getTag(allSinks, defTag)
-  dead$def[dead$names %in% readLIM$compnames[defComps]] <- "Def"
-
   DM <- matrix(0, nrow = length(readLIM$compnames), ncol = length(readLIM$compnames))
   rownames(DM) <- readLIM$compnames
   colnames(DM) <- readLIM$compnames
@@ -373,7 +367,6 @@ extractLIMdata <- function(model, verbose = T) {
     dead$frac <- dead$frac[-remove, -remove]
     l <- !(dead$names %in% names(BM)[remove])
     dead$names <- dead$names[l]
-    dead$def <- dead$def[l]
   }
 
   return(list(
