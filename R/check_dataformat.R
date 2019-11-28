@@ -13,8 +13,8 @@ checkMformat <- function(M) {
   if(length(nans) > 0){
     M[nans] <- 0
     warning("NAs and NaNs in matrix replaced by 0")
-    return(M)
   }
+  return(M)
 }
 
 checkExternalsFormat <- function(externals, M) {
