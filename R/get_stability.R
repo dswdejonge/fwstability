@@ -86,7 +86,7 @@ getScalarStability <- function(JM, MR, stepsize, to_scale) {
 getStability <- function(JM, method = "eigenvalue",
                          MR = NULL, dead = NULL) {
   # Check data format
-  checkMformat(JM)
+  JM <- checkMformat(JM)
   checkNamingFormat(matrices = list(JM), vectors = list(MR))
   checkStabilityMethod(method, JM, MR)
   checkMortalityFormat(MR, dead)
