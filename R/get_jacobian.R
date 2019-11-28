@@ -36,22 +36,16 @@
 #' must be in the same order as the flow matrix.
 #' @param AE (required) Numeric vector with assimilation efficiencies of all
 #' compartments, must be in the same order as the flow matrix.
-#' @param dead (optional) List with at most three elements named \emph{names}, \emph{def},
-#' and \emph{frac} containing information on all dead compartments (like detritus and nutrients).
+#' @param dead (optional) List with at most two elements named \emph{names} and
+#' \emph{frac} containing information on all dead compartments (like detritus and nutrients).
 #' \itemize{
 #' \item The element \emph{names} is required and contains a character vector with all names of dead
 #' compartments.
-#' \item The element \emph{def} should be either NULL or contain a character vector
-#' specifying for each dead compartment if defecation occurs into this compartment
-#' (\bold{Def}) or not (\bold{noDef}).
-#' If this element is NULL it is assumed no defecation occurs into all dead compartments.
-#' If there are multiple defecation compartments, the Flowmatrix \code{FM} is used to
-#' calculate the relative distribution of matter into the specified defecation
-#' compartments.
-#' \item The element \emph{frac} should be either NULL or contain a matrix the same size and order
-#' as the \code{FM} matrix with the fraction of each flow that is defecation.
-#' This information is only needed if there are multiple parallel flows between two compartments of
-#' which only one reflects actual defecation, and the rest is for example mortality.
+#' \item The element \emph{frac} is required if there is more than one detritus compartemnt.
+#' It is matrix the same size and order
+#' as the \code{FM} matrix, and contains the fraction of each flow that is defecation.
+#' If there are multiple defecation compartments, the Flowmatrix \code{FM} combined with \code{frac} is used to
+#' calculate the relative distribution of matter into defecation compartments.
 #' }
 #' @return This function returns a matrix containing the effects of the consumers (rows) on the
 #' resources (columns).
@@ -77,11 +71,6 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
       consumer <- as.character(dead_interactions[i,1])
       resource <- as.character(dead_interactions[i,2])
       if(consumer == resource) {next}
-      #if(is.null(dead$def)) {
-      #  is_defecation_compartment <- FALSE
-      #} else {
-      #  is_defecation_compartment <- dead$def[which(dead$names == resource)] == "Def"
-      #}
 
       # direct input to detritus by consumer
       a <- FMs$original[consumer, resource]
@@ -93,26 +82,10 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
       if(!(length(c) > 0)) {
         c <- 0
       }
-      #if(sum(dead$frac[,"resource"], na.rm = T) > 0) {
-      #if(is_defecation_compartment) {
-        #c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
-        #c <- c[which(c > 0)]
-      #} else {
-        #c <- 0
-      #}
-      #if(!is.null(dead$frac)) {
-        #DFM <- FMs$original * dead$frac
-      #}else {
-      #  DFM <- FMs$original
-      #}
-      #if(length(which(dead$def == "Def")) > 1) {
-        #defecation_compartments <- dead$names[which(dead$def == "Def")]
-        predators <- names(which(FMs$original[consumer,-dead_i] > 0))
-        d <- DFM[predators, resource] /
-               rowSums(DFM[predators, defecation_compartments,drop=F],  na.rm = T)
-      #} else {
-      #  d <- rep(1, length(c))
-      #}
+      # distribution of defecation flow to different dead compartments
+      predators <- names(which(FMs$original[consumer,-dead_i] > 0))
+      d <- DFM[predators, resource] /
+              rowSums(DFM[predators, defecation_compartments,drop=F],  na.rm = T)
 
       value <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
       result[consumer, resource] <- value
@@ -121,7 +94,6 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
       result[resource, consumer] <- NA
     }
   }
-
   return(result)
 }
 
@@ -203,22 +175,16 @@ removeExternals <- function(externals, FM) {
 #' \item The string "model" calculates the diagonal values from flux values.
 #' This requires the argument \code{MR}.
 #' }
-#' @param dead (optional) List with at most three elements named \emph{names}, \emph{def},
-#' and \emph{frac} containing information on all dead compartments (like detritus and nutrients).
+#' @param dead (optional) List with at most two elements named \emph{names} and \emph{frac}
+#' containing information on all dead compartments (like detritus and nutrients).
 #' \itemize{
 #' \item The element \emph{names} is required and contains a character vector with all names of dead
 #' compartments.
-#' \item The element \emph{def} of the list is optional and can contain a character vector
-#' specifying for each dead compartment if defecation occurs into this compartment
-#' (\bold{Def}) or not (\bold{noDef}).
-#' If this element is omitted it is assumed no defecation occurs into all dead compartments.
-#' If there are multiple defecation compartments, the Flowmatrix is used to
+#' \item The element \emph{frac} is required if there are multiple dead compartments, and
+#' is a matrix the same size and order as the \code{FM} matrix with the fraction of each flow that is defecation.
+#' If there are multiple defecation compartments, the \code{FM} combined with \code{frac} is used to
 #' calculate the relative distribution of matter into the specified defecation
 #' compartments.
-#' \item The element \emph{frac} is optional and should contain a matrix the same size and order
-#' as the \code{FM} matrix with the fraction of each flow that is defecation.
-#' This information is only needed if there are multiple parallel flows between two compartments of
-#' which only one reflects actual defecation, and the rest is for example mortality.
 #' }
 #' @param externals (optional) Character vector with all names of external
 #' compartments, i.e. which have no biomass, that have to be removed from
@@ -390,9 +356,8 @@ getNettoFM <- function(FM, deadnames) {
 #' \item{\code{GE} (required) is a named numeric with growth efficiencies for living compartments.}
 #' \item{\code{diagonal} (required) is by default an all-zero diagonal. Can also be set to other values
 #' or calculated from the model by setting it to "model".}
-#' \item{\code{dead} (optional) is a list with the elements \code{names}, \code{def}, \code{frac} that
-#' contains the names of dead compartments (character vector), wether or not defecation occurs into these
-#' dead compartments ("Def" or "noDef" in character vector in same order as names), and what fraction
+#' \item{\code{dead} (optional) is a list with the elements \code{names} and \code{frac} that
+#' contains the names of dead compartments (character vector) and what fraction
 #' of each flow comprises defecation (matrix similar to \code{FM}, only required with parallel flows).}
 #' \item{\code{externals} (optional) is a character vector with any compartments that should not be
 #' considered in the calculations}.

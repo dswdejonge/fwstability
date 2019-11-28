@@ -28,22 +28,16 @@ must be in the same order as the flow matrix.}
 \item{AE}{(required) Numeric vector with assimilation efficiencies of all
 compartments, must be in the same order as the flow matrix.}
 
-\item{dead}{(optional) List with at most three elements named \emph{names}, \emph{def},
-and \emph{frac} containing information on all dead compartments (like detritus and nutrients).
+\item{dead}{(optional) List with at most two elements named \emph{names} and
+\emph{frac} containing information on all dead compartments (like detritus and nutrients).
 \itemize{
 \item The element \emph{names} is required and contains a character vector with all names of dead
 compartments.
-\item The element \emph{def} should be either NULL or contain a character vector
-specifying for each dead compartment if defecation occurs into this compartment
-(\bold{Def}) or not (\bold{noDef}).
-If this element is NULL it is assumed no defecation occurs into all dead compartments.
-If there are multiple defecation compartments, the Flowmatrix \code{FM} is used to
-calculate the relative distribution of matter into the specified defecation
-compartments.
-\item The element \emph{frac} should be either NULL or contain a matrix the same size and order
-as the \code{FM} matrix with the fraction of each flow that is defecation.
-This information is only needed if there are multiple parallel flows between two compartments of
-which only one reflects actual defecation, and the rest is for example mortality.
+\item The element \emph{frac} is required if there is more than one detritus compartemnt.
+It is matrix the same size and order
+as the \code{FM} matrix, and contains the fraction of each flow that is defecation.
+If there are multiple defecation compartments, the Flowmatrix \code{FM} combined with \code{frac} is used to
+calculate the relative distribution of matter into defecation compartments.
 }}
 }
 \value{

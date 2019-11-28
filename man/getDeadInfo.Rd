@@ -22,12 +22,10 @@ Can be achieved with \code{readLIM <- Read("path_to_input_file")}}
 Default is set to "def". Not case sensitive.}
 }
 \value{
-Returns a list with three elements:
+Returns a list with two elements:
 \itemize{
 \item{names: a character vector with names of dead compartments}
-\item{def: a character vector with either "Def" or "noDef" defining wether or not defecation occurs
-into the corresponding dead compartment}
-\item{frac: a matrix the same size as FM containing the fractor of each flow that is defecation}
+\item{frac: a matrix the same size as FM containing the fraction of each flow that is defecation}
 }
 }
 \description{
