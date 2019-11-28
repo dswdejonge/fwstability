@@ -8,13 +8,9 @@ checkMformat <- function(M) {
     stop("Input matrix must have same names in rows and columns.")
   } else if(!is.numeric(M)) {
     stop("Input matrix must be numeric")
+  } else if(length(which(M %in% NaN | M %in% NA)) > 0) {
+    stop("NAs and NaNs not allowed in matrix")
   }
-  nans <- which(M %in% NaN | M %in% NA)
-  if(length(nans) > 0){
-    M[nans] <- 0
-    warning("NAs and NaNs in matrix replaced by 0")
-  }
-  return(M)
 }
 
 checkExternalsFormat <- function(externals, M) {
@@ -74,14 +70,18 @@ checkDeadFormat <- function(dead, correct_names) {
   if(!is.null(dead)) {
     if(!is.list(dead) | is.null(names(dead))) {
       stop("argument \"dead\" must be a named list")
-    } else if(is.null(dead$names) | is.null(dead$frac)) {
-      stop("\"names\" and \"frac\" elements are required in the \"dead\" list")
+    } else if(is.null(dead$names)) {
+      stop("the \"names\" element is required in the \"dead\" list")
+    } else if(length(dead$names) > 1 & is.null(dead$frac)) {
+      stop("the \"frac\" element is required in the \"dead\" list if there are multiple dead compartments")
     } else if(length(dead) > 2) {
       stop(paste("the list \"dead\" should have 2 elements at most"))
     } else if(FALSE %in% (dead$names %in% correct_names)) {
       stop("the names of the dead compartments are unknown")
     }
-    checkMformat(dead$frac)
+    if(!is.null(dead$frac)) {
+      checkMformat(dead$frac)
+    }
   }
 }
 
@@ -98,8 +98,8 @@ checkMortalityFormat <- function(MR, dead) {
 checkStabilityMethod <- function(method, JM, MR) {
   if(method != "eigenvalue" & method != "scalar") {
     stop("unknown method chosen")
-  } else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
-    stop("for the eigenvalue method the diagonal cannot contain NAs")
+  #} else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
+  #  stop("for the eigenvalue method the diagonal cannot contain NAs")
   } else if(method == "scalar" & is.null(MR)) {
     stop("MR vector required for the scalar method")
   }

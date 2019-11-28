@@ -64,7 +64,14 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
   if(!is.null(dead)){
     dead_i <- which(rownames(FMs$original) %in% dead$names)
     dead_interactions <- expand.grid(rownames(FMs$original), rownames(FMs$original)[dead_i])
-    defecation_compartments <- dead$names[which(colSums(dead$frac, na.rm = T) > 0)]
+    # One or multiple defecation compartments?
+    if(!is.null(dead$frac)){
+      DFM <- FMs$original * dead$frac
+      defecation_compartments <- dead$names[which(colSums(dead$frac, na.rm = T) > 0)]
+    } else {
+      DFM <- FMs$original
+      defecation_compartments <- dead$names
+    }
 
     for(i in 1:dim(dead_interactions)[1]){
       consumer <- as.character(dead_interactions[i,1])
@@ -94,7 +101,7 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
         #c <- 0
       #}
       #if(!is.null(dead$frac)) {
-        DFM <- FMs$original * dead$frac
+        #DFM <- FMs$original * dead$frac
       #}else {
       #  DFM <- FMs$original
       #}
@@ -255,8 +262,8 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
   }
   # Do checks for required data formats
-  FMs$original <- checkMformat(FMs$original)
-  FMs$netto <- checkMformat(FMs$netto)
+  checkMformat(FMs$original)
+  checkMformat(FMs$netto)
   checkNamingFormat(
     matrices = list(FMs$original, FMs$netto),
     vectors = list(BM, AE, GE))

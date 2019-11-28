@@ -31,7 +31,7 @@ model <- list(
   BM = BM,
   AE = AE,
   GE = GE,
-  dead = list(names = c("A", "B"))
+  dead = list(names = "A")
 )
 JM <- getJacobian(model)
 
