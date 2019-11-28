@@ -53,7 +53,7 @@ ldet <- c(0, 0, 0.3, 0.4, 0.3, 0.5)
 rdet <- 1-ldet
 FM[3:8, 1] <- defecation * ldet
 FM[3:8, 2] <- defecation * rdet + mortalities
-#FM[1:2, 1:2] <- 0
+FM[1:2, 1:2] <- 0
 # Fraction defecation matrix
 frac <- matrix(
   c(0, 0, 0, 0, 1, 1, 1, 1,
