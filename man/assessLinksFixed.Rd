@@ -11,15 +11,19 @@ assessLinksFixed(JM, method = "eigenvalue", MR = NULL, dead = NULL,
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
 on another compartment (columns).}
 
-\item{method}{(required) Either "eigenvalue" (default) or "scalar".
+\item{method}{(required) Either "eigenvalue" (default), "scalar", or "initial".
 \itemize{
 \item{
-The method "eigenvalue" finds stability as the maximum real part of the eigenvalues
+The method "eigenvalue" finds asymptotic stability as the maximum real part of the eigenvalues
 calculated from the Jacobian matrix.
 }
 \item{
-The "scalar" method finds stability as the scalar of natural mortality
+The "scalar" method finds asymptotic stability as the scalar of natural mortality
 rates needed to acquire a stable matrix.
+}
+\item{
+The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016), based on half the the maximum
+real part of the eigenvalues from the addition of the Jacobian matrix to its transpose.
 }
 }}
 

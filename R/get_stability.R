@@ -28,6 +28,11 @@ getScalarStability <- function(JM, MR, stepsize, to_scale) {
 }
 
 getInitialStability <- function(JM) {
+  # Arnoldi, J.F., Loreau, M., Haegeman, B., 2016.
+  # Resilience, reactivity and variability: A mathematical comparison
+  #of ecological stability measures.
+  # J. Theor. Biol. 389, 47–59.
+  # https://doi.org/10.1016/j.jtbi.2015.10.012
   stability <- 0.5*getMaxReEV(JM + t(JM))
 }
 
@@ -99,6 +104,17 @@ getInitialStability <- function(JM) {
 #' @return This function returns a numeric value. For the "eigenvalue" method
 #' a negative value indicates a stable matrix. For the "scalar" method the value represents
 #' the fraction self-dampening effect needed for system stability.
+#' @references \itemize{
+#' \item{
+#' Arnoldi, J.F., Loreau, M., Haegeman, B., 2016. Resilience, reactivity and variability: A mathematical comparison of ecological stability measures. J. Theor. Biol. 389, 47–59. https://doi.org/10.1016/j.jtbi.2015.10.012
+#' }
+#' \item{
+#' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+#' }
+#' \item{
+#' May, R.M., 1972. Will a large network be stable? Nature 238, 37–38. https://doi.org/10.1038/238413a0
+#' }
+#' }
 #' @export
 #' @examples
 #' getStability(JM)

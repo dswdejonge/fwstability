@@ -10,15 +10,19 @@ getStability(JM, method = "eigenvalue", MR = NULL, dead = NULL)
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
 on another compartment (columns).}
 
-\item{method}{(required) Either "eigenvalue" (default) or "scalar".
+\item{method}{(required) Either "eigenvalue" (default), "scalar", or "initial".
 \itemize{
 \item{
-The method "eigenvalue" finds stability as the maximum real part of the eigenvalues
+The method "eigenvalue" finds asymptotic stability as the maximum real part of the eigenvalues
 calculated from the Jacobian matrix.
 }
 \item{
-The "scalar" method finds stability as the scalar of natural mortality
+The "scalar" method finds asymptotic stability as the scalar of natural mortality
 rates needed to acquire a stable matrix.
+}
+\item{
+The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016), based on half the the maximum
+real part of the eigenvalues from the addition of the Jacobian matrix to its transpose.
 }
 }}
 
@@ -37,18 +41,28 @@ a negative value indicates a stable matrix. For the "scalar" method the value re
 the fraction self-dampening effect needed for system stability.
 }
 \description{
-This function finds the stability of a state matrix either by
-finding the maximum value of the real part of its eigenvalues (requires a quantified
-diagonal) or as the scalar of natural mortality rates that results in a stable matrix
-(requires mortality rate estimates).
+This function can find the initial and asymptotic stability of a Jacobian matrix.
 }
 \details{
+Initial stability is the initial reaction of a system to a small perturbation.
+Initial stability is found by equation 4 from Arnoldi et al. (2016),
+with the difference that this function does not change the sign of the value.
+Therefore, a negative initial stability means the system is reactive i.e. the perturbations are amplified.
+\cr
+\cr
+Asymptotic stability is the long term reaction of a system to a small perturbation.
+Asymptotic stability can be found either as the maximum value of the real part of its eigenvalues (requires a quantified
+diagonal) (May 1972) or as the scalar of natural mortality rates that results in a stable matrix
+(requires mortality rate estimates) (De Ruiter et al. 1995).
+\cr
+\cr
 The interpretation of the "eigenvalue" method relies on the quantification of the diagonal in the
 Jacobian matrix. If there has been no thought on the quantification of the diagonal, the
 "eigenvalue" method might not be informative. The diagonal can be quantified with upperbound
 values for self-dampening by setting the argument \code{diagonal} to "model" in the function
 \code{getJacobian}
-\cr \cr
+\cr
+\cr
 The "scalar" method relies on the estimation of natural mortality rates (t-1).
 A critical matrix, i.e. a matrix that is on the stability threshold, is calculated by setting the
 diagonal to the given mortality values and subtracting the maximum real part of the eigenvalues
@@ -70,4 +84,17 @@ function \code{getMortalityRates}, which assumes natural mortality equal product
 }
 \examples{
 getStability(JM)
+}
+\references{
+\itemize{
+\item{
+Arnoldi, J.F., Loreau, M., Haegeman, B., 2016. Resilience, reactivity and variability: A mathematical comparison of ecological stability measures. J. Theor. Biol. 389, 47–59. https://doi.org/10.1016/j.jtbi.2015.10.012
+}
+\item{
+de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+}
+\item{
+May, R.M., 1972. Will a large network be stable? Nature 238, 37–38. https://doi.org/10.1038/238413a0
+}
+}
 }
