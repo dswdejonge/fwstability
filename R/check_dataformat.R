@@ -9,6 +9,12 @@ checkMformat <- function(M) {
   } else if(!is.numeric(M)) {
     stop("Input matrix must be numeric")
   }
+  nans <- which(M %in% NaN | M %in% NA)
+  if(length(nans) > 0){
+    M[nans] <- 0
+    warning("NAs and NaNs in matrix replaced by 0")
+    return(M)
+  }
 }
 
 checkExternalsFormat <- function(externals, M) {

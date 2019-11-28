@@ -255,8 +255,8 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
   }
   # Do checks for required data formats
-  checkMformat(FMs$original)
-  checkMformat(FMs$netto)
+  FMs$original <- checkMformat(FMs$original)
+  FMs$netto <- checkMformat(FMs$netto)
   checkNamingFormat(
     matrices = list(FMs$original, FMs$netto),
     vectors = list(BM, AE, GE))
