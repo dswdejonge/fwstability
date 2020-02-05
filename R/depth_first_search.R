@@ -10,11 +10,7 @@
 #' before as starting node.
 #' @param output String with filename to store loops.
 #' @param start Is integer with the current start node.
-#' @references \itemize{
-#' \item{
-#' Reference?
-#' }
-#' }
+#' @references Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph
 #' @return No returned value, writes .txt file to working directory.
 #' @export
 dfsall <- function(AM, node, visited, pathway, started, output, start) {
@@ -51,11 +47,7 @@ dfsall <- function(AM, node, visited, pathway, started, output, start) {
 #' before as starting node.
 #' @param output String with filename to store loops.
 #' @param start Is integer with the current start node.
-#' @references \itemize{
-#' \item{
-#' Reference?
-#' }
-#' }
+#' #' @references Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph
 #' @return No returned value, writes .txt file to working directory.
 #' @export
 dfsk <- function(AM, node, visited, pathway, k, started, output, start){
