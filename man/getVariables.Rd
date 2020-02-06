@@ -4,14 +4,16 @@
 \alias{getVariables}
 \title{Calculate value of LIM variables from flow solutions.}
 \usage{
-getVariables(readLIM, web = NULL, verbose = T)
+getVariables(readLIM, web = NULL, lim = NULL, verbose = T)
 }
 \arguments{
 \item{readLIM}{(required) A linear inverse model read into the R environment with the R-package LIM.
 Can be achieved with \code{readLIM <- Read("path_to_input_file")}}
 
 \item{web}{(optional) The solved (food) web problem, i.e. the values of the unknowns;
-if not specified, the model is solved first, using Ldei.}
+if not specified, the model is solved first, using Lsei.}
+
+\item{lim}{(option) A LIM that has been set up with the function (Setup(readLIM)).}
 }
 \value{
 Returns a named vector with all variables.

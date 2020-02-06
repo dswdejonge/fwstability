@@ -73,13 +73,16 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
 #' @param readLIM (required) A linear inverse model read into the R environment with the R-package LIM.
 #' Can be achieved with \code{readLIM <- Read("path_to_input_file")}
 #' @param web (optional) The solved (food) web problem, i.e. the values of the unknowns;
-#' if not specified, the model is solved first, using Ldei.
+#' if not specified, the model is solved first, using Lsei.
+#' @param lim (option) A LIM that has been set up with the function (Setup(readLIM)).
 #' @details Variables in the LIM can be defined as the sum of flows, other variables and parameters.
 #' This function calculates the value of these variables based on the flow solutions and LIM parameters.
 #' @return Returns a named vector with all variables.
 #' @export
-getVariables <- function(readLIM, web = NULL, verbose = T) {
-  lim <- Setup(readLIM)
+getVariables <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
+  if(is.null(lim)){
+    lim <- Setup(readLIM)
+  }
   vars <- numeric(lim$NVariables)
   pars <- readLIM$pars$val
   vareq <- readLIM$vars
