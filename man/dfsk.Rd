@@ -22,7 +22,8 @@ before as starting node.}
 
 \item{output}{String with filename to store loops.}
 
-\item{start}{Is integer with the current start node.}
+\item{start}{Is integer with the current start node.
+#' @references Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph}
 }
 \value{
 No returned value, writes .txt file to working directory.
@@ -30,11 +31,4 @@ No returned value, writes .txt file to working directory.
 \description{
 This recursive Depth-First-Search function finds all loops of length k starting at a
 certain node in the foodweb and writes them to a text file.
-}
-\references{
-\itemize{
-\item{
-Reference?
-}
-}
 }

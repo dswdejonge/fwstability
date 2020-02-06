@@ -30,9 +30,5 @@ This recursive Depth-First-Search function finds all loops in the foodweb starti
 a certain node and writes them to a text file.
 }
 \references{
-\itemize{
-\item{
-Reference?
-}
-}
+Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph
 }
