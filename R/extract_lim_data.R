@@ -244,6 +244,10 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
   DM <- matrix(0, nrow = length(readLIM$compnames), ncol = length(readLIM$compnames))
   rownames(DM) <- readLIM$compnames
   colnames(DM) <- readLIM$compnames
+  # Set defecation flow to one for all flows with the def tag in the name
+  all_def_flows <- readLIM$flows[grep(defTag, readLIM$flows$name),]
+  DM[cbind(all_def_flows$from, all_def_flows$to)] <- 1
+  # Calculate fractions for flows with both mortality and defecation
   flows <- readLIM$flows[,1:2]
   dup <- which(duplicated(flows))
   for(i in dup) {
