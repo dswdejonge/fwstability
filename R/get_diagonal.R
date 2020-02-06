@@ -1,15 +1,33 @@
 # Output is same as flowmatrix
-getMortalityFlow <- function(FM, AE, GE, dead) {
-  dead_i <- which(rownames(FM) %in% dead)
+getMortalityFlow <- function(FM, AE, GE, dead_names) {
+  dead_i <- which(rownames(FM) %in% dead_names)
   production <- AE*GE*colSums(FM, na.rm = T)
   predation <- rowSums(FM[,-dead_i], na.rm = T)
   m <- production - predation
   return(m)
 }
 
-# Output is t-1
-getMortalityRates <- function(FM, AE, GE, BM, dead) {
-  m <- getMortalityFlow(FM, AE, GE, dead)
+#' Calculate mortality rates from energy-fluxes
+#'
+#' This function can be used to calculate mortality rates (unit t-1) based on a Flowmatrix,
+#' conversion efficiencies, and biomasses.
+#' @param FM (required) A named square flowmatrix, source compartments as rows,
+#' sink compartments as columns. Should NOT contain external compartments.
+#' @param AE (required) A named numeric vector with assimilation efficiencies of all
+#' compartments, must be in the same order as the flow matrix after externals
+#' are excluded. Must be a fraction i.e. between 0 and 1.
+#' @param GE (required) A named numeric vector with growth (production) efficiencies of all compartments.
+#' Must be a fraction i.e. between 0 and 1.
+#' @param BM (required) A named numeric vector with biomasses of all compartments, must be in the same
+#' order as the flow matrix after externals are excluded.
+#' @param dead_names (optional) Character vector with all names of detritus and nutrient
+#' compartments (everything that is not fauna).
+#' @return Returns a names vector with mortality rates in the unit per time, t-1.
+#' @export
+getMortalityRates <- function(FM, AE, GE, BM, dead_names) {
+  checkMformat(FM)
+  checkBMformat(BM)
+  m <- getMortalityFlow(FM, AE, GE, dead_names)
   MR <- m / BM
   return(MR)
 }
@@ -19,9 +37,8 @@ getMortalityRates <- function(FM, AE, GE, BM, dead) {
 #' This function finds diagonal values for detritus compartments to be used in the Jacobian
 #' matrix. The calculation is based on the total amount of assimilated detritus in all
 #' consumers of detritus and the biomass of the detritus compartments, and is an
-#' implementation of the equation from Neutel & Thorne (2014). \cr
-#' References: \cr
-#' Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
+#' implementation of the equation from Neutel & Thorne (2014).
+#' @references Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 #' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 #' 651–661. https://doi.org/10.1111/ele.12266
 #' @param FM A named square flowmatrix, source compartments as rows,
@@ -31,16 +48,16 @@ getMortalityRates <- function(FM, AE, GE, BM, dead) {
 #' @param AE A named numeric vector with assimilation efficiencies of all
 #' compartments, must be in the same order as the flow matrix after externals
 #' are excluded. Must be a fraction i.e. between 0 and 1 (required)
-#' @param dead Character vector with all names of detritus and nutrient
+#' @param dead_names Character vector with all names of detritus and nutrient
 #' compartments (everything that is not fauna). (required)
 #' @return This function returns a named numeric vector with the diagonal values for the
 #' detritus compartments in the food web (per unit time). It is important to review the units of the
 #' input data. If the FM is biomass per unit time then BM must be just biomass. If FM is
 #' biomass per unit time per surface area then BM must be biomass per surface area.
-getDiagonalDetritus <- function(FM, BM, AE, dead){
-  dead_i <- which(rownames(FM) %in% dead)
+getDiagonalDetritus <- function(FM, BM, AE, dead_names){
+  dead_i <- which(rownames(FM) %in% dead_names)
 
-  if(length(dead) == 1) {
+  if(length(dead_names) == 1) {
     det_assimilation <- sum(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = T)
   } else {
     det_assimilation <- colSums(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = T)
@@ -69,7 +86,7 @@ getDiagonalDetritus <- function(FM, BM, AE, dead){
 #' @param MR (required) A named numeric vector with non-predatory mortality rates for all
 #' compartments (per unit time, t-1).
 #' If not provided, the input of \code{BM}, \code{FM}, \code{AE}, and \code{GE} are required.
-#' @param dead (optional) Character vector with all names of detritus and nutrient
+#' @param dead_names (optional) Character vector with all names of detritus and nutrient
 #' compartments.
 #' @param BM (required when \code{MR} is NULL, and when dead compartments are included)
 #' A named numeric vector with biomasses of all compartments.
@@ -88,18 +105,18 @@ getDiagonalDetritus <- function(FM, BM, AE, dead){
 #' @return This function returns a named numeric vector with diagonal values for the
 #' species in the food web (per unit time, t-1).
 #' @export
-getDiagonal <- function(MR, dead = NULL, BM = NULL, FM = NULL, AE = NULL) {
+getDiagonal <- function(MR, dead_names = NULL, BM = NULL, FM = NULL, AE = NULL) {
 
   # Species
   checkNamingFormat(vectors = list(MR))
   aii <- -MR
 
   # Dead compartments
-  if(!is.null(dead)) {
+  if(!is.null(dead_names)) {
     if(is.null(BM) | is.null(FM) | is.null(AE)) {
       stop("please provide all required data to calculate dead diagonal values")
     }
-    add <- getDiagonalDetritus(FM = FM, BM = BM, AE = AE, dead = dead)
+    add <- getDiagonalDetritus(FM = FM, BM = BM, AE = AE, dead_names = dead_names)
     aii[names(add)] <- add
   }
   return(aii)

@@ -31,9 +31,6 @@ A named numeric vector containing mortality of the faunal compartments
 (per unit time, t-1). The values and names must be in the same
 order as the Jacobian matrix, and the values for dead compartments should be
 set to NA.}
-
-\item{dead}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
-compartments (everything that is not fauna).}
 }
 \value{
 Returns a dataframe with absolute and relative changes in stability for removal

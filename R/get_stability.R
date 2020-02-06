@@ -99,7 +99,7 @@ getInitialStability <- function(JM) {
 #' (per unit time, t-1). The values and names must be in the same
 #' order as the Jacobian matrix, and the values for dead compartments should be
 #' set to NA.
-#' @param dead (optional if method is "scalar") Character vector with all names of detritus and nutrient
+#' @param dead_names (optional if method is "scalar") Character vector with all names of detritus and nutrient
 #' compartments (everything that is not fauna).
 #' @return This function returns a numeric value. For the "eigenvalue" method
 #' a negative value indicates a stable matrix. For the "scalar" method the value represents
@@ -119,24 +119,24 @@ getInitialStability <- function(JM) {
 #' @examples
 #' getStability(JM)
 getStability <- function(JM, method = "eigenvalue",
-                         MR = NULL, dead = NULL) {
+                         MR = NULL, dead_names = NULL) {
   # Check data format
   checkMformat(JM)
   checkNamingFormat(matrices = list(JM), vectors = list(MR))
   checkStabilityMethod(method, JM, MR)
-  checkMortalityFormat(MR, dead)
-  if(!is.null(dead) & FALSE %in% (dead %in% rownames(JM))) {
+  checkMortalityFormat(MR, dead_names)
+  if(!is.null(dead_names) & FALSE %in% (dead_names %in% rownames(JM))) {
     stop("the names of the dead compartments are unknown")
   }
   # Warnings
-  if(method == "eigenvalue" && (!is.null(MR) | !is.null(dead))) {
+  if(method == "eigenvalue" && (!is.null(MR) | !is.null(dead_names))) {
     warning("given mortality values or dead compartments are irrelevant for the eigenvalue method")
   }
 
   # Get indices compartments to scale (excluding dead compartments)
   to_scale <- 1:dim(JM)[1]
-  if(!is.null(dead)) {
-    to_scale <- to_scale[-which(rownames(JM) %in% dead)]
+  if(!is.null(dead_names)) {
+    to_scale <- to_scale[-which(rownames(JM) %in% dead_names)]
   }
 
   if(method == "eigenvalue") {

@@ -4,7 +4,7 @@
 \alias{getDiagonalDetritus}
 \title{Calculate diagonal for dead (detritus) compartments}
 \usage{
-getDiagonalDetritus(FM, BM, AE, dead)
+getDiagonalDetritus(FM, BM, AE, dead_names)
 }
 \arguments{
 \item{FM}{A named square flowmatrix, source compartments as rows,
@@ -17,7 +17,7 @@ order as the flow matrix after externals are excluded. (required)}
 compartments, must be in the same order as the flow matrix after externals
 are excluded. Must be a fraction i.e. between 0 and 1 (required)}
 
-\item{dead}{Character vector with all names of detritus and nutrient
+\item{dead_names}{Character vector with all names of detritus and nutrient
 compartments (everything that is not fauna). (required)}
 }
 \value{
@@ -30,8 +30,9 @@ biomass per unit time per surface area then BM must be biomass per surface area.
 This function finds diagonal values for detritus compartments to be used in the Jacobian
 matrix. The calculation is based on the total amount of assimilated detritus in all
 consumers of detritus and the biomass of the detritus compartments, and is an
-implementation of the equation from Neutel & Thorne (2014). \cr
-References: \cr
+implementation of the equation from Neutel & Thorne (2014).
+}
+\references{
 Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 651–661. https://doi.org/10.1111/ele.12266

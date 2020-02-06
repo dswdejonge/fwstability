@@ -4,7 +4,7 @@
 \alias{getStability}
 \title{Get the mathematical stability of a matrix.}
 \usage{
-getStability(JM, method = "eigenvalue", MR = NULL, dead = NULL)
+getStability(JM, method = "eigenvalue", MR = NULL, dead_names = NULL)
 }
 \arguments{
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
@@ -32,7 +32,7 @@ A named numeric vector containing mortality of the faunal compartments
 order as the Jacobian matrix, and the values for dead compartments should be
 set to NA.}
 
-\item{dead}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
+\item{dead_names}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
 compartments (everything that is not fauna).}
 }
 \value{

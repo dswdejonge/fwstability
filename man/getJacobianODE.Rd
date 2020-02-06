@@ -6,6 +6,19 @@
 \usage{
 getJacobianODE(y, func, parms)
 }
+\arguments{
+\item{y}{(state) variables, a vector; if \code{y} has a name attribute,
+    the names will be used to label the Jacobian matrix columns.
+  }
+
+\item{func}{function that calculates one function value for each element
+    of \code{y}; if an ODE system, \code{func} calculates the rate of change
+    (see details).
+  }
+
+\item{parms}{parameter values, passed to function \code{func}.
+  }
+}
 \description{
 This function produces a Jacobian matrix from a model defined as a set of
 ordinary differential equations.

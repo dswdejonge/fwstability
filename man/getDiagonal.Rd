@@ -4,14 +4,14 @@
 \alias{getDiagonal}
 \title{Calculate Jacobian diagonal from flux values}
 \usage{
-getDiagonal(MR, dead = NULL, BM = NULL, FM = NULL, AE = NULL)
+getDiagonal(MR, dead_names = NULL, BM = NULL, FM = NULL, AE = NULL)
 }
 \arguments{
 \item{MR}{(required) A named numeric vector with non-predatory mortality rates for all
 compartments (per unit time, t-1).
 If not provided, the input of \code{BM}, \code{FM}, \code{AE}, and \code{GE} are required.}
 
-\item{dead}{(optional) Character vector with all names of detritus and nutrient
+\item{dead_names}{(optional) Character vector with all names of detritus and nutrient
 compartments.}
 
 \item{BM}{(required when \code{MR} is NULL, and when dead compartments are included)
