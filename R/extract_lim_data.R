@@ -301,8 +301,9 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
 extractLIMdata <- function(model, verbose = T) {
   FM <- getFlowMatrix(readLIM = model$LIM, web = model$web, lim = model$setup)
 
-  BM <- model$LIM$comp[,"val"]
-  names(BM) <- toupper(model$LIM$comp[,"name"])
+  # Stocks can be given directly (stored in comp) or in parameters (stored in params)
+  BM <- model$setup$Components[,"val"]
+  names(BM) <- toupper(model$setup$Components[,"name"])
   ### TEMPORARY CODE - start ###
   #if(model$site == "dist") {
   #  BM["DOCPHYTO_S"] <- 0.28
