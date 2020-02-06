@@ -59,10 +59,12 @@ getDiagonalDetritus <- function(FM, BM, AE, dead_names){
 
   if(length(dead_names) == 1) {
     det_assimilation <- sum(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = T)
+    ontogeny <- sum(FM[dead_i, dead_i], na.rm = T)
   } else {
     det_assimilation <- colSums(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = T)
+    ontogeny <- rowSums(FM[dead_i, dead_i], na.rm = T)
   }
-  result <- -det_assimilation/BM[dead_i]
+  result <- -((det_assimilation + ontogeny) / BM[dead_i])
   return(result)
 }
 
