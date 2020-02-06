@@ -1,6 +1,13 @@
 context("Extracting data from a LIM")
 source("models/model_LIM.R")
 
+tagTest <- c(1,2,3,4,5)
+names(tagTest) <- c("myAtag", "myBtag", "myC", "myD", "myE")
+exp_result <- tagTest[1:2]; names(exp_result) <- c("MYA", "MYB")
+test_that("the getTag function extracts the correct information", {
+  expect_equal(getTag(tagTest, tag = "tag"), exp_result)
+})
+
 test_that("the Flowmatrix function works with parallel flows", {
   #expect_equal(Flowmatrix(lim, web = lim_solved$X), FM)
   expect_equal(getFlowMatrix(readLIM), FM)
