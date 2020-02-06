@@ -2,6 +2,7 @@
 # Meiofauna feeds on labile detritus.
 # Meiofauna and macrofauna deposit carcasses into labile detritus (mortality).
 # Meiofauna and macrofauna defecate into refractory detritus.
+# Refractory detritus undergoes untogeny so that part of it becomes labile again.
 #
 #
 # LABILE -7-> MEIO -4->  MACRO
@@ -12,7 +13,7 @@
 fwnames <- c("LABILE", "REFRAC", "MEIO", "MACRO")
 FM <- matrix(c(
   0, 0, 7, 0,
-  0, 0, 0, 0,
+  1, 0, 0, 0,
   0, 0, 0, 4,
   0, 0, 0, 0),
   nrow = 4, ncol = 4, byrow = T)
@@ -43,11 +44,11 @@ model <- list(
 )
 # Expected answer
 JM <- matrix(c(0,
-               0,
+               (FM[2,1]) / BM[2],
                ((FM[3,1] - FM[1,3]) + FM[3,4]*(1-AE[4])*macLab) / BM[3],
                (FM[4,1] - FM[1,4]) / BM[4],
 
-               ((FM[1,2] - FM[2,1]) + FM[1,3]*(1-AE[3])*meiRef) / BM[1],
+               ((FM[1,2]) + FM[1,3]*(1-AE[3])*meiRef) / BM[1],
                0,
                ((FM[3,2] - FM[2,3]) + FM[3,4]*(1-AE[4])*macRef) / BM[3],
                (FM[4,2] - FM[2,4]) / BM[4],

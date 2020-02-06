@@ -71,11 +71,17 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
       consumer <- as.character(dead_interactions[i,1])
       resource <- as.character(dead_interactions[i,2])
       if(consumer == resource) {next}
-
-      # direct input to detritus by consumer
+      # if consumer is not an organism, but detritus, there is detritus-detritus interaction
+      if(consumer %in% dead$names){
+        det_det_interaction <- TRUE
+      }else{
+        det_det_interaction <- FALSE
+      }
+      # direct input to detritus (resource) by consumer
       a <- FMs$original[consumer, resource]
       # uptake of detritus by consumer
       b <- FMs$original[resource, consumer]
+      if(det_det_interaction) {b <- 0}
       # consumer-based defecation by other compartments
       c <- FMs$original[consumer,-dead_i]*(1-AE[-dead_i])
       c <- c[which(c > 0)]
@@ -91,7 +97,7 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
       result[consumer, resource] <- value
 
       # Consumer of detritus is not a resource if it deposits detritus.
-      result[resource, consumer] <- NA
+      if(!det_det_interaction) {result[resource, consumer] <- NA}
     }
   }
   return(result)
