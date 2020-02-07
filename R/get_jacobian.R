@@ -61,7 +61,7 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
     # One or multiple defecation compartments?
     if(!is.null(dead$frac)){
       DFM <- FMs$original * dead$frac
-      defecation_compartments <- dead$names[which(colSums(dead$frac, na.rm = T) > 0)]
+      defecation_compartments <- colnames(dead$frac)[which(colSums(dead$frac, na.rm = T) > 0)]
     } else {
       DFM <- FMs$original
       defecation_compartments <- dead$names
