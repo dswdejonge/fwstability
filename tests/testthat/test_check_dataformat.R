@@ -8,7 +8,7 @@ colnames(FM) <- fwnames
 BM <- c(30, 20, 10) ; names(BM) <- fwnames[1:3]
 AE <- c(NA, 0.2, 0.3) ; names(AE) <- fwnames[1:3]
 GE <- c(NA, 0.2, 0.3) ; names(GE) <- fwnames[1:3]
-dead <- list(names = "DETRITUS")
+dead <- list(names = "DETRITUS", frac = FM[1:3, 1:3])
 # Expected answer
 JM <- matrix(c(0,
                (FM[2,1] - FM[1,2] + FM[2,3]*(1-AE[3])) / BM[2],
@@ -27,7 +27,7 @@ colnames(JM) <- fwnames[1:3]
 # Incomplete data
 test_that("the function only executes when the dead and external compartments have an existing name", {
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE,
-                           dead = list(names = "CARCASS"), externals = "CO2"),
+                           dead = list(names = "CARCASS", frac = FM), externals = "CO2"),
                "the names of the dead compartments are unknown")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE,
                            dead = dead, externals = "CARCASS"),
@@ -174,7 +174,7 @@ test_that("the list \"dead\" format gets checked correctly", {
   expect_error(checkDeadFormat(list(names = "DET", def = "Def", frac = 0, extra = 0)),
                "the list \"dead\" should have 2 elements at most")
   expect_error(checkDeadFormat(list(names = c("DET", "NUT"))),
-               "the \"frac\" element is required in the \"dead\" list if there are multiple dead compartments")
+               "the \"frac\" element is required in the \"dead\" list")
 })
 
 ### Stability

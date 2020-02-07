@@ -28,7 +28,10 @@ checkNamingFormat <- function(matrices = NULL, vectors = NULL) {
     if(is.null(rownames(m)) | is.null(colnames(m))){
       stop("All required matrices must be named.")
     }
-    if(!all(n == rownames(m)) | !all(n == colnames(m))) {
+    #if(!all(n %in% rownames(m)) | !all(n %in% colnames(m))) {
+    if(!all(n %in% rownames(m) & rownames(m) %in% n)) {
+      stop("The names and their order must be equal in all named vectors and matrices.")
+    }else if(FALSE %in% (n == rownames(m))){
       stop("The names and their order must be equal in all named vectors and matrices.")
     }
   }
@@ -66,20 +69,21 @@ checkCEformat <- function(CE) {
   }
 }
 
-checkDeadFormat <- function(dead, correct_names) {
+checkDeadFormat <- function(dead, FM) { #correct_names
   if(!is.null(dead)) {
     if(!is.list(dead) | is.null(names(dead))) {
       stop("argument \"dead\" must be a named list")
     } else if(is.null(dead$names)) {
       stop("the \"names\" element is required in the \"dead\" list")
-    } else if(length(dead$names) > 1 & is.null(dead$frac)) {
-      stop("the \"frac\" element is required in the \"dead\" list if there are multiple dead compartments")
+    } else if(is.null(dead$frac)) {
+      stop("the \"frac\" element is required in the \"dead\" list")
     } else if(length(dead) > 2) {
       stop(paste("the list \"dead\" should have 2 elements at most"))
-    } else if(FALSE %in% (dead$names %in% correct_names)) {
+    } else if(FALSE %in% (dead$names %in% colnames(FM))) {
       stop("the names of the dead compartments are unknown")
-    }
-    if(!is.null(dead$frac)) {
+    } else if(FALSE %in% (dim(FM) == dim(dead$frac))){
+      stop("the FM and dead$frac matrix must have the same dimensions (check for external compartments in your dead$frac matrix)")
+    } else {
       checkMformat(dead$frac)
     }
   }

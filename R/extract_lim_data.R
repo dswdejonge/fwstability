@@ -293,7 +293,6 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
 #' \item \code{diagonal} (optional) Either a single value, a numeric vector or the string "model".
 #' Default is an all-zero diagonal. The string "model" calculates the diagonal values from flux values.
 #' If diagonal is set to "model" mortality must be explicity included in the LIM.
-#' \item \code{netto} (optional) TRUE or FALSE. Use netto FM?
 #' }
 #' @details In order for this function to work, the LIM must be set-up in a specific way.
 #' The flows and variables representing assimilation, growth, defecation, and mortality of an organism

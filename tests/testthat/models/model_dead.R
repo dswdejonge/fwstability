@@ -22,12 +22,12 @@ animal_mortality <- sum(FM[,"ANIMAL"])*AE["ANIMAL"]*GE["ANIMAL"] - sum(FM["ANIMA
 FM["PLANT","DETRITUS"] <- plant_defecation + plant_mortality
 FM["ANIMAL", "DETRITUS"] <- animal_defecation + animal_mortality
 # Get fraction matrix: fraction of flow that comprises defecation
-#frac <- matrix(
-#  c(0, plant_defecation/FM[2,1], animal_defecation/FM[3,1], rep(0, 6)),
-#  ncol = 3, nrow = 3)
-#rownames(frac) <- fwnames ; colnames(frac) <- fwnames
-#dead <- list(names = "DETRITUS", frac = frac)
-dead <- list(names = "DETRITUS")
+frac <- matrix(
+  c(0, plant_defecation/FM[2,1], animal_defecation/FM[3,1], rep(0, 6)),
+  ncol = 3, nrow = 3)
+rownames(frac) <- fwnames ; colnames(frac) <- fwnames
+dead <- list(names = "DETRITUS", frac = frac)
+#dead <- list(names = "DETRITUS")
 # Combine to model
 model <- list(
   type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, dead = dead

@@ -199,7 +199,7 @@ removeExternals <- function(externals, FM) {
 #' A named numeric vector with non-predatory mortality rates for all
 #' compartments per unit time (t-1)).
 #' @param verbose (optional) Default is TRUE. Wether or not to print messages.
-#' @param netto (optional) Boolean. Default is NULL. If TRUE, the netto Flowmatrix is used
+#' @param netto (optional) Boolean. Default is NULL If TRUE, the netto Flowmatrix is used
 #' to calculate interaction strengths. This is only relevant if there are two food web compartments
 #' which act both as prey and predators to one another.
 #' @details \code{MR} can sometimes be extracted from the food web model, for example when
@@ -242,7 +242,7 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   checkBMformat(BM)
   checkDiagonalFormat(diagonal, correct_length = length(BM))
   checkCEformat(CE = list(AE, GE))
-  checkDeadFormat(dead, correct_names = names(BM))
+  checkDeadFormat(dead, FM)
   # Set AE and GE to NA for dead compartments if necessary
   if(!is.null(dead)) {
     if(!all(is.na(AE[dead$names])) |
@@ -364,7 +364,7 @@ getNettoFM <- function(FM, deadnames) {
 #' or calculated from the model by setting it to "model".}
 #' \item{\code{dead} (optional) is a list with the elements \code{names} and \code{frac} that
 #' contains the names of dead compartments (character vector) and what fraction
-#' of each flow comprises defecation (matrix similar to \code{FM}, only required with parallel flows).}
+#' of each flow comprises defecation (matrix similar to \code{FM} after removal of externals, only required with parallel flows).}
 #' \item{\code{externals} (optional) is a character vector with any compartments that should not be
 #' considered in the calculations}.
 #' \item{\code{MR} (required if \code{diagonal} is set to "model")

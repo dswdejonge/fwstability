@@ -31,7 +31,7 @@ model <- list(
   BM = BM,
   AE = AE,
   GE = GE,
-  dead = list(names = "A")
+  dead = list(names = "A", frac = FM)
 )
 JM <- getJacobian(model)
 
