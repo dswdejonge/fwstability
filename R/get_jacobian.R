@@ -457,6 +457,7 @@ getJacobian <- function(model = stop("Model input required"),
       netto = model$netto,
       verbose = verbose
     )
+    JM <- list(JM = JM, extracted_data = extracted_data)
   } else {
     stop("Unknown model input")
   }
