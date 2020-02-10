@@ -326,6 +326,10 @@ getNettoFM <- function(FM, deadnames) {
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
+#' If the model input is a LIM the output is a list \code{JM} with element \code{JM} (so \code{JM$JM})
+#' that is the Jacobian matrix with interaction strengths, and with element \code{extracted_data}
+#' (so \code{JM$extracted_data}) that is another list with all data extracted from the LIM the
+#' Jacobian matrix is calculated from.
 #' @section ODE models:
 #' A ODE type model should be set-up in such a way that it can be used by the \code{rootSolve} package.
 #' For details, please refer to the documentation of this package.
