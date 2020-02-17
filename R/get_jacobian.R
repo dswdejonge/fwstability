@@ -92,6 +92,9 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
       predators <- names(which(FMs$original[consumer,-dead_i] > 0))
       d <- DFM[predators, resource] /
               rowSums(DFM[predators, defecation_compartments,drop=F],  na.rm = T)
+      if(!(length(d) > 0)) {
+        d <- 0
+      }
 
       value <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
       result[consumer, resource] <- value
@@ -237,7 +240,7 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   checkMformat(FMs$original)
   checkMformat(FMs$netto)
   checkNamingFormat(
-    matrices = list(FMs$original, FMs$netto),
+    matrices = list(FMs$original, FMs$netto, dead$frac),
     vectors = list(BM, AE, GE))
   checkBMformat(BM)
   checkDiagonalFormat(diagonal, correct_length = length(BM))
@@ -280,18 +283,6 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
   return(JM)
 }
 
-#' Jacobian matrix from a ODE model
-#'
-#' This function produces a Jacobian matrix from a model defined as a set of
-#' ordinary differential equations.
-#' @inheritParams rootSolve::jacobian.full
-#' @seealso The package rootSolve for full documentation on \code{\link[rootSolve]{jacobian.full}}.
-getJacobianODE <- function(y, func, parms) {
-  JM <- rootSolve::jacobian.full(y = y, func = func, parms = parms)
-  rownames(JM) <- colnames(JM)
-  return(JM)
-}
-
 getNettoFM <- function(FM, deadnames) {
   netto <- FM - t(FM)
   netto[which(netto < 0)] <- 0
@@ -302,18 +293,14 @@ getNettoFM <- function(FM, deadnames) {
   return(netto)
 }
 
-#' Jacobian matrix from a food web model
+#' Jacobian matrix from an energy-flux model
 #'
-#' This is a wrapper function that reviews the given food web model and redirects
+#' This is a wrapper function that reviews the given energy-flux food-web model and redirects
 #' the input to the correct function for obtaining interaction strengths in a Jacobian matrix.
 #' @param model (required) A named list containing elements with food web model data.
 #' One list element named \code{type} denoting the type of input model must exist
-#' and should either be the string "ODE", "EF", or "LIM".
+#' and should either be the string "EF", or "LIM".
 #' \itemize{
-#' \item \bold{"ODE"} should be used if the model is a set of
-#' ordinary differential equations. Other list element required for ODE type models are
-#' \code{func} and \code{y}. The element \code{parms} is optional. All data will be used
-#' in the \code{\link{getJacobianODE}} function which relies on the rootSolve package.
 #' \item \bold{"EF"} should be used if the model is a quantified energy flux model. Other list elements required
 #' for EF models are \code{FM}, \code{BM}, \code{AE}, and \code{GE} to be used by the
 #' \code{\link{getJacobianEnergyFlux}} function.
@@ -330,20 +317,6 @@ getNettoFM <- function(FM, deadnames) {
 #' that is the Jacobian matrix with interaction strengths, and with element \code{extracted_data}
 #' (so \code{JM$extracted_data}) that is another list with all data extracted from the LIM the
 #' Jacobian matrix is calculated from.
-#' @section ODE models:
-#' A ODE type model should be set-up in such a way that it can be used by the \code{rootSolve} package.
-#' For details, please refer to the documentation of this package.
-#' \itemize{
-#' \item{The element \code{type} should be "ODE".}
-#' \item{The element \code{func} should contain a function that calculates the rate of change for all
-#' compartments i.e. a set of ODEs.}
-#' \item{The element \code{y} is a named vector with the initial state (i.e. biomass) of compartments,
-#' which is needed by the function in \code{func}.
-#' In this respect is the data in \emph{y} similar to the BM vector that needs to be provided
-#' for the EF type models.}
-#' \item{The element \code{parms} is optional and contain parameters that can be used by the function
-#' in \code{func}.}
-#' }
 #' @section Energy Flux models:
 #' Interaction strenghts can be calculated from energy flux models as presented in
 #' De Ruiter (1995) and Neutel & Thorne (2014). The energy flux model should at least include
@@ -405,8 +378,7 @@ getNettoFM <- function(FM, deadnames) {
 #' "ass", "growth", "mort", "def", and "dead" respectively.}
 #' }
 #' More information on the requirments of the arguments see \code{?extractLIMdata}
-#' @seealso \code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}},
-#' \code{\link{extractLIMdata}}.
+#' @seealso \code{\link{getJacobianEnergyFlux}}, \code{\link{extractLIMdata}}.
 #' @references \itemize{
 #' \item{de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257
 #' }
@@ -419,12 +391,7 @@ getNettoFM <- function(FM, deadnames) {
 #' @export
 getJacobian <- function(model = stop("Model input required"),
                         verbose = T) {
-  if(model$type == "ODE") {
-    JM <- getJacobianODE(
-      y = model$y,
-      func = model$func,
-      parms = model$parms)
-  } else if(model$type == "EF") {
+  if(model$type == "EF") {
     JM <- getJacobianEnergyFlux(
       FM = model$FM,
       BM = model$BM,

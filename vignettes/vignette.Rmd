@@ -307,6 +307,17 @@ getStability(JM)
 ```
 
 
+Jacobian matrix from a ODE model
+This function produces a Jacobian matrix from a model defined as a set of
+ordinary differential equations.
+@inheritParams rootSolve::jacobian.full
+@seealso The package rootSolve for full documentation on \code{\link[rootSolve]{jacobian.full}}.
+getJacobianODE <- function(y, func, parms) {
+  JM <- rootSolve::jacobian.full(y = y, func = func, parms = parms)
+  rownames(JM) <- colnames(JM)
+  return(JM)
+}
+
 # 2. Obtaining a Jacobian matrix
 This food web model consists of three compartments of which the biomass is measured; Plants, Animals, and Detritus, and two external compartments with infinite biomass; CO2 and export. The unit of biomass is g C m-2 and the unit of flow flux is g C m-2 d-1. Plants take up CO2 and are consumed by Animals. Animals also consume Detritus. Both Plants and Animals deposit carbon into the Detritus compartment through natural mortality and defecation. Animals respire into the CO2 compartment and export carbon from the system, for example when they are predated upon by external animals. Detritus decomposes and thereby releases carbon into the CO2 pool. 
 

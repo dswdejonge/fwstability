@@ -68,7 +68,7 @@ checkCEformat <- function(CE) {
   }
 }
 
-checkDeadFormat <- function(dead, FM) { #correct_names
+checkDeadFormat <- function(dead, FM) {
   if(!is.null(dead)) {
     if(!is.list(dead) | is.null(names(dead))) {
       stop("argument \"dead\" must be a named list")
@@ -101,8 +101,6 @@ checkMortalityFormat <- function(MR, dead) {
 checkStabilityMethod <- function(method, JM, MR) {
   if(method != "eigenvalue" & method != "scalar" & method != "initial") {
     stop("unknown method chosen")
-  #} else if(method == "eigenvalue" & (TRUE %in% is.na(diag(JM)))) {
-  #  stop("for the eigenvalue method the diagonal cannot contain NAs")
   } else if(method == "scalar" & is.null(MR)) {
     stop("MR vector required for the scalar method")
   }

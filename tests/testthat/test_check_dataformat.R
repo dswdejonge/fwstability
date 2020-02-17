@@ -27,7 +27,7 @@ colnames(JM) <- fwnames[1:3]
 # Incomplete data
 test_that("the function only executes when the dead and external compartments have an existing name", {
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE,
-                           dead = list(names = "CARCASS", frac = FM), externals = "CO2"),
+                           dead = list(names = "CARCASS", frac = FM[1:3,1:3]), externals = "CO2"),
                "the names of the dead compartments are unknown")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE,
                            dead = dead, externals = "CARCASS"),
