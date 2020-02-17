@@ -5,9 +5,9 @@ Authors@R:
     person(given = "Danielle",
            family = "de Jonge",
            role = c("aut", "cre"),
-           email = "dsw.dejonge@gmail.com",
+           email = "mail@dswdejonge.com",
            comment = structure("YOUR-ORCID-ID", .Names = "ORCID"))
-Description: What the package does (one paragraph).
+Description: The package can be used to estimate stability and biological tipping points from energy-flux food web models. It takes in an energy-flux food web model with fluxes, conversion efficiencies, and information on mortality and excretion, and uses this to calculate interaction strengths. These interaction strengths are the elements of a Jacobian matrix that can be used in stability analysis.
 License: What license it uses
 Encoding: UTF-8
 LazyData: true
