@@ -41,3 +41,9 @@ test_that("the scalar getStability provides the correct answer including detritu
                stability)
 })
 
+# Method 3: Initial
+stability <- 0.5*max(Re(eigen(JM + t(JM))$values))
+test_that("the initial getStability provides the correct answer", {
+  expect_equal(getStability(JM, method = "initial"),
+               stability)
+})
