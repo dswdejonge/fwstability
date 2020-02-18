@@ -1,5 +1,5 @@
 ---
-title: "Assessing food web stability with the fwstability R-package."
+title: "Assessing energy-flux food-web stability with the fwstability R-package."
 author: "D.S.W. de Jonge"
 date: "`r date()`"
 output: rmarkdown::html_vignette
@@ -16,24 +16,208 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette explains how you can use the fwstability package to assess food web stability. There are basically six sections:  
+NOTE: The package is in the final stages of development and not yet available from CRAN. Please be aware of this when using the package in its current form.  
 
-1) Quick start,  
-2) how to prepare your food web model for stability analysis,  
-3) how to derive the Jacobian matrix,  
-4) how to conduct stability analysis,   
-5) how to assess your food web for characteristics related to stability, and   
-6) examples with food webs from literature.  
+This vignette explains how you can use the fwstability package to assess energy-flux food-web stability. There are basically six sections:  
 
-These sections contain details about all the features of the package and the scientific background. Reading this is highly recommended so that you can interpret your results correctly. This quick start section will give you a general idea about the usage of the package.
+1) Quick start    
+2) How to prepare your energy-flux food-web model for stability analysis   
+3) How to derive the Jacobian matrix    
+4) How to conduct stability analysis   
+5) How to assess your food-web for characteristics related to stability     
+6) Some examples with published food-webs  
+
+These sections contain details about the features of the package and the scientific background. Reading this is highly recommended so that you can interpret your results correctly. This quick start section will give you a general idea about the usage of the package.  
+
+An in-depth explanation of the science of energy-flux food-web stability is found in our paper. Please cite if you are using this package:  
+
+Daniëlle S.W. de Jonge, Johan van de Koppel, Dick van Oevelen, Peter C. de Ruiter. Measuring stability of energy-flux food web models. In prep.
 
 # Quick start
-Install.
+The package is in the final stages of development, and not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub as follows:
+```{r install}
+# Make sure you have installed the devtools package
+install.packages("devtools")
+devtools::install_github("dswdejonge/fwstability")
+```
 
-First, we load the package.
-```{r setup}
+If the installation was successful, we load the fwstability package.
+```{r load}
 library(fwstability)
 ```
+
+First, you need an energy-flux food web model with at least: 
+1) Biomasses (abundance per unit area/volume)
+2) Fluxes (abundance per unit area/volume per unit time)
+3) Energy conversion efficiencies (assimilation and production efficiencies, fraction 0-1)
+
+Often, the fluxes are calculated using the biomasses and/or conversion efficiencies. You need to be able to derive:  
+4) Mortality rates (per unit time, can be calculated from mortality fluxes and biomass)  
+5) Defecation fluxes  
+
+The energy-flux model should stick to the physiological concepts explained in this diagram:
+![Diagram of physiology concepts used in energy-flux food web models. White boxes represent sink compartments outside the organism, whereas grey boxes represent different stages of energy or material inside the organism as they flow through. Fluxes (Fij is Flux from i to j) and the specific processes they represent are presented with a capital letter, energy conversion efficiencies with a lower case letter. Prey is population i, predator is population j, consumer of predator j is k. Q = Consumption, A = Assimilation, E = Excretion, P = Production, R = Respiration, P = Predation, M = Mortality. a = assimilation efficiency, p = production efficiency. Based on (de Ruiter et al., 1993; Hunt et al., 1987).](physiology_diagram.png)
+
+Let's create an example energy-flux food-web model in R with one detritus compartment. There is detritus, insects, and birds. There is one external compartment for export. Insects and birds both take up detritus, and deposit into detritus through defecation and mortality. Birds also eat insects. Keep in mind there are many scientific solid ways to construct an energy-flux food-web model; this is only a very simple example to show you the type of data you need.
+```{r example_energy-flux}
+# Compartment names.
+# All objects must be named according to the compartment they 
+# belong to (matrices, vectors, etc).
+fwnames <- c("DETRITUS", "INSECT", "BIRD", "EXPORT")
+
+# Measurements from the field:
+# Insects take up 10 units detritus biomass per unit area per unit time
+# Birds take up 4 units detritus biomass per unit area per unit time,
+# and 4 units insect biomass per unit area per unit time.
+FM <- matrix(c(0, 0, 0, 0, 10, 0, 0, 0, 4, 4, 0, 0), nrow = 4, ncol = 4)
+rownames(FM) <- fwnames
+colnames(FM) <- fwnames
+
+# Measurements from the field:
+# Biomass of detritus is 30 units biomass per unit area
+# Biomass of insects is 20 units biomass per unit area
+# Biomass of birds is 10 units biomass per unit area
+BM <- c(30, 20, 10) ; names(BM) <- fwnames[1:3]
+
+# Information from literature:
+# Assimilation efficiency is 0.6 for insects, and 0.3 for birds.
+# Growth (production) efficiency is 0.8 for insects, and 0.3 for birds.
+AE <- c(NA, 0.6, 0.3) ; names(AE) <- fwnames[1:3]
+GE <- c(NA, 0.8, 0.3) ; names(GE) <- fwnames[1:3]
+
+# Now we can calculate mortality and excretion fluxes based on the physiological principles:
+# Defecation (excretion) is the total uptake times 1-assimilation efficiency.
+# Mortality is the total growth (uptake times assimilation efficiency times growth efficiency) minus
+# predation on the compartment.
+insect_defecation <- sum(FM[,"INSECT"])*(1-AE["INSECT"])
+bird_defecation <- sum(FM[,"BIRD"])*(1-AE["BIRD"])
+insect_mortality <- sum(FM[,"INSECT"])*AE["INSECT"]*GE["INSECT"] - sum(FM["INSECT",])
+bird_mortality <- sum(FM[,"BIRD"])*AE["BIRD"]*GE["BIRD"] - sum(FM["BIRD",])
+
+# The total feedback flux to detritus is defecation plus mortality
+FM["INSECT","DETRITUS"] <- insect_defecation + insect_mortality
+FM["BIRD", "DETRITUS"] <- bird_defecation + bird_mortality
+
+# The system must be mass-balanced
+# Total input into each compartment
+colSums(FM)
+# Total output from each compartment
+rowSums(FM)
+# To mass balance there in import and export from the EXPORT compartment
+difference <- rowSums(FM) - colSums(FM)
+FM["EXPORT",which(difference > 0)] <- difference[which(difference > 0)]
+FM[which(difference < 0),"EXPORT"] <- abs(difference[which(difference < 0)])
+# Check if difference is zero now
+difference <- rowSums(FM) - colSums(FM)
+```
+
+If you have detritus in your food-web, it is very important for the fwstability package that you include a list that names all detritus compartments (element called 'names') and includes a matrix with **the fraction of each flow that comprises of excretion** (element called 'frac'). Thus, the flux from birds to detritus is both defecation and mortality. By including this matrix with fractions we can later still distinguish the exact magnitude of the defecation flow from the mortality flow. This matrix must have the same dimensions as the flowmatrix FM without the external compartments.
+```{r detritus_info}
+# Divide defecation flux by total flux to get fraction.
+frac <- matrix(
+  c(0, insect_defecation/FM[2,1], bird_defecation/FM[3,1], rep(0, 6)),
+  ncol = 3, nrow = 3)
+rownames(frac) <- fwnames[1:3] ; colnames(frac) <- fwnames[1:3]
+
+# Combine this information in a list
+dead <- list(names = "DETRITUS", frac = frac)
+```
+
+Mortality rates (per unit time) are an important piece of information in stability analysis. Therefore, it might come in handy to have a vector that includes the mortality rates. We can simply manually divide the mortality flux by the biomass of the correpsonding compartment. However, this may be laborious for larger food webs. Therefore, you can also use the package function \code{getMortalityRates}.
+```{r mortality_rates}
+# The FM in this function should NOT include externals.
+mortality_rates <- getMortalityRates(FM[1:3, 1:3], AE, GE, BM, dead$names)
+print(mortality_rates)
+```
+
+Now we have our complete energy-flux food-web model and all the variables we need for the stability analysis. It is a good idea to combine all variables in one object that we will call 'model'. The elements in this model are named so that the function can recognize the right data immediately.
+```{r model_object}
+model <- list(
+  type = "EF", # it is an energy-flux model
+  FM = FM, # our flux matrix (incl. externals)
+  BM = BM, # our biomasses (excl. externals)
+  AE = AE, # assimmiliation efficiency (excl. externals)
+  GE = GE, # growth efficiency (excl. externals)
+  dead = dead, # information on detritus (names and frac matrix)
+  externals = "EXPORT", # character (vector) of external compartments
+  MR = mortality_rates # mortality rates (excl. externals)
+)
+```
+
+Now, we can calculate interaction strengths between all compartments which together form the Jacobian matrix (or Community matrix). The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus). We want the upper-limit of intraspecific effects on the diagonal (thus the maximum amount of possible self-dampening effects on the system), thus we specify in our model how we want the function to treat the diagonal. The resulting  Jacobian matrix shows the per capita effect of species i (in rows) on the population growth rate of species j (in columns) in the unit per time. Beware that the unit of the Jacobian matrix is only per unit time if the input biomass is biomass per unit area (or volume) and and the fluxes unit is biomass per unit area (or volume) per unit time. If you use other units, please refer to the paper how this influences the interpretation of your results.
+```{r Jacobian_matrix}
+# Include in the model how we want to treat the diagonal
+model$diagonal <- "model" # calculate upper limit from model
+
+# Calculate the Jacobian matrix
+JM <- getJacobian(model)
+print(JM)
+```
+
+We see that birds have a negative effect on insects because insects reduce in population through predation by birds, and insects have a positive effect on birds because the bird population grows by eating insects. Additionally, we see that all compartments have negative self-effects, meaning that if the population grows the self-dampening effects become stronger thus keeping population growth constrained. Detritus has a positive effect on both insects and birds, because their population grows by eating detritus. Insects have a negative effect on detritus, meaning their uptake of detritus has a larger effect than the detritus they deposit back through mortality and defecation. Birds, in contrast, have a positive effect on detritus, meaning their deposition into detritus through mortality and defecation is large enough to offset the negative effects of detritus uptake by birds.
+
+Now we can calculate stability from the Jacobian matrix. We first use the 'eigenvalue' method, based on the mathematical concept that a Jacobian matrix is ONLY stable if all real parts of the eigenvalues are negative. Therefore, you only have to review the dominant eigenvalue. If it is negative, the Jacobian matrix is stable, i.e. the system will asymptotically return to equilibrium after a small pulse perturbation. If it is positive, the Jacobian matrix is not stable, i.e. the system will not return to equilibrium after a small pulse perturbation but move away from the equilibrium state. In addition, the unit of the eigenvalue stability measure is the same as the unit of the Jacobian matrix, thus in this case per unit time. If the matrix is stable (negative eigenvalue), the absolute value equals the asympototic return rate of the system, and can also be used to calculate the return time to about 37% of the original state of the system. Be aware that we now review stability when maximum self-dampening effects are present on the diagonal.
+```{r eigenvalue_stability}
+# Calculate stability with the eigenvalue method.
+s <- getStability(JM, method = "eigenvalue")
+print(s)
+# The system is stable, because s is negative!
+
+# The asymptotic return rate is the absolute value of s
+return_rate <- abs(s)
+print(return_rate) # per unit time
+
+# The return time to about 37% of its original state can be calculated
+return_time <- 1/return_rate
+print(return_time) # units of time (e.g. days or years)
+```
+
+Altough return rate and return time can be valuable information on an ecosystem, they **cannot be used to compare stability of different systems**. The stability is dependent on the time-scale the system is operating on. In other words, system A can be much slower to return to equilibrium than system B, but this might be caused by the fact that system A simply includes many slow-living organisms. If time-dependency is removed from system A and B and then stability is evaluated again, system A might turn out to actually be more stable than B despite its longer absolute return times.  
+
+There are two ways to remove time dependency. First option is to normalize the matrix using the maximum intraspecific effects on the diagonal, set all diagonal values to zero, i.e. removing self-dampening effects, except for the detritus compartments, and then find stability again through the eigenvalue method. The stability value can now be interpreted as the fraction of maximum possible self-dampening effects needed to stabilize the matrix. In other words, we expect this value to lie between 0 and 1. If the value is larger than 1 it means more than available self-dampening is needed to stabilize the matrix, thus the system as it is will collapse. The stability measure can be interpreted as a biological tipping point. If the system has less self-dampening than the fraction self-dampening as indicated by the stability measure, it will collapse.
+```{r normalized_stability}
+# Normalize the matrix
+JMnorm <- JM / abs(diag(JM))
+print(JMnorm)
+
+# Set all diagonal values to zero, except detritus
+diag(JMnorm)[2:3] <- 0
+print(JMnorm)
+
+# Calcualte stability with the eigenvalue method
+s <- getStability(JMnorm, method = "eigenvalue")
+print(s)
+# s is negative.
+# This means the system with only detritus feedback is already stable.
+# Lets remove all self-dampening effects from the normalized matrix.
+diag(JMnorm) <- 0
+s <- getStability(JMnorm, method = "eigenvalue")
+print(s)
+# Now we do get a value between 0 and 1, which is the fraction of self-dampening
+# required to stabilize the system.
+```
+
+Another way to remove time dependence is to use the diagonal as a scalar. We take an increasingly larger fraction of natural mortality rates until the Jacobian matrix is stable. The detritus compartments are not scaled in this method. The resulting value is very similar - almost equal - to the stability found with the eigenvalue method executed on a normalized all-zero (except detritus) Jacobian matrix. This second method is more time-consuming and the resolution of the stability value depends on the step-size of the iterations. Therefore, we recommend using the eigenvalue method instead of the scalar method. If you do want to use this method, this is how it works:
+```{r scalar_stability}
+# Lets assume we were not able to quantify the detritus compartments self-dampening effects
+diag(JM) <- 0
+print(JM)
+
+# Now we chose the scalar stability method.
+# This method iteratively increases the fraction of natural mortality
+# rates on the diagonal until the system is stable.
+# It first determines a step size (see documentation) and then 
+# increases the fraction dampening with the stepsize each cycle.
+# For example:
+# diag(JM) <- 0.1 * mortality rates > not stable >
+# diag(JM) <- 0.2 * mortality rates > still not stable >
+# diag(JM) <- 0.3 * mortality rates > stable! 
+# Stability value is 0.3
+s <- getStability(JMtest, method = "scalar", 
+                  MR = mortality_rates, dead_names = dead$names)
+print(s)
+```
+
 
 # 1. Preparing a food web model for stability analysis
 ## 1.1. A linear inverse model
@@ -640,4 +824,5 @@ JM <- getJacobian(
 getStability(JM)
 ```
 
-
+# References
+de Ruiter et al., 1993; Hunt et al., 1987).
