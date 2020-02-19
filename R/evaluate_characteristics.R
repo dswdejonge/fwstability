@@ -1,7 +1,7 @@
 #' Assess stability effect of each compartment.
 #'
-#' This function assesses the affect on stability of removing individual compartments from
-#' the Jacobian matrix.
+#' This function assesses the effect of removing individual compartments from
+#' the Jacobian matrix on stability.
 #' @inheritParams getStability
 #' @references \itemize{
 #' \item{
@@ -38,12 +38,12 @@ assessComps <- function(JM, method = "eigenvalue",
 
 #' Assess stabiliy effect of a fixed link alteration
 #'
-#' This function assesses the effect on stability of altering each interaction strength
-#' in a Jacobian matrix according to a fixed function.
+#' This function assesses the effect of altering each interaction strength
+#' in a Jacobian matrix according to a fixed function on stability .
 #' @inheritParams getStability
 #' @param func (required) Function describing how to alter each interaction strength to
 #' assess the effect on stability of the respective link. Default is doubling each
-#' interaction strength.
+#' interaction strength (interaction strenght *2).
 #' @references \itemize{
 #' \item{
 #' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction
@@ -54,8 +54,9 @@ assessComps <- function(JM, method = "eigenvalue",
 #' @return Returns a dataframe with absolute and relative changes in stability for alteration
 #' of each interaction strength in the Jacobian matrix.
 #' @details If the change in stability (delta) is negative, the system becomes more stable if
-#' the respective food web compartment is removed from the Jacobian matrix. The opposite
-#' is true if delta is positive. \cr
+#' the respective interaction strength is altered in the Jacobian matrix
+#' (all other interaction strenghts keep their original value).
+#' The system becomes less stable if delta is positive. \cr
 #' Using the method 'scalar' might be somewhat slower than the method 'eigenvalue'.
 #' @export
 assessLinksFixed <- function(JM, method = "eigenvalue",
@@ -83,7 +84,7 @@ assessLinksFixed <- function(JM, method = "eigenvalue",
 #' Assess probability of destabilizing system per interaction
 #'
 #' This function determines the probability that a system becomes unstable if the
-#' strengths in an interaction are varied.
+#' strengths in a pair of interactions are varied.
 #' @inheritParams getStability
 #' @param perms (required) Default is 100. Number of times a pair of interaction strengths
 #' is varied.
@@ -103,11 +104,22 @@ assessLinksFixed <- function(JM, method = "eigenvalue",
 #' just stable. This is done by subtracting the maximum real part of the eigenvalues from the
 #' diagonal values, and subsequently reducing the diagonal values by a fraction
 #' (in argument \code{threshold}). The default threshold of 0.01 is used in De Ruiter et al. (1995).
+#' Peter de Ruiter mentions through personal communication that this threshold method is a bit outdated,
+#' and that he personally recommends setting the diagonal to zero. You can achieve this by setting
+#' \code{threshold} to \code{NULL}.
+#' \cr
 #' Every pair of interaction strengths is then randomly varied between 0 and 2aij a certain
 #' number of times. The probability that the food web becomes unstable is the total count of
-#' unstable matrices divided by the total number of permutations. \cr
+#' unstable matrices divided by the total number of permutations.
+#' \cr
 #' Using the method 'scalar' to asses stablity might be somewhat slower than the method 'eigenvalue'.
-#' @seealso \code{getStability}
+#' \cr
+#' Beware that where \code{assessLinksFixed} reports the **absolute and relative** effect on stability
+#' of altering **one** interaction strength according to a **fixed** function,
+#' this function \code{assessLinksPerm} reports the **probability** that the matrix becomes unstable
+#' when a **pair** of interaction strenghts in altered between 0 and 2 time the original interaction
+#' strength a certain number of times.
+#' @seealso \code{getStability} \code{assessLinksFixed}
 #' @export
 assessLinksPerm <- function(JM, method = "eigenvalue",
                             MR = NULL, dead = NULL,
@@ -117,8 +129,12 @@ assessLinksPerm <- function(JM, method = "eigenvalue",
   pairs <- which(lower.tri(JM), arr.ind = TRUE)
 
   cJM <- JM
-  diag(cJM) <- diag(cJM) - getStability(JM)
-  diag(cJM) <- diag(cJM) - abs(diag(cJM)) * threshold
+  if(is.null(threshold)){
+    diag(cJM) <- 0
+  } else {
+    diag(cJM) <- diag(cJM) - getStability(JM)
+    diag(cJM) <- diag(cJM) - abs(diag(cJM))*threshold
+  }
 
   if(getStability(cJM, method, MR, dead) > 0) {
     stop("Initial stability needs to be negative in order for this test to work.")
@@ -147,7 +163,7 @@ assessLinksPerm <- function(JM, method = "eigenvalue",
 
 #' Get flux size diversity.
 
-#' Calculates the diversity in flux weights.
+#' Calculates the diversity in flux weights (flux sizes).
 #' @param FM (required) A square flow matrix with flows from source in rows to sink in columns.
 #' @references \itemize{
 #' \item{
@@ -192,7 +208,7 @@ fluxSizeDiversity <- function(FM){
 #' Rinaldo, A.; Marani, A. (eds) Biological models. Instituto Veneto de Scienze, Lettre ed Arti,
 #' Venica, pp 125-143.}
 #' }
-#' @details Cannibalistic flows (from i to i) are not included in calculations.
+#' @details Cannibalistic flows (from i to i) are included in calculations.
 #' @return Returns a double.
 #' @export
 averageMutualInfo <- function(FM){
@@ -202,8 +218,7 @@ averageMutualInfo <- function(FM){
   product <- expand.grid(outgoingSum, incomingSum)
   product$product <- product$Var1 * product$Var2
   productM <- matrix(product$product, nrow = dim(FM)[1], ncol = dim(FM)[2])
-  m <- FM / FMsum * log(FM * FMsum / productM)
-  diag(m) <- 0
+  m <- (FM / FMsum) * log((FM * FMsum) / productM)
   A <- sum(m, na.rm = TRUE)
   return(A)
 }
@@ -217,6 +232,7 @@ averageMutualInfo <- function(FM){
 #' \item{"eff" calculates the effective connectance per node (m).}
 #' \item{"topo" calculates the topological connectance per node (m*), which is the special
 #' case where all flows have equal weights.}
+#' If nothing is specified the effective connectance per node is calculated.
 #' }
 #' @references \itemize{
 #' \item{
@@ -232,7 +248,7 @@ averageMutualInfo <- function(FM){
 #' @export
 getConnPerNode <- function(FM, type = c("eff", "topo")) {
   if(length(type) == 1 && type == "topo"){
-    FM[which(FM > 0)] <- 1
+    FM[which(FM != 0)] <- 1
   }
   m <- exp((fluxSizeDiversity(FM) - averageMutualInfo(FM)) / 2)
   return(m)
@@ -270,9 +286,10 @@ getCw <- function(FM) {
 #' Get loop weight.
 #'
 #' This function calculates the loop weight.
-#' @param IS (required) Numeric vector of length \code{k} with interaction strengths.
-#' @param d (optional) Numeric vector of length \code{k} with natural death rates in
-#' the same unit as IS.
+#' @param IS (required) Numeric vector of length \code{k} with all
+#' interaction strengths from a loop.
+#' @param d (optional) Numeric vector of length \code{k} with natural
+#' death rates of all compartments included in the loop with the same unit as \code{IS}.
 #' @references \itemize{
 #' \item{
 #' Neutel, A.M., Heesterbeek, J.A.P., Van De Koppel, J., Hoenderboom, G.,
@@ -283,23 +300,21 @@ getCw <- function(FM) {
 #' }
 #' @details Loop weight is defined as the geometric mean of all absolute
 #' interaction strengths in a loop of length k. It combines information on
-#' the feedback of the loop, with natural death rates and the length of
-#' the loop. The feedback is scaled by the natural death rates in the reference
+#' the feedback of the loop with natural death rates and the length of
+#' the loop. The feedback is scaled by the natural death rates as in Neutel et al. 2007,
 #' because the stability measure is also scaled by death rates. Depending on
 #' your stability measure you can decide to omit inclusion of death rates.
 #' @return Returns a double.
 #' @export
 getLoopWeight <- function(IS, d = NULL) {
   k <- length(IS)
-  if(!is.null(d) & !all(d > 0)) {
-    d <- NULL
-    warning("Deat rates should all be positive. Did not include death rate
-            in calculation.")
-  }
-  if(is.null(d)) {
+  if(is.null(d)){
+    message("Loop weight not scaled to death rates.")
     LW <- abs(prod(IS)) ^ (1 / k)
   } else {
-    LW <- abs(prod(IS) / prod(d)) ^ (1 / k)
+    if(!all(d > 0, na.rm = T)){stop("Death rates should all be positive.")}
+    if(k != length(d)){stop("Vector IS and vector d should be same length.")}
+    LW <- abs(prod(IS) / prod(d, na.rm = T)) ^ (1 / k)
   }
   return(LW)
 }
@@ -353,17 +368,19 @@ maxNrLoops <- function(n, k = NULL) {
 #' @param MR (optional) Natural mortality/death rates for scaling the
 #' maximum loop weight, same unit as Jacobian matrix.
 #' @param compnames (optional) Vector with compartment names in same order
-#' as the Jacobian matrix. If it is not included the names of JM
-#' are used as compartment names. If the JM is not named, the output will
+#' as the Jacobian matrix. If it is not included the names of \code{JM}
+#' are used as compartment names. If the \code{JM} is not named, the output will
 #' simply include the index of compartments to indicate loops.
-#' @param findLoops (optional) Default is FALSE. You need a text file with the indices
-#' of each loop per line. If you do not have this yet, this function redirects
-#' to a recursive depth-first-search function to find all loops, or all loops
-#' of length k (see function \code{dfs()}.
-#' @param k (optional) Integer. Can be used if findLoops is TRUE,
+#' @param findLoops (optional) If you want the function to search and store loops in a file,
+#' set findLoops to TRUE. This function will then redirect to a recursive depth-first-search function
+#' to find all loops, or all loops of length k (see element \code{k} and function \code{dfs()}.
+#' If you already have a text file with the compartments indices of each loop per line,
+#' you can set \code{findLoops} to FALSE (see element \code{file}. Default is FALSE.
+#' @param k (optional) Integer. Can be used if \code{findLoops} is TRUE,
 #' and indicates that you only want to search for loops of length k.
-#' @param file (optional) Default is "allLoops.txt". Is the text file
-#' with indices of all loops. Should be present in the working directory.
+#' Default is \code{NULL}, which finds all loops if \code{findLoops} is TRUE.
+#' @param file (optional) Default is "allLoops.txt". This is the path to the text file
+#' with indices of all loops.
 #' @param verbose (optional) Default is TRUE.
 #' Set to FALSE if you don't want messages printed.
 #' @references \itemize{
@@ -380,18 +397,22 @@ maxNrLoops <- function(n, k = NULL) {
 #' https://doi.org/10.1111/ele.12266
 #' }
 #' }
-#' @details Natural death/mortality rates (MR) can be found as the absolute
-#' values on the diagonal.
-#' Diagonal values for detritus are also regarded 'death' rates, as they
-#' represent self-dampening effects. \cr
-#'
-#' The depth-first-search algorithm can find all loops in your network.
+#' @details
+#' Researching feedback loops in your system can be very informative to understand the
+#' system's stability. To find all loops in your system you can use a depth-first-search
+#' algorithm (set \code{findLoops} to TRUE and \code{k} to NULL).
 #' Please be aware that increasing the size of your network, exponentially
-#' increases the computation time to find all loops. If you have a large
+#' increases the computation time to find all loops. Therefore, if you have a large
 #' network you might want to limit your search to loops of length k = 2
 #' or k = 3, as those are found to be the most important in determining
 #' overall feedback and stability in your system (Neutel & Thorne 2014). \cr
 #'
+#' Natural death/mortality rates (MR) can be found as the absolute
+#' values on the diagonal.
+#' Diagonal values for detritus are also regarded 'death' rates, as they
+#' represent self-dampening effects. \cr
+#'
+
 #' Feedback of a loop is the product of all interaction strengths
 #' in a loop (so feedback is not additative but multiplicative).
 #'
