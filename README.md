@@ -1,4 +1,4 @@
 # fwstability
-R-package to calculate food web (fw) stability.
+R-package to calculate food web (fw) stability from an energy-flux model.
 
-Package is in development.
+NOTE: Package is in development, please be aware when using code in its current form.

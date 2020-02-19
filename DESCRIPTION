@@ -15,7 +15,8 @@ Suggests:
     knitr,
     rmarkdown,
     LIM,
-    testthat
+    testthat,
+    ineq
 VignetteBuilder: 
 	knitr,
 	LIM

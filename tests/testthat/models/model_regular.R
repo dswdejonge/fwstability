@@ -34,6 +34,15 @@ rownames(JM) <- fwnames ; colnames(JM) <- fwnames
 
 
 ### Use netto FM ###
+getNettoFM <- function(FM, deadnames) {
+  netto <- FM - t(FM)
+  netto[which(netto < 0)] <- 0
+  if(!is.null(deadnames)){
+    netto[deadnames,] <- FM[deadnames,]
+    netto[,deadnames] <- FM[,deadnames]
+  }
+  return(netto)
+}
 FM1 <- getNettoFM(FM, deadnames = NULL)
 JM1 <- matrix(c(0,
                -FM1[1,2] / BM[2],
