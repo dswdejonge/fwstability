@@ -184,4 +184,4 @@ test_that("The total number of possible loops is calculated correctly", {
   expect_equal(maxNrLoops(5, 2), 20)
 })
 
-
+# assessFeedback(JM, findLoops = T, k = 3)

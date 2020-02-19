@@ -365,22 +365,28 @@ maxNrLoops <- function(n, k = NULL) {
 #' This function can find all loops or loops of a specific length, and consequently
 #' calculate the feedback and loop weight of each loop.
 #' @param JM (required) Jacobian matrix with interaction strengths.
+#' @param findLoops (required) If you want the function to search for loops in your network
+#' and store them a file, set findLoops to TRUE. You will need to provide an output name
+#' (see \code{output}).
+#' This function will then redirect to a recursive depth-first-search function
+#' to find all loops or all loops of length k (see element \code{k} and function \code{dfs()}
+#' and store them in a textfile.
+#' If you already have a text file with the compartments indices of each loop per line,
+#' you can set \code{findLoops} to FALSE (see element \code{file}. Default is FALSE.
+#' @param k (optional) Integer. Can be used if \code{findLoops} is TRUE.
+#' It indicates that you only want to search for loops of length \code{k}.
+#' Default is \code{NULL}, which finds all loops if \code{findLoops} is TRUE.
+#' @param output (required if findLoops is TRUE) String.
+#' The name provided in \code{output} is used to create the text file name
+#' where the loops are stored. Default is "allLoops".
+#' @param file (required if findLoops is FALSE) String.
+#' This is the path to the text file where the loops are stored.
 #' @param MR (optional) Natural mortality/death rates for scaling the
 #' maximum loop weight, same unit as Jacobian matrix.
 #' @param compnames (optional) Vector with compartment names in same order
 #' as the Jacobian matrix. If it is not included the names of \code{JM}
 #' are used as compartment names. If the \code{JM} is not named, the output will
 #' simply include the index of compartments to indicate loops.
-#' @param findLoops (optional) If you want the function to search and store loops in a file,
-#' set findLoops to TRUE. This function will then redirect to a recursive depth-first-search function
-#' to find all loops, or all loops of length k (see element \code{k} and function \code{dfs()}.
-#' If you already have a text file with the compartments indices of each loop per line,
-#' you can set \code{findLoops} to FALSE (see element \code{file}. Default is FALSE.
-#' @param k (optional) Integer. Can be used if \code{findLoops} is TRUE,
-#' and indicates that you only want to search for loops of length k.
-#' Default is \code{NULL}, which finds all loops if \code{findLoops} is TRUE.
-#' @param file (optional) Default is "allLoops.txt". This is the path to the text file
-#' with indices of all loops.
 #' @param verbose (optional) Default is TRUE.
 #' Set to FALSE if you don't want messages printed.
 #' @references \itemize{
@@ -427,19 +433,17 @@ maxNrLoops <- function(n, k = NULL) {
 #' with feedbacks (column "fdb") and loop weights (column "lw") of
 #' those loops.
 #' @export
-assessFeedback <- function(JM, MR = NULL, compnames = NULL,
-                           findLoops = F, k = NULL,
-                           file = NULL, verbose = T) {
-  # path = getwd(), file = "allLoops.txt"
+assessFeedback <- function(JM, findLoops = F, k = NULL,
+                           output = "allLoops", file = NULL,
+                           MR = NULL, compnames = NULL,
+                           verbose = T) {
   if(findLoops) {
     maxL <- maxNrLoops(dim(JM)[1], k)
     if(verbose) {message(paste0(
-      "Assuming full connectance, there are at most ",maxL," loops.\n
-      Finding all loops in specified network..."))}
+      "Assuming full connectance and the specified loop length, there are at most ",maxL," loops.\n Finding loops in specified network..."))}
     AM <- abs(JM)
     AM[which(AM > 0)] <- 1
-    # paste0(path,"/",file)
-    file <- dfs(AM, k, output = file, verbose)
+    file <- dfs(AM, k, output = output, verbose)
   }
   if(verbose) {message("Read loop data...")}
   allLoops <- readLines(paste0(file))
