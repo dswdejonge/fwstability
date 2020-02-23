@@ -19,6 +19,13 @@ test_that("getJacobian incorporates vector diagonal correctly", {
 test_that("getJacobian calculates the diagonal from flux values", {
   expect_equal(getJacobian(model3), JM3)
 })
+test_that("a matrix with dead compartments gets normalized correctly", {
+  expect_error(normalizeJacobian(JM1),
+               "No zeroes may be present on the diagonal when normalizing the Jacobian matrix.")
+  expect_equal(normalizeJacobian(JM2, allzero = F), JMnorm)
+  expect_equal(normalizeJacobian(JM2, dead_names = "DETRITUS"), JMnorm2)
+})
+
 
 source("models/model_externals.R")
 test_that("correct JM created with external compartments", {
