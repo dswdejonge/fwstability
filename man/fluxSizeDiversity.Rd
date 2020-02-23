@@ -3,7 +3,7 @@
 \name{fluxSizeDiversity}
 \alias{fluxSizeDiversity}
 \title{Get flux size diversity.
-Calculates the diversity in flux weights.}
+Calculates the diversity in flux weights (flux sizes).}
 \usage{
 fluxSizeDiversity(FM)
 }
@@ -15,7 +15,7 @@ Returns a double.
 }
 \description{
 Get flux size diversity.
-Calculates the diversity in flux weights.
+Calculates the diversity in flux weights (flux sizes).
 }
 \details{
 Cannibalistic flows (from i to i) are included in calculations.

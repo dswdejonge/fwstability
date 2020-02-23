@@ -2,19 +2,15 @@
 % Please edit documentation in R/get_jacobian.R
 \name{getJacobian}
 \alias{getJacobian}
-\title{Jacobian matrix from a food web model}
+\title{Jacobian matrix from an energy-flux model}
 \usage{
 getJacobian(model = stop("Model input required"), verbose = T)
 }
 \arguments{
 \item{model}{(required) A named list containing elements with food web model data.
 One list element named \code{type} denoting the type of input model must exist
-and should either be the string "ODE", "EF", or "LIM".
+and should either be the string "EF", or "LIM".
 \itemize{
-\item \bold{"ODE"} should be used if the model is a set of
-ordinary differential equations. Other list element required for ODE type models are
-\code{func} and \code{y}. The element \code{parms} is optional. All data will be used
-in the \code{\link{getJacobianODE}} function which relies on the rootSolve package.
 \item \bold{"EF"} should be used if the model is a quantified energy flux model. Other list elements required
 for EF models are \code{FM}, \code{BM}, \code{AE}, and \code{GE} to be used by the
 \code{\link{getJacobianEnergyFlux}} function.
@@ -29,28 +25,15 @@ If the LIM is not resolved, the function will use the parsimonious (least distan
 This function returns a matrix containing interaction strengths, i.e. the
 effect of the resources (rows) on the consumers (columns) - for all
 interactions in the food web.
+If the model input is a LIM the output is a list \code{JM} with element \code{JM} (so \code{JM$JM})
+that is the Jacobian matrix with interaction strengths, and with element \code{extracted_data}
+(so \code{JM$extracted_data}) that is another list with all data extracted from the LIM the
+Jacobian matrix is calculated from.
 }
 \description{
-This is a wrapper function that reviews the given food web model and redirects
+This is a wrapper function that reviews the given energy-flux food-web model and redirects
 the input to the correct function for obtaining interaction strengths in a Jacobian matrix.
 }
-\section{ODE models}{
-
-A ODE type model should be set-up in such a way that it can be used by the \code{rootSolve} package.
-For details, please refer to the documentation of this package.
-\itemize{
-\item{The element \code{type} should be "ODE".}
-\item{The element \code{func} should contain a function that calculates the rate of change for all
-compartments i.e. a set of ODEs.}
-\item{The element \code{y} is a named vector with the initial state (i.e. biomass) of compartments,
-which is needed by the function in \code{func}.
-In this respect is the data in \emph{y} similar to the BM vector that needs to be provided
-for the EF type models.}
-\item{The element \code{parms} is optional and contain parameters that can be used by the function
-in \code{func}.}
-}
-}
-
 \section{Energy Flux models}{
 
 Interaction strenghts can be calculated from energy flux models as presented in
@@ -76,7 +59,7 @@ The list with model information should contain:
 or calculated from the model by setting it to "model".}
 \item{\code{dead} (optional) is a list with the elements \code{names} and \code{frac} that
 contains the names of dead compartments (character vector) and what fraction
-of each flow comprises defecation (matrix similar to \code{FM}, only required with parallel flows).}
+of each flow comprises defecation (matrix similar to \code{FM} after removal of externals, only required with parallel flows).}
 \item{\code{externals} (optional) is a character vector with any compartments that should not be
 considered in the calculations}.
 \item{\code{MR} (required if \code{diagonal} is set to "model")
@@ -130,6 +113,5 @@ More information on the requirments of the arguments see \code{?extractLIMdata}
 }
 }
 \seealso{
-\code{\link{getJacobianODE}}, \code{\link{getJacobianEnergyFlux}},
-\code{\link{extractLIMdata}}.
+\code{\link{getJacobianEnergyFlux}}, \code{\link{extractLIMdata}}.
 }

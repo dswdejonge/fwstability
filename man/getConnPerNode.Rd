@@ -13,6 +13,7 @@ getConnPerNode(FM, type = c("eff", "topo"))
 \item{"eff" calculates the effective connectance per node (m).}
 \item{"topo" calculates the topological connectance per node (m*), which is the special
 case where all flows have equal weights.}
+If nothing is specified the effective connectance per node is calculated.
 }}
 }
 \value{

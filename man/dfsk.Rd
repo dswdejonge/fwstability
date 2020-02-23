@@ -4,7 +4,7 @@
 \alias{dfsk}
 \title{Depth-First-Search loops of length k}
 \usage{
-dfsk(AM, node, visited, pathway, k, started, output, start)
+dfsk(AM, node, visited, pathway, k, started, file, start)
 }
 \arguments{
 \item{AM}{Adjacency matrix.}
@@ -20,10 +20,9 @@ dfsk(AM, node, visited, pathway, k, started, output, start)
 \item{started}{Logical vector which stores which nodes have been used
 before as starting node.}
 
-\item{output}{String with filename to store loops.}
+\item{file}{String with filename to store loops.}
 
-\item{start}{Is integer with the current start node.
-#' @references Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph}
+\item{start}{Is integer with the current start node.}
 }
 \value{
 No returned value, writes .txt file to working directory.
@@ -31,4 +30,7 @@ No returned value, writes .txt file to working directory.
 \description{
 This recursive Depth-First-Search function finds all loops of length k starting at a
 certain node in the foodweb and writes them to a text file.
+}
+\references{
+Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph
 }

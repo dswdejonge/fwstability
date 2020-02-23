@@ -4,7 +4,7 @@
 \alias{dfsall}
 \title{Depth-First-Search all loops}
 \usage{
-dfsall(AM, node, visited, pathway, started, output, start)
+dfsall(AM, node, visited, pathway, started, file, start)
 }
 \arguments{
 \item{AM}{Adjacency matrix.}
@@ -18,7 +18,7 @@ dfsall(AM, node, visited, pathway, started, output, start)
 \item{started}{Logical vector which stores which nodes have been used
 before as starting node.}
 
-\item{output}{String with filename to store loops.}
+\item{file}{String with name for textfile that will store loops.}
 
 \item{start}{Is integer with the current start node.}
 }

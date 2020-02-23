@@ -4,8 +4,15 @@
 \alias{assessLinksPerm}
 \title{Assess probability of destabilizing system per interaction}
 \usage{
-assessLinksPerm(JM, method = "eigenvalue", MR = NULL, dead = NULL,
-  perms = 100, threshold = 0.01, seed = 1)
+assessLinksPerm(
+  JM,
+  method = "eigenvalue",
+  MR = NULL,
+  dead = NULL,
+  perms = 100,
+  threshold = 0.01,
+  seed = 1
+)
 }
 \arguments{
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
@@ -22,8 +29,9 @@ The "scalar" method finds asymptotic stability as the scalar of natural mortalit
 rates needed to acquire a stable matrix.
 }
 \item{
-The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016), based on half the the maximum
-real part of the eigenvalues from the addition of the Jacobian matrix to its transpose.
+The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016);
+initial stability is half the maximum real part of the eigenvalues derived from the
+matrix obtained by addition of the Jacobian matrix to its transpose.
 }
 }}
 
@@ -47,17 +55,28 @@ pair of trophic interactions.
 }
 \description{
 This function determines the probability that a system becomes unstable if the
-strengths in an interaction are varied.
+strengths in a pair of interactions are varied.
 }
 \details{
 First, the diagonal of the Jacobian matrix is altered so that the matrix is
 just stable. This is done by subtracting the maximum real part of the eigenvalues from the
 diagonal values, and subsequently reducing the diagonal values by a fraction
 (in argument \code{threshold}). The default threshold of 0.01 is used in De Ruiter et al. (1995).
+Peter de Ruiter mentions through personal communication that this threshold method is a bit outdated,
+and that he personally recommends setting the diagonal to zero. You can achieve this by setting
+\code{threshold} to \code{NULL}.
+\cr
 Every pair of interaction strengths is then randomly varied between 0 and 2aij a certain
 number of times. The probability that the food web becomes unstable is the total count of
-unstable matrices divided by the total number of permutations. \cr
+unstable matrices divided by the total number of permutations.
+\cr
 Using the method 'scalar' to asses stablity might be somewhat slower than the method 'eigenvalue'.
+\cr
+Beware that where \code{assessLinksFixed} reports the **absolute and relative** effect on stability
+of altering **one** interaction strength according to a **fixed** function,
+this function \code{assessLinksPerm} reports the **probability** that the matrix becomes unstable
+when a **pair** of interaction strenghts in altered between 0 and 2 time the original interaction
+strength a certain number of times.
 }
 \references{
 \itemize{
@@ -69,5 +88,5 @@ https://doi.org/10.1126/science.269.5228.1257
 }
 }
 \seealso{
-\code{getStability}
+\code{getStability} \code{assessLinksFixed}
 }

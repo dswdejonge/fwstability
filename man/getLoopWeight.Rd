@@ -7,10 +7,11 @@
 getLoopWeight(IS, d = NULL)
 }
 \arguments{
-\item{IS}{(required) Numeric vector of length \code{k} with interaction strengths.}
+\item{IS}{(required) Numeric vector of length \code{k} with all
+interaction strengths from a loop.}
 
-\item{d}{(optional) Numeric vector of length \code{k} with natural death rates in
-the same unit as IS.}
+\item{d}{(optional) Numeric vector of length \code{k} with natural
+death rates of all compartments included in the loop with the same unit as \code{IS}.}
 }
 \value{
 Returns a double.
@@ -21,8 +22,8 @@ This function calculates the loop weight.
 \details{
 Loop weight is defined as the geometric mean of all absolute
 interaction strengths in a loop of length k. It combines information on
-the feedback of the loop, with natural death rates and the length of
-the loop. The feedback is scaled by the natural death rates in the reference
+the feedback of the loop with natural death rates and the length of
+the loop. The feedback is scaled by the natural death rates as in Neutel et al. 2007,
 because the stability measure is also scaled by death rates. Depending on
 your stability measure you can decide to omit inclusion of death rates.
 }

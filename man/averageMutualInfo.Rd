@@ -16,7 +16,7 @@ Returns a double.
 Calculates average mutual information.
 }
 \details{
-Cannibalistic flows (from i to i) are not included in calculations.
+Cannibalistic flows (from i to i) are included in calculations.
 }
 \references{
 \itemize{

@@ -4,8 +4,13 @@
 \alias{assessLinksFixed}
 \title{Assess stabiliy effect of a fixed link alteration}
 \usage{
-assessLinksFixed(JM, method = "eigenvalue", MR = NULL, dead = NULL,
-  func = function(x) {     return(x * 2) })
+assessLinksFixed(
+  JM,
+  method = "eigenvalue",
+  MR = NULL,
+  dead = NULL,
+  func = function(x) {     return(x * 2) }
+)
 }
 \arguments{
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
@@ -22,8 +27,9 @@ The "scalar" method finds asymptotic stability as the scalar of natural mortalit
 rates needed to acquire a stable matrix.
 }
 \item{
-The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016), based on half the the maximum
-real part of the eigenvalues from the addition of the Jacobian matrix to its transpose.
+The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016);
+initial stability is half the maximum real part of the eigenvalues derived from the
+matrix obtained by addition of the Jacobian matrix to its transpose.
 }
 }}
 
@@ -35,20 +41,21 @@ set to NA.}
 
 \item{func}{(required) Function describing how to alter each interaction strength to
 assess the effect on stability of the respective link. Default is doubling each
-interaction strength.}
+interaction strength (interaction strenght *2).}
 }
 \value{
 Returns a dataframe with absolute and relative changes in stability for alteration
 of each interaction strength in the Jacobian matrix.
 }
 \description{
-This function assesses the effect on stability of altering each interaction strength
-in a Jacobian matrix according to a fixed function.
+This function assesses the effect of altering each interaction strength
+in a Jacobian matrix according to a fixed function on stability .
 }
 \details{
 If the change in stability (delta) is negative, the system becomes more stable if
-the respective food web compartment is removed from the Jacobian matrix. The opposite
-is true if delta is positive. \cr
+the respective interaction strength is altered in the Jacobian matrix
+(all other interaction strenghts keep their original value).
+The system becomes less stable if delta is positive. \cr
 Using the method 'scalar' might be somewhat slower than the method 'eigenvalue'.
 }
 \references{

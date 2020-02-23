@@ -20,4 +20,4 @@ Suggests:
 VignetteBuilder: 
 	knitr,
 	LIM
-RoxygenNote: 6.1.1.9000
+RoxygenNote: 7.0.2

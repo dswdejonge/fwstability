@@ -4,30 +4,47 @@
 \alias{assessFeedback}
 \title{Assess feedback characteristics of network}
 \usage{
-assessFeedback(JM, MR = NULL, compnames = NULL, findLoops = F,
-  k = NULL, file = NULL, verbose = T)
+assessFeedback(
+  JM,
+  findLoops = F,
+  k = NULL,
+  output = "allLoops",
+  file = NULL,
+  MR = NULL,
+  compnames = NULL,
+  verbose = T
+)
 }
 \arguments{
 \item{JM}{(required) Jacobian matrix with interaction strengths.}
+
+\item{findLoops}{(required) If you want the function to search for loops in your network
+and store them a file, set findLoops to TRUE. You will need to provide an output name
+(see \code{output}).
+This function will then redirect to a recursive depth-first-search function
+to find all loops or all loops of length k (see element \code{k} and function \code{dfs()}
+and store them in a textfile.
+If you already have a text file with the compartments indices of each loop per line,
+you can set \code{findLoops} to FALSE (see element \code{file}. Default is FALSE.}
+
+\item{k}{(optional) Integer. Can be used if \code{findLoops} is TRUE.
+It indicates that you only want to search for loops of length \code{k}.
+Default is \code{NULL}, which finds all loops if \code{findLoops} is TRUE.}
+
+\item{output}{(required if findLoops is TRUE) String.
+The name provided in \code{output} is used to create the text file name
+where the loops are stored. Default is "allLoops".}
+
+\item{file}{(required if findLoops is FALSE) String.
+This is the path to the text file where the loops are stored.}
 
 \item{MR}{(optional) Natural mortality/death rates for scaling the
 maximum loop weight, same unit as Jacobian matrix.}
 
 \item{compnames}{(optional) Vector with compartment names in same order
-as the Jacobian matrix. If it is not included the names of JM
-are used as compartment names. If the JM is not named, the output will
+as the Jacobian matrix. If it is not included the names of \code{JM}
+are used as compartment names. If the \code{JM} is not named, the output will
 simply include the index of compartments to indicate loops.}
-
-\item{findLoops}{(optional) Default is FALSE. You need a text file with the indices
-of each loop per line. If you do not have this yet, this function redirects
-to a recursive depth-first-search function to find all loops, or all loops
-of length k (see function \code{dfs()}.}
-
-\item{k}{(optional) Integer. Can be used if findLoops is TRUE,
-and indicates that you only want to search for loops of length k.}
-
-\item{file}{(optional) Default is "allLoops.txt". Is the text file
-with indices of all loops. Should be present in the working directory.}
 
 \item{verbose}{(optional) Default is TRUE.
 Set to FALSE if you don't want messages printed.}
@@ -43,17 +60,19 @@ This function can find all loops or loops of a specific length, and consequently
 calculate the feedback and loop weight of each loop.
 }
 \details{
+Researching feedback loops in your system can be very informative to understand the
+system's stability. To find all loops in your system you can use a depth-first-search
+algorithm (set \code{findLoops} to TRUE and \code{k} to NULL).
+Please be aware that increasing the size of your network, exponentially
+increases the computation time to find all loops. Therefore, if you have a large
+network you might want to limit your search to loops of length k = 2
+or k = 3, as those are found to be the most important in determining
+overall feedback and stability in your system (Neutel & Thorne 2014). \cr
+
 Natural death/mortality rates (MR) can be found as the absolute
 values on the diagonal.
 Diagonal values for detritus are also regarded 'death' rates, as they
 represent self-dampening effects. \cr
-
-The depth-first-search algorithm can find all loops in your network.
-Please be aware that increasing the size of your network, exponentially
-increases the computation time to find all loops. If you have a large
-network you might want to limit your search to loops of length k = 2
-or k = 3, as those are found to be the most important in determining
-overall feedback and stability in your system (Neutel & Thorne 2014). \cr
 
 Feedback of a loop is the product of all interaction strengths
 in a loop (so feedback is not additative but multiplicative).

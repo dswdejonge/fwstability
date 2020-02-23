@@ -4,15 +4,17 @@
 \alias{dfs}
 \title{Depth-First-Search wrapper}
 \usage{
-dfs(AM, k = NULL, output = NULL, verbose = T)
+dfs(AM, output = "allLoops", k = NULL, verbose = T)
 }
 \arguments{
 \item{AM}{(required) Adjacency matrix}
 
-\item{k}{(optional) Integer of length loop to search for.}
-
-\item{output}{(optional) Filename to store loops. Default is "allLoops.txt"
+\item{output}{(required) Name for textfile to store loops.
+The data will be stored as "<output>.txt" if all loops are searched for, or as
+"<output>_k=<k>.txt". Default is "allLoops", so the text file will be "allLoops.txt"
 or "allLoops_k=<k>.txt".}
+
+\item{k}{(optional) Default is NULL. Integer of length loop to search for.}
 
 \item{verbose}{(optional) Default is TRUE. Set to FALSE to hide messages.}
 }
@@ -25,9 +27,5 @@ The wrapper checks data input, redirects to the right algorithm, and checks if n
 file will be overwritten.
 }
 \references{
-\itemize{
-\item{
-Reference?
-}
-}
+Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph
 }

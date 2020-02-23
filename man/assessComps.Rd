@@ -21,8 +21,9 @@ The "scalar" method finds asymptotic stability as the scalar of natural mortalit
 rates needed to acquire a stable matrix.
 }
 \item{
-The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016), based on half the the maximum
-real part of the eigenvalues from the addition of the Jacobian matrix to its transpose.
+The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016);
+initial stability is half the maximum real part of the eigenvalues derived from the
+matrix obtained by addition of the Jacobian matrix to its transpose.
 }
 }}
 
@@ -37,8 +38,8 @@ Returns a dataframe with absolute and relative changes in stability for removal
 of each food web compartment from the Jacobian matrix.
 }
 \description{
-This function assesses the affect on stability of removing individual compartments from
-the Jacobian matrix.
+This function assesses the effect of removing individual compartments from
+the Jacobian matrix on stability.
 }
 \details{
 If the change in stability (delta) is negative, the system becomes more stable if

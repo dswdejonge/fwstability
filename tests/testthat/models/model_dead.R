@@ -51,6 +51,15 @@ DIAG <- c(-1,-2,-3)
 model2 <- model
 model2$diagonal <- DIAG
 JM2 <- JM; JM2[c(1,5,9)] <- DIAG
+
+JMnorm <- matrix(c(
+  JM2[1]/abs(JM2[1]), JM2[2]/abs(JM2[5]), JM2[3]/abs(JM2[9]),
+  JM2[4]/abs(JM2[1]), JM2[5]/abs(JM2[5]), JM2[6]/abs(JM2[9]),
+  JM2[7]/abs(JM2[1]), JM2[8]/abs(JM2[5]), JM2[9]/abs(JM2[9])
+  ), 3, 3
+)
+rownames(JMnorm) <- fwnames ; colnames(JMnorm) <- fwnames
+JMnorm2 <- JMnorm ; diag(JMnorm2) <- c(JMnorm[1], 0, 0)
 ###
 
 

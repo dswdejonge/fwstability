@@ -434,3 +434,32 @@ getJacobian <- function(model = stop("Model input required"),
   }
   return(JM)
 }
+
+#' Normalize the Jacobian matrix
+#'
+#' This function normalizes the Jacobian matrix by dividing each row by
+#' the corresponding absolute diagonal value.
+#'
+#' @param JM (required) A square named Jacobian matrix with numeric values representing
+#' the effect of one compartment (rows) on another compartment (columns).
+#' The diagonal must be quantified, and cannot contain zeroes.
+#' @param allzero Boolean. Default TRUE. Sets all diagonal values - except for dead compartments -
+#' to zero after normalisation. If set to FALSE, the normalized Jacobian will have -1 for each diagonal
+#' value.
+#' @param dead_names (required if allzero is TRUE and there are dead compartments in the system)
+#' Character vector with the names of all dead compartments.
+#' @return Returns a normalized Jacobian matrix with either an all-zero (except detritus) diagonal
+#' or a diagonal with -1.
+#' @export
+normalizeJacobian <- function(JM, allzero = TRUE, dead_names = NULL){
+  checkMformat(JM)
+  if(0 %in% diag(JM)){
+    stop("No zeroes may be present on the diagonal when normalizing the Jacobian matrix.")
+  }
+  JMnorm <- JM / abs(diag(JM))
+  if(allzero){
+    i <- names(diag(JMnorm)) %in% dead_names
+    diag(JMnorm)[!i] <- 0
+  }
+  return(JMnorm)
+}

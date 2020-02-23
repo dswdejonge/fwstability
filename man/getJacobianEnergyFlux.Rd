@@ -4,8 +4,18 @@
 \alias{getJacobianEnergyFlux}
 \title{Jacobian matrix with interaction strengths}
 \usage{
-getJacobianEnergyFlux(FM, BM, AE, GE, diagonal = NULL, dead = NULL,
-  externals = NULL, MR = NULL, verbose = T, netto = NULL)
+getJacobianEnergyFlux(
+  FM,
+  BM,
+  AE,
+  GE,
+  diagonal = NULL,
+  dead = NULL,
+  externals = NULL,
+  MR = NULL,
+  verbose = T,
+  netto = NULL
+)
 }
 \arguments{
 \item{FM}{(required) A named square flowmatrix, source compartments as rows,
@@ -55,7 +65,7 @@ compartments per unit time (t-1)).}
 
 \item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
 
-\item{netto}{(optional) Boolean. Default is NULL. If TRUE, the netto Flowmatrix is used
+\item{netto}{(optional) Boolean. Default is NULL If TRUE, the netto Flowmatrix is used
 to calculate interaction strengths. This is only relevant if there are two food web compartments
 which act both as prey and predators to one another.}
 }

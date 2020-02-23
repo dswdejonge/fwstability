@@ -21,8 +21,9 @@ The "scalar" method finds asymptotic stability as the scalar of natural mortalit
 rates needed to acquire a stable matrix.
 }
 \item{
-The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016), based on half the the maximum
-real part of the eigenvalues from the addition of the Jacobian matrix to its transpose.
+The "initial" method finds initial stability as equation 4 from Arnoldi et al. (2016);
+initial stability is half the maximum real part of the eigenvalues derived from the
+matrix obtained by addition of the Jacobian matrix to its transpose.
 }
 }}
 
@@ -46,7 +47,7 @@ This function can find the initial and asymptotic stability of a Jacobian matrix
 \details{
 Initial stability is the initial reaction of a system to a small perturbation.
 Initial stability is found by equation 4 from Arnoldi et al. (2016),
-with the difference that this function does not change the sign of the value.
+with the difference that th function in this package does not change the sign of the value.
 Therefore, a negative initial stability means the system is reactive i.e. the perturbations are amplified.
 \cr
 \cr
@@ -63,7 +64,8 @@ values for self-dampening by setting the argument \code{diagonal} to "model" in 
 \code{getJacobian}
 \cr
 \cr
-The "scalar" method relies on the estimation of natural mortality rates (t-1).
+The "scalar" method for asymptotic stability relies on the estimation of natural mortality rates
+(unit per time, t-1).
 A critical matrix, i.e. a matrix that is on the stability threshold, is calculated by setting the
 diagonal to the given mortality values and subtracting the maximum real part of the eigenvalues
 from each diagonal value.
@@ -73,13 +75,14 @@ Subsequently, the provided natural mortality is iteratively scaled with the dete
 stepsize until the matrix becomes stable, i.e. the maximum real part of the eigenvalues
 is negative.
 If dead compartments exist, their diagonal values are not scaled, because dead compartments do not
-have mortality rates. Therefore, the diagonal values of dead compartments in the Jacobian matrix should
-be quantified correctly, or set to zero (assuming there is no intracompartmental feedback).
+have natural mortality rates. Therefore, the diagonal values of dead compartments in the Jacobian matrix should
+be quantified correctly, or set to zero (assuming there is no intracompartmental detritus feedback).
 \cr \cr
 Mortality rates per unit time can for example be calculated as the mortality flux (biomass
-per surface area per unit time) divided by the biomass (biomass) per surface area, or as the
-inverse of the natural lifespan of the species. The mortality flux can be found with the
-function \code{getMortalityRates}, which assumes natural mortality equal production
+per surface area per unit time) divided by the biomass per surface area, or as the
+inverse of the natural lifespan of the species. Mortality fluxes can be found with the
+function \code{getMortalityRates} if you have the relevant data;
+the function assumes natural mortality equals production
 (AE x GE x Consumption) minus predation (flux to all other faunal compartments).
 }
 \examples{
