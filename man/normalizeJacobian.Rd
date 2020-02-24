@@ -4,19 +4,19 @@
 \alias{normalizeJacobian}
 \title{Normalize the Jacobian matrix}
 \usage{
-normalizeJacobian(JM, allzero = TRUE, dead_names = NULL)
+normalizeJacobian(JM, dead_names = NULL, allzero = TRUE)
 }
 \arguments{
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing
 the effect of one compartment (rows) on another compartment (columns).
 The diagonal must be quantified, and cannot contain zeroes.}
 
+\item{dead_names}{(required if allzero is TRUE and there are dead compartments in the system)
+Character vector with the names of all dead compartments.}
+
 \item{allzero}{Boolean. Default TRUE. Sets all diagonal values - except for dead compartments -
 to zero after normalisation. If set to FALSE, the normalized Jacobian will have -1 for each diagonal
 value.}
-
-\item{dead_names}{(required if allzero is TRUE and there are dead compartments in the system)
-Character vector with the names of all dead compartments.}
 }
 \value{
 Returns a normalized Jacobian matrix with either an all-zero (except detritus) diagonal

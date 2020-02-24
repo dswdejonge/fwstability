@@ -39,7 +39,7 @@ where the loops are stored. Default is "allLoops".}
 This is the path to the text file where the loops are stored.}
 
 \item{MR}{(optional) Natural mortality/death rates for scaling the
-maximum loop weight, same unit as Jacobian matrix.}
+loop weight, same unit as Jacobian matrix.}
 
 \item{compnames}{(optional) Vector with compartment names in same order
 as the Jacobian matrix. If it is not included the names of \code{JM}

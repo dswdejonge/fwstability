@@ -382,7 +382,7 @@ maxNrLoops <- function(n, k = NULL) {
 #' @param file (required if findLoops is FALSE) String.
 #' This is the path to the text file where the loops are stored.
 #' @param MR (optional) Natural mortality/death rates for scaling the
-#' maximum loop weight, same unit as Jacobian matrix.
+#' loop weight, same unit as Jacobian matrix.
 #' @param compnames (optional) Vector with compartment names in same order
 #' as the Jacobian matrix. If it is not included the names of \code{JM}
 #' are used as compartment names. If the \code{JM} is not named, the output will
@@ -418,7 +418,6 @@ maxNrLoops <- function(n, k = NULL) {
 #' Diagonal values for detritus are also regarded 'death' rates, as they
 #' represent self-dampening effects. \cr
 #'
-
 #' Feedback of a loop is the product of all interaction strengths
 #' in a loop (so feedback is not additative but multiplicative).
 #'

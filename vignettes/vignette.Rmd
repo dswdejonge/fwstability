@@ -21,14 +21,14 @@ NOTE: The package is in the final stages of development and not yet available fr
 This vignette explains how you can use the fwstability package to assess stability of energy-flux food-web models. The subsections contain details about the features of the package and the scientific background. Reading this is highly recommended so that you can interpret your results correctly. An in-depth explanation of the science of energy-flux food-web stability is found in our paper. Please cite if you are using this package:  
 Daniëlle S.W. de Jonge, Johan van de Koppel, Dick van Oevelen, Peter C. de Ruiter. Measuring stability of energy-flux food web models. In prep.
 
-1) Quick start    
-2) How to prepare your energy-flux food-web model for stability analysis   
-3) How to derive the Jacobian matrix    
-4) How to conduct stability analysis   
-5) How to assess your food-web for characteristics related to stability     
-6) Some examples with published food-webs  
+1) Quick start.    
+2) How to prepare your energy-flux food-web model for stability analysis.   
+3) How to derive the Jacobian matrix.    
+4) How to conduct stability analysis.   
+5) How to assess your food-web for characteristics related to stability.     
+6) Some examples with published food-webs.  
 
-# Quick start
+# 1. Quick start
 The fwstability package is in the final stages of development, and not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub. There is also the fwmodels package, that contains several published energy-flux food-web models that are used as examples in this vignette.
 ```{r installation}
 # install.packages("devtools")
@@ -140,17 +140,27 @@ print(s2)
 
 # Calcalate stability with the eigenvalue method 
 # performed on a normalized JM with an all-zero diagonal (except dead compartments).
+# To normalize the diagonal must be quantified.
+JMnorm <- normalizeJacobian(JM4, dead_names = model$dead$names)
+s3 <- getStability(JMnorm)
 
+# The value of s3 is found to be very similar to s2 (Neutel & Thorne 2014), and
+# thus also represents the fraction of self-dampening necessary to stabilize the system.
+# This value is suitable to compare stability between different systems. 
+# The resolution of s3 is probably better than the resolution of s2, and quicker to calculate.
+# Therefore, we recommend using s3 as the standard stability measure.
+print(s3)
 ```
 
-# 1. Preparing a food web model for stability analysis
-## 1.1. A linear inverse model
-In a linear inverse model (LIM) all processes in a food web are captured by a set of linear equations. These linear equations can be either equalities (the outcome of an equation should equal another value) or inequalities (the outcome of an equation should be equal or greater than another value). The equations can parameterized with known data, but often not all processes are studied well enough to quantify. The unknowns in the equations can then be found with linear programming, thereby fully quantifying your model. A simple example of a linear optimization problem can be found on \link{Wikipedia}[https://en.wikipedia.org/wiki/Linear_programming#Example]. More information on using LIM for food web quantification can be found in:  
-van Oevelen, D., van den Meersche, K., Meysman, F.J.R., Soetaert, K., Middelburg, J.J., Vézina, A.F., 2010. Quantifying food web flows using linear inverse models. Ecosystems 13, 32–45. https://doi.org/10.1007/s10021-009-9297-6.
+# 2. Preparing a food web model for stability analysis
+## 2.1. A linear inverse model
+In a linear inverse model (LIM) all processes in a food web are captured by a set of linear equations. These linear equations can be either equalities (the outcome of an equation should equal another value) or inequalities (the outcome of an equation should be equal or greater than another value). The equations can parameterized with known data, but often not all processes are studied well enough to quantify. The unknowns in the equations can then be found with linear programming, thereby fully quantifying your model. A simple example of a linear optimization problem can be found on \link{Wikipedia}[https://en.wikipedia.org/wiki/Linear_programming#Example].  
 
-A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). The example food web models used in this section are the same food web model as in the LIM vignette with small alterations, so please refer to this document to understand the concept and set-up of a LIM. A LIM model produced by the LIM package can be used directly by the fwstability package if it is formatted in a certain why. If your model is not formatted according to the requirements of the package, you will need to extract certain data from the model yourself before using the package. Both are explained below.
+A linear inverse food web model (LIM) can be prepared with the R-package LIM (https://cran.r-project.org/web/packages/LIM/index.html). More information on using LIM for food web quantification can be found in:  
+van Oevelen, D., van den Meersche, K., Meysman, F.J.R., Soetaert, K., Middelburg, J.J., Vézina, A.F., 2010. Quantifying food web flows using linear inverse models. Ecosystems 13, 32–45. https://doi.org/10.1007/s10021-009-9297-6.  
 
-### 1.1A. Formatting of LIM model for direct usage in the fwstability package
+A LIM model produced by the LIM package can be used directly by the fwstability package if it is formatted in a certain way, as explained below. If your LIM is not formatted according to the requirements of the fwstability package, you will need to extract certain data from the model yourself before using the package. For the latter, please refer to 2.2. Energy-flux model.
+
 In order to obtain a Jacobian matrix, certain physiological processes must be calculated from your LIM. The fwstability can automatically extract this data if you labelled them with a unique tag. In the model you specify:  
 
 - which compartments are dead compartments (e.g. detritus and carrion, default tag is "dead")  
@@ -170,12 +180,11 @@ Rules and tips for using tags:
 - **The tag may occur anywhere in the string** (so, it does not have to be added specifically at the beginning or ending of the name of the compartment/flow/variable). Ensure that the rest of names do not accidentally contain a tag! For example, if you include the Indian wild ass (*Equus hemionus khur*) in your foodweb, a variable representing its respiration called respirationAss will be interpreted as the assimilation variable of an unknown compartment 'respiration' because it contains the default assimilation tag "ass".    
 - Dead compartments, defecation, and mortality can be omitted from your model if you don't want to include them (for example make them all export to an external compartment). However, including assimilation and growth is required for all non-dead compartments. If you have no growth or assimilation data (for example for bacteria) you can assume the full ingestion is used for assimilation and/or growth and define your variable accordingly.  
 
-
-
 General tips for setting up a LIM:  
 
 - It is recommended to be consistent in your naming of flows and variables so later you can easily extract data. For naming flows for example: sourceProcessSink.  
 - In order to prevent certain processes to be quantified as zero, include minimum constraints. This is especially important if you later want to normalize the Jacobian matrix, because this process does not allow zeroes on the diagonal. For example, if you don't set a minimum constraint for non-predatory mortality, the parsimonious solution might set this flow to zero. This is not realistic and it the occurence of these zeroes may hamper your future calculations.
+- The inclusion of biomasses in the LIM is not required to be able to solve the model. However, biomasses *are* required for all internal compartments in order to calculate the Jacobian matrix. If there are compartments that do not have biomasses in the LIM, they must either be quantified anyway or excluded from the getJacobian() function by including them as 'externals'.
 
 Specifying your compartments in a LIM input file can look like this:  
 *****  
@@ -206,7 +215,7 @@ animalDef       : Animal -> deadDetritus
 detritusMineralization: deadDetritus -> CO2  
 \#\# END FLOWS  
 *****  
-Make sure you use the name as specified in "COMPARTMENT", so including the tag for dead compartments. The name of defecation and mortality flows should only contain the name of the compartment and the tag. If it contains more words, like "thisAnimalMort" the package ignores this flow. If, for some reason, you want to include multiple parallel defecation or mortality flows, you need to define a variable (in the VARIABLE section) that includes the sum of all defecation and mortality flows. Like this:  
+Make sure you use the compartment names as specified in "COMPARTMENT", so including the tag for dead compartments. The name of defecation and mortality flows should only contain the name of the compartment and the tag. If it contains more words, like "thisAnimalMort" the package ignores this flow. If, for some reason, you want to include multiple parallel defecation or mortality flows, you need to define a variable (in the VARIABLE section) that includes the sum of all defecation and mortality flows. Like this:  
 *****   
 \#\# FLOWS  
 animalDefOne       : Animal -> deadDetritusOne    
@@ -225,7 +234,8 @@ animalGrowth    = animalAss * animalGrowthEfficiency ! Default growht tag "growt
 When your LIM input file is done, you can read it into R, and optionally solve it with the LIM package. 
 ```{r}
 # Use the LIM package for importing your model
-require(LIM)
+# install.packages("LIM")
+library(LIM)
 lim <- Read(system.file("extdata", "foodweb.lim", package = "fwstability"))
 # This example is only one of many ways to solve a LIM.
 lim_solved <- Ldei(Setup(lim))
@@ -233,7 +243,7 @@ lim_solved <- Ldei(Setup(lim))
 
 The model should be included in a list that can later be parsed into the getJacobian function. The getJacobian matrix will need a list with at least the elements "type" and "model". The element "type" must be set to "LIM", and the element "model" is the read-in LIM (beware, not yet set up!). If there is no solution specified, the parsimonious solution is used (minimizing the sum of squares).
 ```{r eval = FALSE}
-mymodel <- list(
+model <- list(
   type = "LIM",
   model = lim
 )
@@ -242,17 +252,18 @@ mymodel <- list(
 
 If you have solved the model, you can include it in your list under the element "web" so that it can be used by the package. This element must be a named vector with flow values and their names.
 ```{r eval = FALSE}
-mymodel <- list(
+model <- list(
   type = "LIM",
   model = lim,
   web = lim_solved$X
 )
+# Ready to use in the fwstability package!
 ```
 
 If you use your own tags in the model, for example "RIP" in stead of "MORT", you  need to specify this in the list under the elements "aTag", "gTag", "mTag", "deadTag", and/or "defTag". If one or more of these elements are omitted, the default tags are used.
 ```{r eval = FALSE}
 # Example when I want to use my own tags for growth, mortality and defecation.
-mymodel <- list(
+model <- list(
   type = "LIM",
   model = lim,
   gTag = "production",
@@ -261,7 +272,7 @@ mymodel <- list(
 )
 ```
 
-If setting up your model takes a long time (quite rare), you can include your set-up model in the element "setup" so that it is not setup within the function.
+If setting up your model takes a long time, you can include your set-up model in the element "setup" so that it is not setup within the function.
 ```{r eval = FALSE}
 setupLIM <- Setup(lim)
 mymodel <- list(
@@ -271,81 +282,22 @@ mymodel <- list(
 )
 ```
 
-The getJacobian function by default creates an all-zero diagonal. If you want another diagonal you can specify this in your list under the element "diagonal". The options are either a single value (will set the whole diagonal to this value), a numeric vector, or the word "model" which will calculate the upperbound values of the diagonal from the model.
-```{r eval = FALSE}
-mymodel <- list(
-  type = "LIM",
-  model = lim,
-  diagonal = "model"
-)
-```
+For a working example, please refer to 5.3 A complex application.
 
+## 2.2. Energy flux model
+If you don't use a linear inverse model (LIM) to mass-balance your system, or your LIM is not formatted correctly to be used by the fwstability package, you will need to extract the necessary data first. In order to obtain a Jacobian matrix you need:  
 
-### 1.1B. Energy flux model
-If you have detritus in your food-web, it is very important for the fwstability package that you include a list that names all detritus compartments (element called 'names') and includes a matrix with **the fraction of each flow that comprises of excretion** (element called 'frac'). Thus, the flux from birds to detritus is both defecation and mortality. By including this matrix with fractions we can later still distinguish the exact magnitude of the defecation flow from the mortality flow. This matrix must have the same dimensions as the flowmatrix FM without the external compartments.
-
-Mortality rates (per unit time) are an important piece of information in stability analysis. Therefore, it might come in handy to have a vector that includes the mortality rates. We can simply manually divide the mortality flux by the biomass of the correpsonding compartment. However, this may be laborious for larger food webs. Therefore, you can also use the package function \code{getMortalityRates}.
-
-Now we have our complete energy-flux food-web model and all the variables we need for the stability analysis. It is a good idea to combine all variables in one object that we will call 'model'. The elements in this model are named so that the function can recognize the right data immediately.
-
-
-If you don't have a LIM or your LIM is formatted in such a way that it cannot be automatically used by the getJacobian function, you need to extract the necessary data first. In order to obtain a Jacobian matrix you need:  
-
-- a flowmatrix containing the total flow of material/energy between compartments.   
+- a named flowmatrix containing the total flow of material/energy between compartments.   
 - a named vector with biomasses for all compartments (including the dead ones).  
-- a named vector with assimilation efficiencies for all non-dead compartments. An organism assimilates (A) the part of all ingested food (I) that is not defecated (D): $A = I-D$. So, assimilation efficiency (AE) is the assimilated amount of food (A) divided by the total of ingested food (I): $AE = A/I $.  
-- a named vector with growth efficiencies for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$.  
-
-Optionally, you can specify:  
-
-- a list containg three elements with the names of dead compartments (element "names"), if those compartments receive feaces (string "Def") or not (string "noDef") (element def), and a matrix with the fraction of each flow that constitutes defecation (element "frac"). The element "def" and "frac" are optional. If "def" is omitted, it is assumed no defecation occurs in the food web. The element "frac" is only necessary if you have multiple parallel flows between two compartments, of which only one or a couple constitute defecation.  
+- a named vector with assimilation efficiencies for all non-dead compartments. An organism assimilates (A) the part of all ingested food (I) that is not defecated (D): $A = I-D$. So, assimilation efficiency (AE) is the assimilated amount of food (A) divided by the total of ingested food (I): $AE = A/I $. (see diagram under quick start)  
+- a named vector with growth efficiencies for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$. (see diagram under quick start)  
+- if you have dead compartments in your system, you should specify a list containg two elements with the names of dead compartments (element "names"), a matrix with the fraction of each flow that constitutes defecation (element "frac").
 - a character vector containing the names of external compartments (these are removed from the flowmatrix before the calculations).  
-- a numeric vector with mortality rates (in the same unit as the flowmatrix). This information is obligatory if you want to calculate diagonal values for the Jacobian matrix from the flux values. Perhaps this is already included in your model as a flow from the organism into a detritus or carrion compartment. Beware that these mortality rates must represent non-predatory mortality! Mortality rates can be searched for in literature or calculated as the inverse of the natural lifespan (per unit time) and multiplied by the biomass of the compartment to obtain the same unit as in the flowmatrix.  
+- a numeric vector with mortality rates (in the same unit as the flowmatrix). This information is obligatory if you want to calculate diagonal values for the Jacobian matrix from the flux values. Perhaps this is already included in your model as a flow from the organism into a detritus or carrion compartment. Beware that these mortality rates must represent *non-predatory* mortality! Mortality rates can be searched for in literature or calculated as the inverse of the natural lifespan (per unit time) and multiplied by the biomass of the compartment to obtain the same unit as in the flowmatrix. Mortality rates can heavily influence your stability results, so it is wise to use high-confidence data in your model.    
 
+The above information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the getJacbianEnergyFlux function. Please review the format of the examples in the fwmodels package to understand how to format your data.  
 
-This information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the getJacbianEnergyFlux function. For a working example please see the examples from literatures De Ruiter 1995.  
-
-```{r}
-# An example food web model (not necessarily ecologically correct...)
-# Detritus takes up CO2.
-# Plants and animals take up detritus.
-# Plants are eaten by animals.
-# Animals and plants both deposit material into detritus compartment.
-# Animals respire into the external CO2 compartment.
-compartments <- c("DETRITUS", "PLANT", "ANIMAL", "CO2")
-# A named flow matrix
-FM <- matrix(c(0, 3, 8, 1, 7, 0, 0, 0, 4, 4, 0, 0, 0, 0, 1, 0), nrow = 4, ncol = 4)
-rownames(FM) <- compartments
-colnames(FM) <- compartments
-# Named numeric vectors with biomasses, assimilation efficiencies,
-# and growth efficiencies
-BM <- c(30, 20, 10) ; names(BM) <- compartments[1:3]
-AE <- c(NA, 0.2, 0.3) ; names(AE) <- compartments[1:3]
-GE <- c(NA, 0.2, 0.3) ; names(GE) <- compartments[1:3]
-# There is one dead compartment into which defecation occurs.
-# All flow from the animal to detritus constitutes defecation (and
-# not for example also mortality) so the element "frac" is omitted.
-dead <- list(names = "DETRITUS", def = "Def")
-# There is one external compartment
-externals <- "CO2"
-
-# Option 1
-model <- list(
-  type = "EF", 
-  FM = FM, 
-  BM = BM, AE = AE, GE = GE,
-  dead = dead, externals = externals
-)
-getJacobian(model)
-
-# Option 2
-getJacobianEnergyFlux(
-  FM = FM, 
-  BM = BM, AE = AE, GE = GE,
-  dead = dead, externals = externals)
-```
-
-If you have a LIM with the wrong data format, the functions getFlowMatrix and getVariables  may still be of use to easily calculate the needed data. The function getFlowMatrix is similar to the function Flowmatrix from the LIM package, but enhanced so that it also works if parallel flows exist between the same two compartments. The function getVariables returns a named list with the values of all defined variables calculated from the food web flows. So, for example, if you have defined variables related to assimilation but for some reason didn't use the tag system, you can easily extract the variables values and find your assimilation efficiency.
+If you have a LIM with the wrong data format, the functions getFlowMatrix and getVariables may still be of use to easily calculate the needed data. The function getFlowMatrix is similar to the function Flowmatrix from the LIM package, but enhanced so that it also works if parallel flows exist between the same two compartments. The function getVariables returns a named list with the values of all defined variables calculated from the food web flows. So, for example, if you have defined variables related to assimilation but for some reason didn't use the tag system, you can easily extract the variables values and find your assimilation efficiency.
 
 ```{r}
 # Use the LIM package for importing your model
@@ -359,410 +311,843 @@ vars <- getVariables(lim)
 print(vars)
 ```
 
+# 3. Obtaining a Jacobian matrix
+Mathematically speaking, the Jacobian matrix contains the first order partial derivatives of a set of differential equations. If the differential equations describe the change in biomass over time for a set of food web compartments, the Jacobian elements can be interpreted as interaction strengths: the effect of population i on population j. In the fwstability package population i that exerts an effect is in rows, and population j that receives the effect is in columns. If you want to, you can change this by transposing the matrix. If the differential equations describe the total change in biomass per time unit $dBiomass/dt$, then the unit of the Jacobian matrix is per unit time and is also called the Community matrix. If the differential equations describe something else (like the per capita change in biomass per unit time), the unit of the Jacobian matrix will also be different (for example per unit biomass per unit time) and is therefore more difficult to ecologically interpret.  
 
-## 1.2. A dynamic model
-A dynamic food web model is a set of differential equations that describe the change in biomass of each food web compartment based on the biomass of other compartments and potentially other factors. It is common to use a set of (generalized) Lotka-Volterra equations for your food web model. The form of a generalized Lotka-Volterra equation is:
-$$\frac{dx_i}{dt} = x_i (r_i + \sum_{j=1}^n c_{ij}x_j) $$
-where $r_i$ is the natural per capita growth rate and $c_ij$ is the coefficient of the interaction i.e. the effect of population $j$ on population $i$. 
+An example of working with units: If you have a food web model with flows in the unit g Carbon $m^{-2} d^{-1}$ and biomass in g Carbon $m^{-2}$, the interaction strengths will have the unit $d^{-1}$.
 
-Lets create a dynamic model based on the same food web structure and data as the linear inverse model described above. Plants have a natural growth rate as they take up CO2 for primary production. Furthermore, plants are negatively impacted by animals as they are preyed upon. Plants have a negative effect on their own population growth, and are not influenced by detritus. Growth of animals is dependen on the feeding on plants. Animals, like plants, have a negative effect on their own population growth. Detritus have natural decline by decomposition, but are positively affected by animal defecation and plant waste.
-
-The deSolve package is great for solving a system of orginary differential equations. You can write your model in R, plug in parameters, and simulate the change over time in your ecosystem.
-```{r Lotka-Volterra}
-library(deSolve)
-library(ggplot2)
-
-fwnames <- c("PLANT", "ANIMAL", "DETRITUS")
-
-# Define the set of differential equations
-LotkaVolterra <- function (Time, State, Pars) {
-  with(as.list(c(State, Pars)), {
-    dP = PLANT * (r1 - c11 * PLANT - c12 * ANIMAL)
-    dA = ANIMAL * (-r2 + c21 * PLANT - c22 * ANIMAL - c23 * DET)
-    dD = DET * (-r3 + c31 * PLANT + c32 * ANIMAL - c33 * DET)
-    return(list(c(dP, dA, dD)))
-  })
-}
-
-# Parameters to initialize model
-#Pars <- c(alpha = 2, beta = 0.5, gamma = 0.2, delta = 0.6)
-Pars <- c(
-  r1 = 10, r2 = 1, r3 = 1,
-  c11 = 0.05, c12 = 0.5,
-  c21 = 7, c22 = 0.5, c23 = 0.5,
-  c31 = 0.75, c32 = 3, c33 = 2
-)
-# Initial biomass of compartments
-State <- c(PLANT = 10, ANIMAL = 5, DET = 10)
-# Time to run the simulation
-Time <- seq(0, 50, by = 1)
-
-# Run and plot simulation
-simulation <- ode(func = LotkaVolterra, y = State, parms = Pars, times = Time)
-plot <- ggplot(as.data.frame(simulation)) +
-  geom_line(aes(x = time, y = PLANT), colour = "green") +
-  geom_line(aes(x = time, y = ANIMAL), colour = "blue") +
-  geom_line(aes(x = time, y = DET), colour = "brown")
-
-```
-
-Mathematically speaking, the Jacobian matrix contains elements $\alpha_{ij}$ which are the first-order partial derivatives of each differential function valued with initial state biomasses. The rootSolve package numerically estimates these values by perturbing the initial state values.
-
-```{r}
-library(rootSolve)
-newState <- simulation[50,2:4]
-JM <- jacobian.full(y=newState, func=LotkaVolterra, parms = Pars)
-rownames(JM) <- fwnames ; colnames(JM) <- fwnames
-print(JM)
-```
-
-This Jacobian matrix already contains diagonal values. The stability can be found from this complete Jacobian matrix.
-```{r}
-getStability(JM)
-```
-
-
-Jacobian matrix from a ODE model
-This function produces a Jacobian matrix from a model defined as a set of
-ordinary differential equations.
-@inheritParams rootSolve::jacobian.full
-@seealso The package rootSolve for full documentation on \code{\link[rootSolve]{jacobian.full}}.
-getJacobianODE <- function(y, func, parms) {
-  JM <- rootSolve::jacobian.full(y = y, func = func, parms = parms)
-  rownames(JM) <- colnames(JM)
-  return(JM)
-}
-
-# 2. Obtaining a Jacobian matrix
-We want the upper-limit of intraspecific effects on the diagonal (thus the maximum amount of possible self-dampening effects on the system), thus we specify in our model how we want the function to treat the diagonal.  Beware that the unit of the Jacobian matrix is only per unit time if the input biomass is biomass per unit area (or volume) and and the fluxes unit is biomass per unit area (or volume) per unit time. If you use other units, please refer to the paper how this influences the interpretation of your results.
-
-We see that birds have a negative effect on insects because insects reduce in population through predation by birds, and insects have a positive effect on birds because the bird population grows by eating insects. Additionally, we see that all compartments have negative self-effects, meaning that if the population grows the self-dampening effects become stronger thus keeping population growth constrained. Detritus has a positive effect on both insects and birds, because their population grows by eating detritus. Insects have a negative effect on detritus, meaning their uptake of detritus has a larger effect than the detritus they deposit back through mortality and defecation. Birds, in contrast, have a positive effect on detritus, meaning their deposition into detritus through mortality and defecation is large enough to offset the negative effects of detritus uptake by birds.
-This food web model consists of three compartments of which the biomass is measured; Plants, Animals, and Detritus, and two external compartments with infinite biomass; CO2 and export. The unit of biomass is g C m-2 and the unit of flow flux is g C m-2 d-1. Plants take up CO2 and are consumed by Animals. Animals also consume Detritus. Both Plants and Animals deposit carbon into the Detritus compartment through natural mortality and defecation. Animals respire into the CO2 compartment and export carbon from the system, for example when they are predated upon by external animals. Detritus decomposes and thereby releases carbon into the CO2 pool. 
-
-Some of these flows are constrained by measured values. Therefore, linear programming can be used to find the parsimonious solution of all the flows (see LIM vignette). The quantified flows are stored in FM. 
-
-Based on the final flow values and the constraints defined in the model it is possible to calculate the assimilation and growth efficiencies of animals and plants. Assimilation efficiency is 1 - (defecation / ingestion) and assumed 1 for Plants. Growth efficiency is defined in model for Animals and assumed 1 for Plants. The vectors containing biomass, assimilation and growth efficiencies must be named for usage in the getJacobian function. If assimilation and growth efficiencies are not specified in the model, or cannot be calculated from the model, you can estimate a value or try to find a value from literature.
-
-```{r eval = FALSE}
-# Order Plant, Animal, Detritus. Just like the FM.
-AE <- c(1, 1 - (FM[2,3] / sum(FM[,2])), NA)
-GE <- c(1, 0.3, NA)
-BM <- lim$Components$val
-names(AE) <- rownames(FM)[1:3]
-names(GE) <- rownames(FM)[1:3]
-names(BM) <- rownames(FM)[1:3]
-```
-
-The food web data and calculated flows can be used to calculate a Jacobian matrix with the function getJacobian(). It is important to tell the function which compartments to regard as dead compartments (in this case detritus) and which compartments are external.
-```{r getJacobian, eval = FALSE}
-JM <- getJacobian(
-  FM = FM,
-  BM = BM,
-  AE = AE,
-  GE = GE,
-  dead = c("DET"),
-  externals = c("CO2", "EXP")
-)
-
-print(JM)
-```
-
-The interaction strengths have the unit per time. In our food web model the flows were g C m-2 d-1 and biomass g C m-2, so the interaction strengths have the unit d-1.
-
-From the interaction strengths in the Jacobian matrix we observe that Animals have a negative effect on the growth of Plants, and Plants have a positive effect on Animals, which makes sense because Plants are eaten by Animals. Detritus for this same reason has a positive effect on Animals. Both Plants and Animals have a positive effect on detritus, despite the fact that Detritus is consumed by Animals. This is caused by the fact that Animals overall deposit more Detritus than they take up. This highlights the importance of including Detritus as a dead compartment in the function. If we would leave out this argument the Detritus compartment would be viewed as a living compartment which can actively consume other compartments. In that case the deposition of feces would be regarded as predation on the animals by detritus, which makes no sense.  
-
-In the getJacobian function, the effect of a predator on its prey ($\alpha_{ij}$) is calculated as:
-
+In order to translate the energy-flux food-web model from the static domain to the dynamic domain, the system is described in Lotka-Volterra type equations and fluxes are equated to elements of these differential equations. For full explanation, please refer to the paper. In the getJacobian function, the effect of a predator $j$ on its prey $i$ ($\alpha_{ij}$) is calculated as:
 $$\alpha_{ij}=-\frac{F_{ij}}{x{j}}$$
-and the effect of a prey on its predator($\alpha_{ji}$) is calculated as:
-
+and the effect of a prey $i$ on its predator $j$ ($\alpha_{ji}$, which is also valid for the effect of detritus on its consumer) is calculated as:
 $$\alpha_{ji}=\frac{a_jp_jF_{ij}}{x{i}}$$
 where $F_{ij}$ is the flux between resource population $i$ and consumer population $j$, $a_j$ is the assimilation efficiency of the consumer, $p_j$ is the production efficiency of the consumer, and $x_{i,j}$ is the biomass of the respective population (de Ruiter et al., 1995; Neutel et al., 2002).
 
-The effect of a population $j$ on detritus ($\alpha_{dj}$) is calculated as:
+The effect of a population $j$ on detritus $d$ ($\alpha_{dj}$) is calculated as:
+$$\alpha_{dj}=\frac{1}{x_j}(\sum_{i=1}^n (1-a_j)F_{ij}\epsilon_{jd} + \sum_{i=1}^n (1-a_i)F_{ji}\epsilon_{id} + (\sum_{i=1}^na_jp_jF_{ij}-\sum_{i=1}^nF_{ji})\delta_{jd} - F_{dj})$$
+where $n$ is the total number of compartments in the food web, $\epsilon_{jd}$ is the fraction of total egestion by $j$ that flows into detritus $d$, and $\delta_{jd}$ is the fraction of total mortality of $j$ that flows into detritus $d$.  
+The effect of another detritus compartment $o$ on detritus $d$ ($\alpha_{do}$) is calculated as:
+$$\alpha_{do}=\frac{1}{x_o}(\sum_{i=1}^n(1-a_i)F_{oi}\epsilon_{id}+F_{od}$$
 
-$$\alpha_{dj}=\frac{1}{x_j}(F_{jd} - F_{dj} + \sum_{k=1}^n (1-a_k)F_{jk})$$
-where $n$ is the total number of compartments in the food web (Neutel & Thorne, 2014).
+The detritus functions used to construct Jacobian matrices in previous literature (de Ruiter 1995, Neutel et al. 2002, Neutel et al. 2007, Neutel & Thorne 2014) were only taking into consideration one detritus compartment. The presented equations used in this package allow the inclusion of multiple detritus compartments in the food-web, including linear ontogeny of detritus. For details, review our paper.  
 
-The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is to set all values to zero. Neutel & Thorne (2014) show that an all-zero diagonal (with exception of detritus flows) has the biological meaning of a tipping point where any loss of self-dampening effect or intraspecific competition will cause the system to collapse. Diagonal values can also be calculated from the energy-flux model. Diagonal values for fauna are found as their non-predatory mortality (Neutel & Thorne, 2014):
+The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is to set all values to zero. Diagonal values can also be calculated from the energy-flux model. Diagonal values for fauna are found as their non-predatory mortality (Neutel & Thorne, 2014):
 $$\alpha_{ii}=-\frac{\sum_{j=1}^n a_i p_i F_{ji}-\sum_{j=1}^n F_{ij}}{x_i}$$
 and for detritus as:
-$$\alpha_{dd}=-\frac{1}{x_d} \sum_{j=1}^n (a_j F_{dj})$$
+$$\alpha_{dd}=-\frac{1}{x_d} \sum_{j=1}^n (a_j F_{dj}+\sum_{o=1}^nF_{do})$$
+The function for detritus diagonal values is adjusted from Neutel & Thorne (2014) to allow density-dependent detritus ontogeny. The diagonal values found with these functions represent the **upper-limit** of self-dampening effect possible in the system. Therefore, Jacobian matrixes with model-based diagonals are often stable. If you want to compare stability between two food web models that are both stable, you can redefine stability as the minimum fraction of natural mortality needed to stabilize the matrix (see 3. Stability analysis).
 
-The Jacobian matrix we calculated earlier had the default all-zero diagonal. You can also decide to calculate diagonal values from the flux values as described by the equations above. In order to do this, natural mortality rates (biomass per unit time) are needed. There are several ways to obtain these values:  
-
-1) Sometimes your food web model will specifically include a natural mortality flow. You can simply extract this information from your model into a named vector and use it as input.  
-2) You can multiple the biomass by the inverse of the lifespan. The inverse of the lifespan represents the fraction of biomass that will disappear due to natural mortality on a certain time scale. For example, the biomass of animals in the example food web model is 50 g C m-2 and the natural lifespan of these animals is assumed to be 30 days. Then the natural mortality rate is 50 * 1/30 = 1.67 g C m-2 d-1. This lifespan should NOT include mortality due to predation, and be a good representative for the whole compartment.  
-
-To calculate diagonal values based on the model we include the argument "diagonal" and set the value to the string "model". In our model natural mortality flows are already specified, so we can extract this information and use it as input for the mortality rates argument "MR". The mortality rate for Detritus is set to NA.
-
-```{r getJacobian_diagonal, eval = FALSE}
-MR <- c(FM["PL","DET"], FM["AN", "EXP"], NA)
-names(MR) <- rownames(FM)[1:3]
-
-JM2 <- getJacobian(
-  FM = FM,
-  BM = BM,
+The getJacobian function should be used like this:
+```{r eval=FALSE}
+# If you have an energy-flux model:
+JM <- getJacobian(model = list(
+  type = "EF",
+  # a named square flowmatrix with fluxes between all compartments
+  FM = FM, 
+  # a named numeric vector with biomasses for all compartments
+  BM = BM, 
+  # a named numeric vector with assimilation efficiencies for all compartments
   AE = AE,
+  # a named numeric vector with growth efficiencies for all compartments
   GE = GE,
-  dead = c("DET"),
-  externals = c("CO2", "EXP"),
-  diagonal = "model",
-  MR = MR
-)
+  # how to treat the diagonal. Default is 0; can also be a numeric vector or "model"
+  diagonal = 0,
+  # info on the dead (detritus) compartments
+  dead = list(
+    # character vector with names of all dead (detritus) compartments
+    names = dead_names,
+    # a matrix with the fraction defecation of each flow in the flowmatrix
+    frac = frac_matrix
+  ),
+  # a character vector with the names of external compartments
+  # that should not be included in the calculatinons,
+  externals = externals, 
+  # a named numeric vector with mortality rates (per unit time);
+  # only required if you want the diagonal to be "model"
+  MR = MR 
+))
 
-print(JM2)
+# If you have a Linear Inverse Model formatted correctly with tags
+getJacobian(model = list(
+  type = "LIM",
+  # A read-in LIM model
+  LIM = Read(path_to_lim_file),
+  # Optionally a setup LIM model
+  setup = Setup(Read(path_to_lim_file)),
+  # A named numeric vector with all flow solutions.
+  # If not given the least sum of squares solution is found.
+  web = flow_solutions,
+  # how to treat the diagonal. Default is 0; can also be a numeric vector or "model"
+  diagonal = 0,
+  # tag in the LIM assigned to the total assimilation of each compartment
+  aTag = "ass",
+  # tag in the LIM assigned to the total growth (production) of each compartment
+  gTag = "growth",
+  # tag in the LIM assigned to the total mortality of each compartment
+  mTag = "mort",
+  # tag in the LIM included in the compartment name of dead (detritus) compartments
+  deadTag = "dead"
+))
+```
+For working examples, please review the examples given in 5. Examples from literature.
+
+# 4. Stability analysis
+A Jacobian matrix is only stable if all real parts of the eigenvalues are negative. Therefore, the stability of a Jacobian matrix can be measured as the maximum real value of the eigenvalues, also called the dominant eigenvalue. A negative value indicates a stable matrix, a positive value indicates an unstable matrix. If the dominant eigenvalue is negative (thus stable), the absolute value of the dominant eigenvalue is the rate of return of the slowest trajectory back to equilibrium. If the Jacobian matrix has the unit per unit time, the rate of return is also per unit time. The return rate can be used to calculate return time.  
+
+```{r eval=FALSE}
+# Find the dominant eigenvalue
+s <- getStability(JM)
+return_rate <- abs(s) # per unit time (e.g. per day or per year)
+return_time <- 1/return_rate # unit of time (e.g. days or years)
 ```
 
-Some notes:
-- The inclusion of biomasses in the LIM is not required to be able to solve the model. However, it is required that all internal compartments have quantified biomasses to calculate the Jacobian matrix. If there are compartments that do not have biomasses in the LIM, they must either be quantified anyway or excluded from the getJacobian() function by including them as 'externals'.
-- The diagonal values calculated from the model for non-dead compartments represent the UPPER bound (in absolute value). This means we assume maximum self-dampening effects of populations. Jacobian matrixes with model-based diagonals are therefore often stable. If you want to compare stability between two food web models that are initially both stable, you can redefine stability as the minimum fraction of natural mortality needed to stabilize the matrix (see below 2. Stability analysis).
+The diagonal of the Jacobian matrix is strongly correlated to stability (the sum of the diagonal values equals the sum of eigenvalues). Therefore, it is important to know what values are on the diagonal before you interpret your results. If you calculated the diagonal values from the model, they represent upper-limits of self-dampening effects. In other words, it is the maximum amount of buffering effect the system can provide to stabilize. If the system is unstable even with upper-limit diagonal values, the natural state of the system is unstable and will collapse.  
 
-# 3. Stability analysis
-Another way to remove time dependence is to use the diagonal as a scalar. We take an increasingly larger fraction of natural mortality rates until the Jacobian matrix is stable. The detritus compartments are not scaled in this method. The resulting value is very similar - almost equal - to the stability found with the eigenvalue method executed on a normalized all-zero (except detritus) Jacobian matrix. This second method is more time-consuming and the resolution of the stability value depends on the step-size of the iterations. Therefore, we recommend using the eigenvalue method instead of the scalar method. If you do want to use this method, this is how it works
+There are two important pieces of information to consider if you are interpreting return times:  
+1) The return time does NOT indicate the return time back to equilibrium, but the time to return to about 37% ($1/e$) of the equilibrium state. The reason for this is mathematical and has to do with natural logarithms, and is explained more in depth in our paper.  
+2) Although return rates and return times can be useful information to review, they are NOT suitable to compared relative stability between ecosystems. Ecosystems can operate on different time-scales, which makes a comparison between return rates and return times not 'fair'. In other words, system A can be much slower to return to equilibrium than system B, but only because system A simply includes many slow-living organisms. If time-dependency is removed from system A and B and stability is evaluated again, system A might turn out to actually be more stable than B despite its longer absolute return times.  
 
-Altough return rate and return time can be valuable information on an ecosystem, they **cannot be used to compare stability of different systems**. The stability is dependent on the time-scale the system is operating on. In other words, system A can be much slower to return to equilibrium than system B, but this might be caused by the fact that system A simply includes many slow-living organisms. If time-dependency is removed from system A and B and then stability is evaluated again, system A might turn out to actually be more stable than B despite its longer absolute return times.  
+In ecology, it is useful and powerful to compare stability between two or more systems. In order to allow such comparison of relative stability, time dependency must be removed. In this case stability is not defined as the slowest return rate to equilibrium (per unit time), but redefined as the dimensionless minimum fraction of self-dampening effect necessary to stabilize the matrix. There are two ways to achieve this:  
+1) Stablity can be found as the minimum scalar of natural mortality rates needed to stabilize the system. This method is included as the 'scalar' method in the getStability function, and is based on iteratively increasing the fraction of natural mortality rates used as the Jacobian diagonal with a certain step-size until the Jacobian matrix is found to be stable. This method requires a vector with natural mortality rates and the names of all dead (detritus) compartments.    
+2) The Jacobian matrix is normalized by dividing each interaction strength by absolute value of the the corresponding diagonal value (per unit time divided by per unit time is dimensionless). Then, all diagonal values - except for detritus compartments - are set to zero (self-dampening effects are removed) and the dominant eigenvalue is found again. The matrix can be normalized with the normalizeJacobian function. This matrix requires a fully quantified diagonal with negative, non-zero, values.  
 
-There are two ways to remove time dependency. First option is to normalize the matrix using the maximum intraspecific effects on the diagonal, set all diagonal values to zero, i.e. removing self-dampening effects, except for the detritus compartments, and then find stability again through the eigenvalue method. The stability value can now be interpreted as the fraction of maximum possible self-dampening effects needed to stabilize the matrix. In other words, we expect this value to lie between 0 and 1. If the value is larger than 1 it means more than available self-dampening is needed to stabilize the matrix, thus the system as it is will collapse. The stability measure can be interpreted as a biological tipping point. If the system has less self-dampening than the fraction self-dampening as indicated by the stability measure, it will collapse.
+In both cases it is assumed detritus feedbacks are constant and cannot be scaled.  
 
-A Jacobian matrix is only stable if all real parts of the eigenvalues are negative. Therefore, the stability of a Jacobian matrix can be measured as the maximum real value of the eigenvalues. A negative value indicates a stable matrix, a positive value indicates an unstable matrix.
-```{r eval = FALSE}
-# Using the default 'eigenvalue' method.
-# Jacobian matrix with all-zero diagonal
-getStability(JM)
-# Jacobian matrix with calculated values on the diagonal
-getStability(JM2)
+Both these values can be interpreted as  the fraction of maximum possible self-dampening effects needed to stabilize the matrix (Neutel & Thorne, 2014). In other words, we expect this value to lie between 0 and 1. If the value is larger than 1 it means more than available self-dampening is needed to stabilize the matrix, thus the system as it is will collapse. These time-independent stability measure can be interpreted as a biological tipping point, and can be used to compare relative stability between systems. If the system has less self-dampening than the fraction self-dampening as indicated by the stability measure, it will collapse.
+
+The scalar method (1) is used in the first papers reviewing stability of different systems. However, the iterative algorithmic implementation is more time-consuming and the resolution of the stability value depends on the step-size of the iterations. Therefore, we recommend finding the dominant eigenvalue of the normalized all-zero Jacobian matrix (2) instead of the scalar method. 
+
+Finding time-independent measures of stability:
+```{r eval=FALSE}
+# Using the scalar method
+# You need to provided mortality rates (MR) and
+# a character vector with names of dead compartments.
+s <- getStability(JM, method = "scalar", MR, dead_names)
+
+# Finding the dominant eigenvalue of a normalized all-zero Jacobian
+# This method requires a quantified non-zero diagonal (model$diagonal = "model") and
+# a character vector with names of dead compartments.
+JMnorm <- normalizeJacobian(JM, dead_names)
+s <- getStability(JMnorm)
+```
+For working examples, please review 6. Examples from literature.
+
+# 5. Analysize food web for (de)stabilizing characteristics
+It can be useful for your research to review other network characteristics, to try to understand why stability between systems differ. This package does NOT provide a comprehensive set of functions to do such analysis, but it does provide a starting point.  
+
+## Effect individual compartments and links
+Functions are included to review the effect on stability when individual compartments are removed from the system, or when certain interaction strengths are altered.  
+
+The function assessComps removes individual compartments and reassesses the stability. It returns a dataframe with a row for every compartment, and the absolute and relative change in stability if that compartment is removed. If the change in stability (delta) is negative, the system becomes more stable if the respective food web compartment is removed from the Jacobian matrix. If delta is positive the system becomes less stable. You need to specify what stability method you want to use (default is the eigenvalue method, but the scalar method is also possible).  
+```{r}
+df <- assessComps(JM)
 ```
 
-The first Jacobian matrix with an all-zero diagonal is an unstable matrix, whereas the second Jacobian matrix with a diagonal calculated from the model is indeed stable. This highlights the importance of thinking about how you want to quantify your diagonal. 
-If you use different methods to quantify the diagonal the stability of different models are are not comparable.
+It is also possible to review how altering the interaction strengths impacts the stability measure. There two functions included for this:  
+1) assessLinksFixed. This function alters **each individual** interaction strength (one cell of the Jacobian) **once** by a **fixed function** (default is times 2) and review the effect of stability. Thus, it returns a dataframe with as many rows as nrows(JM) times ncols(JM), with relative and absolute changes in stability. Again, if the change in stability (delta) is negative, the system becomes more stable if the respective food web compartment is removed from the Jacobian matrix. If delta is positive the system becomes less stable.   
+2) assessLinksPerm. This function alters a **pair** of interaction strengths (i on j, AND j on i) in a **number of permutations** to be between **0 and 2 times the initial interaction strength**. It returns a dataframe that is half of the dataframe created by assessLinksFixed, and included the **probability that the matrix becomes unstable** if the respective interaction pair is altered.   
 
-There is a second stability measurement that is commonly used, that allows comparison of food web models that are initially stable. In this case the minimum fraction of self-dampening needed to stabilize the Jacobian matrix is used as measure. For example, two Jacobian matrices with a diagonal calculated from the model are stable i.e. the maximum real part of the eigenvalues is negative. The diagonal of both Jacobian matrices contain the upper bound values representing the maximum possible self-dampening effect possible. If you start reducing the self-dampening effect, at some point the Jacobian matrix will become unstable. If the first matrix becomes unstable with 75% of its original self-dampening and the second becomes unstable at 50% of its original self-dampening, we can conclude that the second matrix is more stable than the first one. The second matrix requires a lot less intra-specific feedback to dampen the destabilizing effects of interspecific interactions.
+In both functions you can specify which stability measure you would like to use, the default is the eigenvalue method.  
 
-This concept is implemented in the getStability() function using the 'scalar' method. For this method the additional argument mortalities is required, and 'dead' is required only if there are indeed dead compartments.
-```{r eval = FALSE}
-getStability(JM2, method = "scalar", 
-             mortalities = MR/BM, dead = "DET")
+```{r}
+df <- assessLinksFixed(JM, func = function(x){return(x*2)})
+df <- assessLinksPerm(JM, perms = 100, threshold = 0.01)
 ```
 
-In this case, the diagonal value for detritus is calculated from the model (see 1. Preparing a food web model for stability analysis). If we then scale the natural mortality rates of non-dead compartments we see that the minimum fraction natural mortality needed to stabilize the matrix is 0.45. This means that at least 45% of the maximum self-dampening effect of populations is needed in order to buffer pertubations to the whole system.
+## Feedback loops
+Different scientific publications have shown that looking at individual interaction strengths might not be very insightful to understand stability of systems. It is often better to look at the patterning of interaction strengths, specifically in feedback loops. Therefore, the function assessFeedback is added that wraps multiple functions:  
+- First it finds all loops (of a certain length k if specified) in your network. The indices of each loop (eg 1 > 2 > 3 > 1) are stored in a textfile. Finding these loops is done with a recursive depth-first-search function. Beware that it can take a really long time to find all loops in a large network! In that case it might be better to only review loops of length 2 and 3, that are known to most heavily influence stability (see works by Neutel).  
+- Then for each loop it finds the feedback i.e. the product of all interaction strengths, and the loop weight i.e. the geometric mean of all absolute interaction strengths in the loop.  
+The functions returns a dataframe with all loops noted as 'compName1->compName2->compNamek' (column "loop"), with feedbacks (column "fdb") and loop weights (column "lw") of those loops.  
 
+How to use this function:
+```{r eval=FALSE}
+# The following statements finds ALL loops in the system,
+# stores these in the textfile "allLoops.txt",
+# finds the loop feedback and loop weight the latter
+# being scaled according to the mortality rates MR (which makes
+# sense if you also scaled your stability values),
+# and returns a dataframe where the loops are printed with their
+# compartment names (using the argument compnames) and not only 
+# their indices.
+loops <- assessFeedback(JM, findLoops = TRUE, MR, compnames)
+```
 
-# 4. Analysize food web for (de)stabilizing characteristics
-show in vignette that doubling small interaction strength can have larger
-effect on stability than doubling large interaction strengths, thus a
-function + 10 would be more difficult to interpret in stead of relative change.
-per link (not per link pair) also intraspecific interaction.
+If you have a really large network, it might not be useful to find all loops in the system, and to only focus on loops of length 2 and 3. You can do this as follows:
+```{r eval=FALSE}
+# Create an adjacency matrix that indicates which interactions exist,
+# i.e. only 0 and 1 in stead of quantified interaction strengths.
+AM <- abs(JM)
+AM[which(AM > 0)] <- 1
 
-# 5. Examples from literature
+# Find loops of length 2 and 3 and store in text files 
+# "allLoops_k=2.txt" and "allLoops_k=3.txt".
+file_name_loop2 <- dfs(AM, k = 2, verbose)
+file_name_loop3 <- dfs(AM, k = 3, verbose)
 
-## de Ruiter et al. (1995) Energetics, Patterns of Interaction Strenghts, and Stability in Real Ecosystems. Science, 269 (5228), 1257 - 1260
+# Evaluate loop feedback and weight for these loops of length 2 and 3.
+loops2 <- assessFeedback(JM, findLoops = FALSE, file = file_name_loop2, MR, compnames)
+loops3 <- assessFeedback(JM, findLoops = FALSE, file = file_name_loop3, MR, compnames)
+```
 
-In the Science paper by de Ruiter et al. (1995) the stability of seven food webs is assessed. The soil food web of the Lovinkhoeve Experimental Farm is singled out and a energy-flux model is provided including biomasses (kg ha-1), specific death rates (yr-1), assimilation efficiencies, and growth efficiencies for all compartments. 
+It is also possible to assess the skewness of fluxes, which is known to be related to stabiliy, through calculating weighted connectance (van Altena et al. 2016). A lower value indicates a more skewed flux distribution, which is found to be correlated to less stable systems.
+```{r eval=FALSE}
+Cw <- getCw(FM)
+```
 
-```{r model_data}
-# Get food web data on the compartments
-foodweb_data <- list(
-  # Compartment names
-  compartment = c(
-    "Detritus", 
-    "Roots", 
-    "Fungi",
-    "Bacteria", 
-    "Phytophagous_nematodes", 
-    "Collembola", 
-    "Cryptostigmatic_mites",
-    "Noncryptostigmatic_mites",
-    "Fungivorous_nematodes",
-    "Enchytraeids",
-    "Bacteriophagous_nematodes",
-    "Flagellates",
-    "Bacteriophagous_mites",
-    "Amoebae",
-    "Predatory_nematodes",
-    "Nematophagous_mites",
-    "Predatory_collembola",
-    "Predatory_mites"
-  ),
-  # Biomasses(kg ha-1)
-  BM = c(
-    2500,
-    300,
-    2.13,
-    227.5,
-    0.19,
-    0.47,
-    0.01,
-    0.02,
-    0.08,
-    0.43,
-    0.30,
-    0.53,
-    0.001,
-    11.53,
-    0.06,
-    0.004,
-    0.03,
-    0.0635
-  ),
-  MR = c(
-    NA,
-    1.00,
-    1.20,
-    1.20,
-    1.08,
-    1.84,
-    1.20,
-    1.84,
-    1.92,
-    5.00,
-    2.68,
-    6.00,
-    1.84,
-    6.00,
-    3.00,
-    1.84,
-    1.84,
-    1.84
-  ),
-  AE = c(
-    NA,
-    NA,
-    1.00,
-    1.00,
-    0.25,
-    0.50,
-    0.50,
-    0.50,
-    0.38,
-    0.25,
-    0.60,
-    0.95,
-    0.50,
-    0.95,
-    0.50,
-    0.90,
-    0.50,
-    0.60
-  ),
-  GE = c(
-    NA,
-    NA,
-    0.30,
-    0.30,
-    0.37,
-    0.35,
-    0.35,
-    0.35,
-    0.37,
-    0.40,
-    0.37,
-    0.40,
-    0.35,
-    0.40,
-    0.37,
-    0.35,
-    0.35,
-    0.35
-  )
+# 6. Examples from literature
+## A simple application
+Reference: de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257  
+
+The Lovinkhoeve Experimental Farm with conventional and integrated farming practices. In this example we use the food web model with values determined by top-down balancing and without detritus compartment. Altough the original publication includes a detritus compartment, we left it out in this example to keep it simple.  
+
+```{r Lovinkhove_foodweb_exploration}
+# Information on the Lovinkhoeve food web model
+?Lovinkhoeve
+
+# This food web model is an energy flux ("EF") model
+LovinkhoeveCP_noDet$type
+
+# This food web model consists of 17 compartments.
+dim(LovinkhoeveCP_noDet$FM)
+rownames(LovinkhoeveCP_noDet$FM)
+
+# The biomasses (kg C ha-1) of all compartments are
+LovinkhoeveCP_noDet$BM
+LovinkhoeveIF_noDet$BM
+
+# The assimilation and production (growth) efficiency of all compartments are
+LovinkhoeveCP_noDet$AE
+LovinkhoeveCP_noDet$GE
+LovinkhoeveIF_noDet$AE
+LovinkhoeveIF_noDet$GE
+
+# The natural death (mortality) rates (yr-1) of all compartments are
+LovinkhoeveCP_noDet$MR
+LovinkhoeveIF_noDet$MR
+
+# The calculated flow sizes between compartments (kg C ha-1 yr-1) can be viewed as
+LovinkhoeveCP_noDet$FM
+LovinkhoeveIF_noDet$FM
+```
+
+We now use the flow values to calculate interaction strengths between all compartments, and thereby create a Jacobian matrix.
+
+```{r Lovinkhoeve_get_Jacobian}
+# Information on the function getJacobian
+?getJacobian
+
+# We want a Jacobian matrix for both the conventional and integrated farming practice model.
+# We use the getJacobian wrapper function, which requires the model as a named list,
+# as is already the case in the example models from the fwmodels package.
+# Information we already have of this food web model: 
+# type, FM, BM, AE, GE, MR.
+# The model does not have external or dead compartments.
+# Later we will calculate stability as the scalar of natural mortality rates, so we will
+# simply set the diagonal to zero (default)
+JM_CP <- getJacobian(model = LovinkhoeveCP_noDet)
+JM_IF <- getJacobian(model = LovinkhoeveIF_noDet)
+```
+
+The diagonal is used as a variable to find stability, where stability is defined as the minimum scalar of natural mortality rates needed to stabilize the food web model.
+
+```{r Lovinkhoeve_scalar_stability}
+# Information on the getStability function
+?getStability
+
+# Stability can be found with the scalar method, 
+# for which natural mortality rates in unit t-1 must be provided
+s_CP <- getStability(JM_CP, method = "scalar", MR = LovinkhoeveCP_noDet$MR)
+s_IF <- getStability(JM_IF, method = "scalar", MR = LovinkhoeveIF_noDet$MR)
+```
+
+The lower the value of s, the more stable the food web. The stability of the food web in conventional farming practice is `r s_CP`, whereas the stability of soil food web in the integrated farming practice is `r s_IF`. Therefore, the usage of integrated farming practices i.e. reduced input of inorganic fertilizer, pesticides, and soil tillage, appears to be beneficial for the stability of the soil food web.
+
+## An advanced application
+Reference: de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+
+```{r Antarctic_dry_tundra}
+# We use the Antarctic dry tundra food web model from the fwmodels package.
+model <- Antarctic_tundra_dry
+
+# The following representative taxa are included:
+model$representative_taxa
+# In this food web model we have a detritus compartment that receives
+# egestion and mortality flows.
+model$dead$names
+# The fraction of the fluxes from fauna to detritus that is ONLY egestion is:
+model$dead$frac[,model$dead$names]
+
+?getJacobian
+# In order to calculate the Jacobian matrix we need the following info:
+# type of model, FM, BM, AE, GE, diagonal treatment, dead compartments info,
+# externals if present, and mortality rates if we want a diagonal calculated
+# from the model.
+# Information present in the model already:
+names(model)
+# We only still need to specify the diagonal treatment.
+model$diagonal <- "model"
+
+# Calculate the Jacobian matrix from the energy flux model
+JM <- getJacobian(model)
+
+# Calculate stability using the scalar method.
+# The result is the fraction of self-dampening effects needed to stabilize the system.
+getStability(JM, method = "scalar", MR = model$MR, dead_names = model$dead$names)
+
+# Calculate stability using the eigenvalue method AFTER normalizing the Jacobian matrix.
+JMnorm <- normalizeJacobian(JM, dead_names = model$dead$names)
+getStability(JMnorm)
+
+# Calculate stability with the eigenvalue method after removing the interactions with detritus
+getStability(JMnorm[1:22, 1:22])
+```
+
+We repeat the analysis as done on the dry tundra food web on the wet tundra food web.
+```{r Antarctic_wet_tundra}
+model <- Antarctic_tundra_wet
+model$diagonal <- "model"
+JM <- getJacobian(model)
+
+# scalar stability
+getStability(JM, method = "scalar", MR = model$MR, dead_names = model$dead$names)
+
+# eigenvalue stability: normalized JM (all-zero diagonal)
+JMnorm <- normalizeJacobian(JM, dead_names = model$dead$names)
+getStability(JMnorm)
+
+# eigenvalue stability: remove detritus interactions
+getStability(JMnorm[1:17, 1:17])
+```
+
+## A complex application
+Reference: de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257
+
+Put the provided LIM input files in the same working directory as this file. The files are the same as the original input files, with the exception that tags were added to the relevant compartments, fluxes, and variables in order to directly use these files in the fwstability package. Also, the compartment DOC was not provided with a biomass by the authors of the original model. For demonstration purposes we have set the biomass of DOC equal to the biomass of semi-labile detritus. The lower limit for mortality was set at zero in the original files, but as natural mortality rates are very important for stability analysis and are never 0 in the field, they were set at a conservatively lower limit of 0.00001.
+
+The tag 'dead' was added to the compartment names (and thus changed throughout the model):  
+- lDet  
+- sDet  
+- rDet  
+- DOC  
+
+Defecation, mortality, assimilation, and growth were already defined in the model with the tags 'DetProd', 'Mort', 'Ass', and 'Prod' respectively. For bacteria the following statements were added to the variables:  
+- BacMort = BacDocProd  
+- BacAss = BacUpt  
+Finally, the naming of defecation and mortality fluxes was moved from the 'variable' section to the 'flows' section, so that the names including the tags for mortality and defecation could be processed by the function.
+
+```{r upper_submarine_canyon}
+# load the LIM library
+library(LIM)
+
+# Read-in and set up the linear inverse model
+readLIMupper <- Read("Nazare_Canyon_upper.input")
+readLIM <- readLIMupper
+LIMupper <- Setup(readLIM)
+LIM <- LIMupper
+
+# Which and how many compartments?
+LIM$NComponents
+LIM$Components # you can see the 'dead' tag on the detritus compartments
+
+# Find the range of solutions for each defined flow.
+# All solutions within the range belong to the so-called 'solution space'.
+# If the model includes incompatible constraints, this function will throw an error.
+Flowranges <- Xranges(LIM)
+print(Flowranges)
+
+# Now we randomly sample the solution space for 100 concrete solutions.
+# In this tutorial we use relatively few iterations and a relatively large steps (= small value for jumpsize)
+# in order to reduce calculation times and get a rough overview of possible solutions.
+# In proper studies the number of random iterations should be much larger (magnitude in the range of 10,000s)
+# and with much smaller step (= larger value of jumpsize, e.g. 100), 
+# in order to get a representative set of solutions.
+iter <- 100 # 100 random solutions
+jumpsize <- 10 # the space will be sampled with steps of 'solution range'/jumpsize
+# Find parsimonious solution x0
+x0        <- lsei(E=LIM$A,
+                  F=LIM$B,
+                  A=diag(LIM$NUnknowns),
+                  B=rowMeans(Flowranges),
+                  G=LIM$G,
+                  H=LIM$H)$X 
+# Markov chain, can take a couple of minutes
+set.seed(1994)
+xs <- xsample(E    = LIM$A,
+              F    = LIM$B,
+              G    = LIM$G,
+              H    = LIM$H,
+              jmp  = (Flowranges[,2] - Flowranges[,1])/jumpsize,
+              x0   = x0,
+              iter = iter)
+# In the output fluxes are columns, and rows are iterations.
+print(head(xs$X[,1:6]))
+
+# Lets calculate the mean, standard deviation, min and max of each flow.
+meanvalues <- cbind(LIM$Unknowns, colMeans(xs$X))
+standarddev <- cbind(LIM$Unknowns, sqrt(diag(var(xs$X))))
+minimum <- apply(xs$X, 2, min, na.rm = TRUE)
+maximum <- apply(xs$X, 2, max, na.rm = TRUE)
+flow <- meanvalues[,1]
+mean <- as.numeric(meanvalues[,2])
+std <- as.numeric(standarddev[,2])
+Flows <- data.frame(flow, mean, std, minimum, maximum)
+print(Flows)
+
+# First we can find the stability of the most likely solution, which are the mean values.
+# The fwstability package can directly use a linear inverse model if it is set up with the package LIM
+# and formatted in a particular way as explained in the package vignette.
+most_likely_solution <- Flows$mean
+names(most_likely_solution) <- Flows$flow
+model <- list(
+  type = "LIM",
+  LIM = readLIM,
+  setup = LIM,
+  web = most_likely_solution,
+  diagonal = "model", # we want a diagonal with values calculated from the model
+  aTag = "Ass",
+  gTag = "Prod",
+  mTag = "Mort",
+  defTag = "DetProd"
 )
-names(foodweb_data$BM) <- foodweb_data$compartment
-names(foodweb_data$MR) <- foodweb_data$compartment
-names(foodweb_data$AE) <- foodweb_data$compartment
-names(foodweb_data$GE) <- foodweb_data$compartment
 
-FM <- matrix(
-  0,
-  nrow = length(foodweb_data$compartment), 
-  ncol = length(foodweb_data$compartment),
-  byrow = T
-)
-if(T){
-  FM[1,3] <- 40.8
-  FM[1,4] <- 1606
-  FM[2,5] <- 7.44
-  FM[3,6] <- 6.65
-  FM[3,7] <- 0.08
-  FM[3,8] <- 0.34
-  FM[3,9] <- 2.51
-  FM[3,10] <- 0.09
-  FM[1,10] <- 11.1
-  FM[4,10] <- 10.1
-  FM[4,11] <- 6.89
-  FM[4,12] <- 9.46
-  FM[4,13] <- 0.01
-  FM[4,14] <- 182
-  FM[11,15] <- 0.42
-  FM[4,15] <- 0.33
-  FM[12,15] <- 0.008
-  FM[12,14] <- 0.42
-  FM[14,15] <- 0.17
-  FM[5,18] <- 0.06
-  FM[5,17] <- 0.13
-  FM[5,16] <- 0.01
-  FM[5,15] <- 0.28
-  FM[6,18] <- 0.31
-  FM[7,18] <- 0.005
-  FM[8,18] <- 0.015
-  FM[9,18] <- 0.03
-  FM[9,17] <- 0.05
-  FM[9,16] <- 0.004
-  FM[9,15] <- 0.11
-  FM[13,18] <- 0.003
-  FM[11,18] <- 0.10
-  FM[11,17] <- 0.20
-  FM[11,16] <- 0.014
-  FM[15,18] <- 0.02
-  FM[15,17] <- 0.04
-  FM[15,16] <- 0.003
-  FM[16,18] <- 0.002
-  FM[17,18] <- 0.02
+JM <- getJacobian(model)
+s <- getStability(JM$JM)
+if(s < 0){
+  return_rate <- abs(s)
+  return_time <- 1/return_rate # days
+  return_months <- return_time/30
+  return_years <- return_time/365
+}else{
+  return_rate <- "the system is not stable and will not return to the equilibrium point"
+  return_time <- NA ; return_months <- NA ; return_years <- NA
 }
 
-rownames(FM) <- foodweb_data$compartment
-colnames(FM) <- foodweb_data$compartment
+upper_solutions <- xs$X
+colnames(upper_solutions) <- Flows$flow
 ```
 
-Now we use this data to calculate interaction strength values to get a Jacobian matrix. The authors state that intragroup interferences i.e. the values for the diagonal of the Jacobian matrix, could not be established empirically. Therefore, the diagonal is set to zero for now (default). In the original paper the interaction strengths related to the detritus compartment were not calculated with a function specific for detritus. Therefore, the results from the paper can be duplicated by NOT defining  detritus as a dead compartment.
+The upper canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
 
-```{r}
+```{r middle_submarine_canyon}
+# load the LIM library
+library(LIM)
+
+# Read-in and set up the linear inverse model
+readLIMmiddle <- Read("Nazare_Canyon_middle.input")
+readLIM <- readLIMmiddle
+LIMmiddle <- Setup(readLIM)
+LIM <- LIMmiddle
+
+# Which and how many compartments?
+LIM$NComponents
+LIM$Components # you can see the 'dead' tag on the detritus compartments
+
+# Find the range of solutions for each defined flow.
+# All solutions within the range belong to the so-called 'solution space'.
+# If the model includes incompatible constraints, this function will throw an error.
+Flowranges <- Xranges(LIM)
+print(Flowranges)
+
+# Now we randomly sample the solution space for 100 concrete solutions.
+# In this tutorial we use relatively few iterations and a relatively large steps (= small value for jumpsize)
+# in order to reduce calculation times and get a rough overview of possible solutions.
+# In proper studies the number of random iterations should be much larger (magnitude in the range of 10,000s)
+# and with much smaller step (= larger value of jumpsize, e.g. 100), 
+# in order to get a representative set of solutions.
+iter <- 100 # 100 random solutions
+jumpsize <- 10 # the space will be sampled with steps of 'solution range'/jumpsize
+# Find parsimonious solution x0
+x0        <- lsei(E=LIM$A,
+                  F=LIM$B,
+                  A=diag(LIM$NUnknowns),
+                  B=rowMeans(Flowranges),
+                  G=LIM$G,
+                  H=LIM$H)$X 
+# Markov chain, can take a couple of minutes
+set.seed(1994)
+xs <- xsample(E    = LIM$A,
+              F    = LIM$B,
+              G    = LIM$G,
+              H    = LIM$H,
+              jmp  = (Flowranges[,2] - Flowranges[,1])/jumpsize,
+              x0   = x0,
+              iter = iter)
+# In the output fluxes are columns, and rows are iterations.
+print(head(xs$X[,1:6]))
+
+# Lets calculate the mean, standard deviation, min and max of each flow.
+meanvalues <- cbind(LIM$Unknowns, colMeans(xs$X))
+standarddev <- cbind(LIM$Unknowns, sqrt(diag(var(xs$X))))
+minimum <- apply(xs$X, 2, min, na.rm = TRUE)
+maximum <- apply(xs$X, 2, max, na.rm = TRUE)
+flow <- meanvalues[,1]
+mean <- as.numeric(meanvalues[,2])
+std <- as.numeric(standarddev[,2])
+Flows <- data.frame(flow, mean, std, minimum, maximum)
+print(Flows)
+
+# First we can find the stability of the most likely solution, which are the mean values.
+# The fwstability package can directly use a linear inverse model if it is set up with the package LIM
+# and formatted in a particular way as explained in the package vignette.
+most_likely_solution <- Flows$mean
+names(most_likely_solution) <- Flows$flow
 model <- list(
-  type = "EF",
-  FM = FM,
-  BM = foodweb_data$BM,
-  AE = foodweb_data$AE,
-  GE = foodweb_data$GE
+  type = "LIM",
+  LIM = readLIM,
+  setup = LIM,
+  web = most_likely_solution,
+  diagonal = "model", # we want a diagonal with values calculated from the model
+  aTag = "Ass",
+  gTag = "Prod",
+  mTag = "Mort",
+  defTag = "DetProd"
 )
+
 JM <- getJacobian(model)
+s <- getStability(JM$JM)
+if(s < 0){
+  return_rate <- abs(s)
+  return_time <- 1/return_rate # days
+  return_months <- return_time/30
+  return_years <- return_time/365
+}else{
+  return_rate <- "the system is not stable and will not return to the equilibrium point"
+  return_time <- NA ; return_months <- NA ; return_years <- NA
+}
+
+middle_solutions <- xs$X
+colnames(middle_solutions) <- Flows$flow
 ```
 
-The stability of the food web can now be found by finding the maximum real part of the eigenvalues. Remember our Jacobian matrix has an all-zero diagonal.
-```{r}
-getStability(JM)
-```
+The middle canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
 
-It is also possible to find stability as the scalar of the natural mortality rates needed to produce a stable matrix (the method used in the original paper).
-```{r eval = FALSE}
-getStability(JM, method = "scalar", 
-             mortalities = foodweb_data$MR, dead = "Detritus")
-```
+```{r lower_submarine_canyon}
+# load the LIM library
+library(LIM)
 
-Both methods are valid, altough it is clear that the actual values differ. Therefore, it is important to know what stability method has been used in order to interpret the results correctly.
+# Read-in and set up the linear inverse model
+readLIMlower <- Read("Nazare_Canyon_lower.input")
+readLIM <- readLIMlower
+LIMlower <- Setup(readLIM)
+LIM <- LIMlower
 
-It is also possible to calculate values for the diagonal instead of setting them to zero.
-```{r eval = FALSE}
-JM <- getJacobian(
-  FM = FM,
-  BM = foodweb_data$BM,
-  AE = foodweb_data$AE,
-  GE = foodweb_data$GE,
-  diagonal = "model",
-  dead = list(names = "Detritus"),
-  MR = foodweb_data$MR
+# Which and how many compartments?
+LIM$NComponents
+LIM$Components # you can see the 'dead' tag on the detritus compartments
+
+# Find the range of solutions for each defined flow.
+# All solutions within the range belong to the so-called 'solution space'.
+# If the model includes incompatible constraints, this function will throw an error.
+Flowranges <- Xranges(LIM)
+print(Flowranges)
+
+# Now we randomly sample the solution space for 100 concrete solutions.
+# In this tutorial we use relatively few iterations and a relatively large steps (= small value for jumpsize)
+# in order to reduce calculation times and get a rough overview of possible solutions.
+# In proper studies the number of random iterations should be much larger (magnitude in the range of 10,000s)
+# and with much smaller step (= larger value of jumpsize, e.g. 100), 
+# in order to get a representative set of solutions.
+iter <- 100 # 100 random solutions
+jumpsize <- 10 # the space will be sampled with steps of 'solution range'/jumpsize
+# Find parsimonious solution x0
+x0        <- lsei(E=LIM$A,
+                  F=LIM$B,
+                  A=diag(LIM$NUnknowns),
+                  B=rowMeans(Flowranges),
+                  G=LIM$G,
+                  H=LIM$H)$X 
+# Markov chain, can take a couple of minutes
+set.seed(1994)
+xs <- xsample(E    = LIM$A,
+              F    = LIM$B,
+              G    = LIM$G,
+              H    = LIM$H,
+              jmp  = (Flowranges[,2] - Flowranges[,1])/jumpsize,
+              x0   = x0,
+              iter = iter)
+# In the output fluxes are columns, and rows are iterations.
+print(head(xs$X[,1:6]))
+
+# Lets calculate the mean, standard deviation, min and max of each flow.
+meanvalues <- cbind(LIM$Unknowns, colMeans(xs$X))
+standarddev <- cbind(LIM$Unknowns, sqrt(diag(var(xs$X))))
+minimum <- apply(xs$X, 2, min, na.rm = TRUE)
+maximum <- apply(xs$X, 2, max, na.rm = TRUE)
+flow <- meanvalues[,1]
+mean <- as.numeric(meanvalues[,2])
+std <- as.numeric(standarddev[,2])
+Flows <- data.frame(flow, mean, std, minimum, maximum)
+print(Flows)
+
+# First we can find the stability of the most likely solution, which are the mean values.
+# The fwstability package can directly use a linear inverse model if it is set up with the package LIM
+# and formatted in a particular way as explained in the package vignette.
+most_likely_solution <- Flows$mean
+names(most_likely_solution) <- Flows$flow
+model <- list(
+  type = "LIM",
+  LIM = readLIM,
+  setup = LIM,
+  web = most_likely_solution,
+  diagonal = "model", # we want a diagonal with values calculated from the model
+  aTag = "Ass",
+  gTag = "Prod",
+  mTag = "Mort",
+  defTag = "DetProd"
 )
 
-getStability(JM)
+JM <- getJacobian(model)
+s <- getStability(JM$JM)
+if(s < 0){
+  return_rate <- abs(s)
+  return_time <- 1/return_rate # days
+  return_months <- return_time/30
+  return_years <- return_time/365
+}else{
+  return_rate <- "the system is not stable and will not return to the equilibrium point"
+  return_time <- NA ; return_months <- NA ; return_years <- NA
+}
+
+lower_solutions <- xs$X
+colnames(lower_solutions) <- Flows$flow
+```
+
+The lower canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
+
+However, the return times cannot simply be compared directly because the ecosystems operate on somewhat different time scales. Therefore, we first normalize the matrices and set the diagonal to all-zeroes, except for the detritus compartments. Also, it is more thorough to calculate stability for each of the 100 solutions, and then take the mean of stability (in stead of calculating the stability for the mean flow solution).
+
+```{r canyon_iterate_normalize}
+dead_names <- c("DEADLDET", "DEADSDET", "DEADRDET", "DEADDOC")
+
+# Upper
+model <- list(
+  type = "LIM",
+  LIM = readLIMupper,
+  setup = LIMupper,
+  diagonal = "model",
+  aTag = "Ass",
+  gTag = "Prod",
+  mTag = "Mort",
+  defTag = "DetProd"
+)
+stabilities_upper <- numeric(length = dim(upper_solutions)[1])
+JMs_upper <- list()
+for(i in 1:dim(upper_solutions)[1]){
+  print(i)
+  # Get one of 100 solutions as energy-flux model
+  solution <- upper_solutions[i,]
+  names(solution) <- colnames(upper_solutions)
+  model$web <- solution
+  # Calculate Jacobian matrix
+  JM <- getJacobian(model, verbose = F)
+  JMs_upper[[i]] <- JM
+  # Normalize
+  JMnorm <- normalizeJacobian(JM$JM, dead_names)
+  # Get stability as max real part eigenvalues
+  s <- getStability(JMnorm)
+  # Store stability in vector
+  stabilities_upper[i] <- s
+}
+
+# middle
+model <- list(
+  type = "LIM",
+  LIM = readLIMmiddle,
+  setup = LIMmiddle,
+  diagonal = "model",
+  aTag = "Ass",
+  gTag = "Prod",
+  mTag = "Mort",
+  defTag = "DetProd"
+)
+stabilities_middle <- numeric(length = dim(middle_solutions)[1])
+JMs_middle <- list()
+for(i in 1:dim(middle_solutions)[1]){
+  print(i)
+  # Get one of 100 solutions as energy-flux model
+  solution <- middle_solutions[i,]
+  names(solution) <- colnames(middle_solutions)
+  model$web <- solution
+  # Calculate Jacobian matrix
+  JM <- getJacobian(model, verbose = F)
+  JMs_middle[[i]] <- JM
+  # Normalize
+  JMnorm <- normalizeJacobian(JM$JM, dead_names)
+  # Get stability as max real part eigenvalues
+  s <- getStability(JMnorm)
+  # Store stability in vector
+  stabilities_middle[i] <- s
+}
+
+# lower
+model <- list(
+  type = "LIM",
+  LIM = readLIMlower,
+  setup = LIMlower,
+  diagonal = "model",
+  aTag = "Ass",
+  gTag = "Prod",
+  mTag = "Mort",
+  defTag = "DetProd"
+)
+stabilities_lower <- numeric(length = dim(lower_solutions)[1])
+JMs_lower <- list()
+for(i in 1:dim(lower_solutions)[1]){
+  print(i)
+  # Get one of 100 solutions as energy-flux model
+  solution <- lower_solutions[i,]
+  names(solution) <- colnames(lower_solutions)
+  model$web <- solution
+  # Calculate Jacobian matrix
+  JM <- getJacobian(model, verbose = F)
+  JMs_lower[[i]] <- JM
+  # Normalize
+  JMnorm <- normalizeJacobian(JM, dead_names)
+  # Get stability as max real part eigenvalues
+  s <- getStability(JMnorm)
+  # Store stability in vector
+  stabilities_lower[i] <- s
+}
+```
+
+Assess the distribution of stability values.
+```{r summary_stabilities}
+hist(stabilities_upper)
+hist(stabilities_middle)
+hist(stabilities_lower)
+
+plot(stabilities_upper)
+plot(stabilities_middle)
+plot(stabilities_middle[2:length(stabilities_middle)])
+plot(stabilities_lower)
+
+summary(stabilities_upper) ; sd(stabilities_upper)
+summary(stabilities_middle) ; sd(stabilities_middle)
+summary(stabilities_lower) ; sd(stabilities_lower)
+```
+
+Calculate a network index that can be used to quantify network complexity: weighted connectance. Subsequently, assess the distribution of calculated values.
+```{r stability_characteristics}
+# Weighted connectance
+Cw_upper <- numeric(length = length(JMs_upper))
+Cw_middle <- numeric(length = length(JMs_upper))
+Cw_lower <- numeric(length = length(JMs_upper))
+
+for(i in 1:length(JMs_upper)){
+  cw <- fwstability::getCw(JMs_upper[[i]]$extracted_data$FM)
+  Cw_upper[i] <- cw
+}
+
+for(i in 1:length(JMs_middle)){
+  cw <- fwstability::getCw(JMs_middle[[i]]$extracted_data$FM)
+  Cw_middle[i] <- cw
+}
+
+for(i in 1:length(JMs_lower)){
+  cw <- fwstability::getCw(JMs_lower[[i]]$extracted_data$FM)
+  Cw_lower[i] <- cw
+}
+
+summary(Cw_upper) ; sd(Cw_upper)
+summary(Cw_middle) ; sd(Cw_middle)
+summary(Cw_lower) ; sd(Cw_lower)
+
+plot(stabilities_upper ~ Cw_upper)
+plot(stabilities_middle ~ Cw_middle)
+plot(stabilities_lower ~ Cw_lower)
+
+plot(stabilities_middle[2:length(stabilities_middle)] ~ Cw_middle[2:length(Cw_middle)])
 ```
 
 # References
-de Ruiter et al., 1993; Hunt et al., 1987).
+Allesina, S., & Bondavalli, C. (2003). Steady state of ecosystem flow networks: A comparison between balancing procedures. Ecological Modelling, 165(2–3), 221–229. https://doi.org/10.1016/S0304-3800(03)00075-9  
+
+Allesina, S., Grilli, J., Barabás, G., Tang, S., Aljadeff, J., & Maritan, A. (2015). Predicting the stability of large structured food webs. Nature Communications, 6, 1–6. https://doi.org/10.1038/ncomms8842  
+
+Allesina, S., & Tang, S. (2012). Stability criteria for complex ecosystems. Nature, 483(7388), 205–208. https://doi.org/10.1038/nature10832  
+
+Allesina, S., & Tang, S. (2015). The stability–complexity relationship at age 40: a random matrix perspective. Population Ecology, 57(1), 63–75. https://doi.org/10.1007/s10144-014-0471-0  
+
+Arnoldi, J. F., Loreau, M., & Haegeman, B. (2016). Resilience, reactivity and variability: A mathematical comparison of ecological stability measures. Journal of Theoretical Biology, 389, 47–59. https://doi.org/10.1016/j.jtbi.2015.10.012  
+
+Berlow, E. L., Neutel, A. M., Cohen, J. E., De Ruiter, P. C., Ebenman, B., Emmerson, M., … Petchey, O. (2004). Interaction Strengths in Food Webs : Issues and Opportunities. Journal of Animal Ecology, 73(3), 585–598.  
+
+Boit, A., & Gaedke, U. (2014). Benchmarking successional progress in a quantitative food web. PLoS ONE, 9(2). https://doi.org/10.1371/journal.pone.0090404  
+
+Botton, S., Van Heusden, M., Parsons, J. R., Smidt, H., & Van Straalen, N. (2006). Resilience of microbial systems towards disturbances. Critical Reviews in Microbiology, 32(2), 101–112. https://doi.org/10.1080/10408410600709933  
+
+Christensen, V., & Pauly, D. (1992). Ecopath II – a software for balancing steady-state ecosystem models and calculating network characteristics. Ecological Modelling, 61, 169–185.  
+
+Davis, R. C. (1981). Structure and Function of Two Antarctic Terrestrial Moss Communities. Ecological Monographs, 51(2), 125–143. https://doi.org/10.2307/2937260  
+
+de Ruiter, P. C., Neutel, A. M., & Moore, J. C. (1995). Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science, 269(5228), 1257–1260. https://doi.org/10.1126/science.269.5228.1257  
+
+de Ruiter, P. C., Van Veen, J. A., Moore, J. C., Brussaard, L., & Hunt, H. W. (1993). Calculation of nitrogen mineralization in soil food webs. Plant and Soil, 157(2), 263–273. https://doi.org/10.1007/BF00011055  
+
+Drazen, J. C., & Sutton, T. T. (2017). Dining in the Deep: The Feeding Ecology of Deep-Sea Fishes. Annual Review of Marine Science, 9(1), 337–366. https://doi.org/10.1146/annurev-marine-010816-060543
+Fath, B. D., Scharler, U. M., Ulanowicz, R. E., & Hannon, B. (2007). Ecological network analysis: network construction. Ecological Modelling, 208(1), 49–55. https://doi.org/10.1016/j.ecolmodel.2007.04.029  
+
+Heal, O. W., & MacLean, S. F. (1975). Comparative productivity in ecosystems - secondary productivity. In W. H. Van Dobben & R. H. Lowe-McConnell (Eds.), Unifying Concepts in Ecology (pp. 89–108). The Hague: Dr. W. Junk.  
+
+Heymans, J. J., Coll, M., Libralato, S., Morissette, L., & Christensen, V. (2014). Global patterns in ecological indicators of marine food webs: A modelling approach. PLoS ONE, 9(4). https://doi.org/10.1371/journal.pone.0095845  
+
+Holling, C. S. (1959). Some characteristics of simple types of predation and parasitism. Canadian Entomology, 91, 385–398.  
+
+Hoving, H.-J. T., Perez, J. A. A., Bolstad, K. S. R., Braid, H. E., Evans, A. B., Fuchs, D., … Xavier, J. C. C. (2014). The study of deep-sea cephalopods. In Advances in Marine Biology (Vol. 67, pp. 235–359). Elsevier Ltd. https://doi.org/10.1016/B978-0-12-800287-2.00003-2  
+
+Hunt, H. W., Coleman, D. C., Ingham, E. R., Ingham, R. E., Elliott, E. T., Moore, J. C., … Morley, C. R. I. (1987). The detrital food web in a shortgrass prairie. Biol, 3, 57–68.  
+
+Jacquet, C., Moritz, C., Morissette, L., Legagneux, P., Massol, F., Archambault, P., & Gravel, D. (2016). No complexity–stability relationship in empirical ecosystems. Nature Communications, 7, 12573. https://doi.org/10.1038/ncomms12573  
+
+Kuiper, J. J., Van Altena, C., de Ruiter, P. C., Van Gerven, L. P. A. A., Janse, J. H., & Mooij, W. M. (2015). Food-web stability signals critical transitions in temperate shallow lakes. Nature Communications, 6, 1–7. https://doi.org/10.1038/ncomms8727  
+
+Landi, P., Minoarivelo, H. O., Brännström, Å., Hui, C., & Dieckmann, U. (2018). Complexity and stability of ecological networks: a review of the theory. Population Ecology, 60(4), 319–345. https://doi.org/10.1007/s10144-018-0628-3
+Latham, L. G. (2006). Network flow analysis algorithms. Ecological Modelling, 192(3–4), 586–600. https://doi.org/10.1016/j.ecolmodel.2005.07.029  
+
+Logofet, D. O. (1993). Matrices and Graphs: Stability Problems in Mathematical Ecology. Boca Raton, FL: CRCPress.
+May, R. M. (1972). Will a large network be stable? Nature, 238, 37–38. https://doi.org/10.1038/238413a0  
+
+Montoya, J. M., Woodward, G., Emmerson, M. C., & Solé, R. V. (2009). Press Perturbations and Indirect Effects in Real Food Webs. Ecology, 90(9), 2426–2433.  
+
+Moore, J. C., Berlow, E. L., Coleman, D. C., De Suiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600. https://doi.org/10.1111/j.1461-0248.2004.00606.x  
+
+Moore, J. C., & de Ruiter, P. C. (2012). Energetic Food Webs (First). Oxford, UK: Oxford University Press.  
+
+Moore, J. C., Ruiter, P. C. De, & Hunt, H. W. (1993). Influence of Productivity on the Stability of Real and Model Ecosystems. Science, 261, 906–908.  
+
+Neubert, M. G., & Caswell, H. (1997). Alternatives to resilience for measuring the responses of ecological systems to perturbations. Ecology, 78(3), 653.  
+
+Neutel, A. M., Heesterbeek, J. A. P., & Ruiter, P. C. De. (2002). Stability in Real Food Webs: Weak Links in Long Loops. Science, 296(5570), 1120–1123. https://doi.org/10.1126/science.1068326  
+
+Neutel, A. M., Heesterbeek, J. A. P., Van De Koppel, J., Hoenderboom, G., Vos, A., Kaldeway, C., … De Ruiter, P. C. (2007). Reconciling complexity with stability in naturally assembling food webs. Nature, 449(7162), 599–602. https://doi.org/10.1038/nature06154  
+
+Neutel, A. M., & Thorne, M. A. S. (2014). Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity and stability. Ecology Letters, 17(6), 651–661. https://doi.org/10.1111/ele.12266  
+
+Nilsson, K. A., & McCann, K. S. (2016). Interaction strength revisited—clarifying the role of energy flux for food web stability. Theoretical Ecology, 9(1), 59–71. https://doi.org/10.1007/s12080-015-0282-8  
+
+Novak, M., Yeakel, J. D., Noble, A. E., Doak, D. F., Emmerson, M., Estes, J. A., … Wootton, J. T. (2016). Characterizing Species Interactions to Understand Press Perturbations: What Is the Community Matrix? Annual Review of Ecology, Evolution, and Systematics, 47(1), 409–432. https://doi.org/10.1146/annurev-ecolsys-032416-010215  
+
+Pimm, S. L., Lawton, J. H., & Cohen, J. E. (1991). Food web patterns and their consequences. Nature, 350, 669–674.
+Ramirez-Llodra, E., Brandt, A., Danovaro, R., De Mol, B., Escobar, E., German, C. R., … Vecchione, M. (2010). Deep, diverse and definitely different: Unique attributes of the world’s largest ecosystem. Biogeosciences, 7(9), 2851–2899. https://doi.org/10.5194/bg-7-2851-2010  
+
+Soetaert, K. (2009a). Package NetIndices , network indices and food web descriptors in R. Ecology, 1, 1–10.  
+
+Soetaert, K. (2009b). rootSolve: Nonlinear root finding, equilibrium and steady-state analysis of ordinary differential equations.  
+
+Soetaert, K., & Herman, P. M. J. (2009). A Practical Guide to Ecological Modelling. Using R as a Simulation Platform. Springer.  
+
+Soetaert, K., & Van Oevelen, D. (2010). Package LIM , implementing linear inverse models in R, 37.
+van Altena, C., Hemerik, L., & de Ruiter, P. C. (2016). Food web stability and weighted connectance: the complexity-stability debate revisited. Theoretical Ecology, 9(1), 49–58. https://doi.org/10.1007/s12080-015-0291-7  
+
+van Oevelen, D., Soetaert, K., Garcia, R., de Stigter, H. C., Cunha, M. R., Pusceddu, A., & Danovaro, R. (2011). Canyon conditions impact carbon flows in food webs of three sections of the Nazaré canyon. Deep-Sea Research Part II: Topical Studies in Oceanography, 58(23–24), 2461–2476. https://doi.org/10.1016/j.dsr2.2011.04.009  
+
+van Oevelen, D., Soetaert, K., & Heip, C. (2012). Carbon flows in the benthic food web of the Porcupine Abyssal Plain: The (un)importance of labile detritus in supporting microbial and faunal carbon demands. Limnology and Oceanography, 57(2), 645–664. https://doi.org/10.4319/lo.2012.57.2.0645  
+
+van Oevelen, D., van den Meersche, K., Meysman, F. J. R., Soetaert, K., Middelburg, J. J., & Vézina, A. F. (2010). Quantifying food web flows using linear inverse models. Ecosystems, 13(1), 32–45. https://doi.org/10.1007/s10021-009-9297-6  
+Vézina, A. F., & Platt, T. (1988). Food web dynamics in the ocean. I. Best-estimates of flow networks using inverse methods. Marine Ecology Progress Series, 42, 269–287.  
+
+Wilkinson, J. H. (1965). The Algebraic Eigenvalue Problem. Oxford, UK: Clarendon Press.  
+
+Wilson, E. E., & Wolkovich, E. M. (2011). Scavenging: How carnivores and carrion structure communities. Trends in Ecology and Evolution, 26(3), 129–135. https://doi.org/10.1016/j.tree.2010.12.011  
+
+Zwart, K. B., Burgers, S. L. G. E., Bloem, J., Bouwman, L. A., Brussaard, L., Lebbink, G., … de Ruiter, P. C. (1994). Population dynamics in the belowground food webs in two different agricultural systems. Agriculture, Ecosystems & Environment, 51(1), 187–198. https://doi.org/https://doi.org/10.1016/0167-8809(94)90043-4
