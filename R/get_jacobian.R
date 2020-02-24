@@ -451,7 +451,7 @@ getJacobian <- function(model = stop("Model input required"),
 #' @return Returns a normalized Jacobian matrix with either an all-zero (except detritus) diagonal
 #' or a diagonal with -1.
 #' @export
-normalizeJacobian <- function(JM, allzero = TRUE, dead_names = NULL){
+normalizeJacobian <- function(JM, dead_names = NULL, allzero = TRUE){
   checkMformat(JM)
   if(0 %in% diag(JM)){
     stop("No zeroes may be present on the diagonal when normalizing the Jacobian matrix.")
