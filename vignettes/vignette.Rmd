@@ -30,9 +30,12 @@ Daniëlle S.W. de Jonge, Johan van de Koppel, Dick van Oevelen, Peter C. de Ruit
 
 # 1. Quick start
 The fwstability package is in the final stages of development, and not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub. There is also the fwmodels package, that contains several published energy-flux food-web models that are used as examples in this vignette.
-```{r installation}
+```{r installation, eval=FALSE}
 # install.packages("devtools")
-devtools::install_github("dswdejonge/fwstability")
+# build_vignettes = TRUE builds the vignette for you: this can 
+# take some time as it includes some more complex calculations. 
+# You can skip building the vignette by using build_vignettes = FALSE.
+devtools::install_github("dswdejonge/fwstability", build_vignettes = TRUE)
 
 # To use the example food-webs, install the fwmodels package as well
 devtools::install_github("dswdejonge/fwmodels")
@@ -120,7 +123,7 @@ print(s1)
 # The unit of s1 is per unit time if the unit of the 
 # Jacobian matrix is also per unit time.
 # The asymptotic return rate is the absolute value of s.
-return_rate <- abs(s) # per unit time
+return_rate <- abs(s1) # per unit time
 
 # The time for the system to return to about 37% of its original state 
 # can be calculated.
@@ -438,7 +441,7 @@ It can be useful for your research to review other network characteristics, to t
 Functions are included to review the effect on stability when individual compartments are removed from the system, or when certain interaction strengths are altered.  
 
 The function assessComps removes individual compartments and reassesses the stability. It returns a dataframe with a row for every compartment, and the absolute and relative change in stability if that compartment is removed. If the change in stability (delta) is negative, the system becomes more stable if the respective food web compartment is removed from the Jacobian matrix. If delta is positive the system becomes less stable. You need to specify what stability method you want to use (default is the eigenvalue method, but the scalar method is also possible).  
-```{r}
+```{r eval=FALSE}
 df <- assessComps(JM)
 ```
 
@@ -448,7 +451,7 @@ It is also possible to review how altering the interaction strengths impacts the
 
 In both functions you can specify which stability measure you would like to use, the default is the eigenvalue method.  
 
-```{r}
+```{r eval=FALSE}
 df <- assessLinksFixed(JM, func = function(x){return(x*2)})
 df <- assessLinksPerm(JM, perms = 100, threshold = 0.01)
 ```
@@ -640,7 +643,7 @@ Finally, the naming of defecation and mortality fluxes was moved from the 'varia
 library(LIM)
 
 # Read-in and set up the linear inverse model
-readLIMupper <- Read("Nazare_Canyon_upper.input")
+readLIMupper <- Read(system.file("extdata", "Nazare_Canyon_upper.input", package = "fwstability"))
 readLIM <- readLIMupper
 LIMupper <- Setup(readLIM)
 LIM <- LIMupper
@@ -733,7 +736,8 @@ The upper canyon has a stability of `r print(s)`, thus an asymptotic rate of ret
 library(LIM)
 
 # Read-in and set up the linear inverse model
-readLIMmiddle <- Read("Nazare_Canyon_middle.input")
+readLIMmiddle <- Read(system.file("extdata", "Nazare_Canyon_middle.input", package = "fwstability"))
+
 readLIM <- readLIMmiddle
 LIMmiddle <- Setup(readLIM)
 LIM <- LIMmiddle
@@ -826,7 +830,7 @@ The middle canyon has a stability of `r print(s)`, thus an asymptotic rate of re
 library(LIM)
 
 # Read-in and set up the linear inverse model
-readLIMlower <- Read("Nazare_Canyon_lower.input")
+readLIMlower <- Read(system.file("extdata", "Nazare_Canyon_lower.input", package = "fwstability"))
 readLIM <- readLIMlower
 LIMlower <- Setup(readLIM)
 LIM <- LIMlower
@@ -1002,7 +1006,7 @@ for(i in 1:dim(lower_solutions)[1]){
   JM <- getJacobian(model, verbose = F)
   JMs_lower[[i]] <- JM
   # Normalize
-  JMnorm <- normalizeJacobian(JM, dead_names)
+  JMnorm <- normalizeJacobian(JM$JM, dead_names)
   # Get stability as max real part eigenvalues
   s <- getStability(JMnorm)
   # Store stability in vector
