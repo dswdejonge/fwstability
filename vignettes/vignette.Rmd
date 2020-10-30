@@ -638,7 +638,9 @@ Defecation, mortality, assimilation, and growth were already defined in the mode
 - BacAss = BacUpt  
 Finally, the naming of defecation and mortality fluxes was moved from the 'variable' section to the 'flows' section, so that the names including the tags for mortality and defecation could be processed by the function.
 
-```{r upper_submarine_canyon}
+The code takes a long time to execute, and is therefore not evaluated for building the vignette.
+
+```{r upper_submarine_canyon, eval=FALSE}
 # load the LIM library
 library(LIM)
 
@@ -729,9 +731,9 @@ upper_solutions <- xs$X
 colnames(upper_solutions) <- Flows$flow
 ```
 
-The upper canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
+The upper canyon has a stability of 'print(s)', thus an asymptotic rate of return of 'print(return_rate)'. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in 'print(return_time)' days, thus 'print(return_months)' months or 'print(return_years)' years.
 
-```{r middle_submarine_canyon}
+```{r middle_submarine_canyon, eval=FALSE}
 # load the LIM library
 library(LIM)
 
@@ -823,9 +825,9 @@ middle_solutions <- xs$X
 colnames(middle_solutions) <- Flows$flow
 ```
 
-The middle canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
+The middle canyon has a stability of 'print(s)', thus an asymptotic rate of return of 'print(return_rate)'. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in ' print(return_time)' days, thus 'print(return_months)' months or ' print(return_years)' years.
 
-```{r lower_submarine_canyon}
+```{r lower_submarine_canyon, eval=FALSE}
 # load the LIM library
 library(LIM)
 
@@ -916,11 +918,11 @@ lower_solutions <- xs$X
 colnames(lower_solutions) <- Flows$flow
 ```
 
-The lower canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
+The lower canyon has a stability of 'print(s)', thus an asymptotic rate of return of 'print(return_rate)'. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in ' print(return_time)' days, thus 'print(return_months)' months or ' print(return_years)' years.
 
 However, the return times cannot simply be compared directly because the ecosystems operate on somewhat different time scales. Therefore, we first normalize the matrices and set the diagonal to all-zeroes, except for the detritus compartments. Also, it is more thorough to calculate stability for each of the 100 solutions, and then take the mean of stability (in stead of calculating the stability for the mean flow solution).
 
-```{r canyon_iterate_normalize}
+```{r canyon_iterate_normalize, eval=FALSE}
 dead_names <- c("DEADLDET", "DEADSDET", "DEADRDET", "DEADDOC")
 
 # Upper
@@ -1015,7 +1017,7 @@ for(i in 1:dim(lower_solutions)[1]){
 ```
 
 Assess the distribution of stability values.
-```{r summary_stabilities}
+```{r summary_stabilities, eval=FALSE}
 hist(stabilities_upper)
 hist(stabilities_middle)
 hist(stabilities_lower)
@@ -1031,7 +1033,7 @@ summary(stabilities_lower) ; sd(stabilities_lower)
 ```
 
 Calculate a network index that can be used to quantify network complexity: weighted connectance. Subsequently, assess the distribution of calculated values.
-```{r stability_characteristics}
+```{r stability_characteristics, eval=FALSE}
 # Weighted connectance
 Cw_upper <- numeric(length = length(JMs_upper))
 Cw_middle <- numeric(length = length(JMs_upper))
