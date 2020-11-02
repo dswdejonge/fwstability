@@ -203,10 +203,14 @@ removeExternals <- function(externals, FM) {
 #' @param netto (optional) Boolean. Default is NULL If TRUE, the netto Flowmatrix is used
 #' to calculate interaction strengths. This is only relevant if there are two food web compartments
 #' which act both as prey and predators to one another.
-#' @details \code{MR} can sometimes be extracted from the food web model, for example when
+#' @details If \code{MR} is set to NULL, it is calculated from the model as the non-predatory mortality:
+#' production minus predation divided by biomass.
+#' Otherwise \code{MR} can sometimes be extracted from the food web model, for example when
 #' natural death results in a flux from the faunal compartment to a carcass compartment.
-#' It can also be calculated as the inverse of the natural lifespan of the species
-#' (per unit time) multiplied by the biomass of the compartment.
+#' Diving the mortality flux by the biomass of the faunal compartment gives the specific
+#' mortality rate per unit time.
+#' Mortality rate can also be calculated as the inverse of the natural lifespan of the species
+#' (per unit time).
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.

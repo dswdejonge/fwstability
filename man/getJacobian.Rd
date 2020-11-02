@@ -4,7 +4,11 @@
 \alias{getJacobian}
 \title{Jacobian matrix from an energy-flux model}
 \usage{
-getJacobian(model = stop("Model input required"), verbose = T)
+getJacobian(
+  model = stop("Model input required"),
+  diagonal = "model",
+  verbose = T
+)
 }
 \arguments{
 \item{model}{(required) A named list containing elements with food web model data.
@@ -20,6 +24,9 @@ The other list element required for LIM type models is \code{LIM} containing a r
 If the LIM is resolved the flow solutions can be provided in the list element \code{web}.
 If the LIM is not resolved, the function will use the parsimonious (least distance) solution.
 }}
+
+\item{diagonal}{(required) is by default calculated from the model (= "model").
+Can also be set to an all-zero diagonal (= 0) or a numeric vector.}
 }
 \value{
 This function returns a matrix containing interaction strengths, i.e. the
@@ -55,15 +62,14 @@ The list with model information should contain:
 \item{\code{BM} (required) is a named numeric with biomasses for all compartments.}
 \item{\code{AE} (required) is a named numeric with assimilation efficiencies for living compartments.}
 \item{\code{GE} (required) is a named numeric with growth efficiencies for living compartments.}
-\item{\code{diagonal} (required) is by default an all-zero diagonal. Can also be set to other values
-or calculated from the model by setting it to "model".}
 \item{\code{dead} (optional) is a list with the elements \code{names} and \code{frac} that
 contains the names of dead compartments (character vector) and what fraction
 of each flow comprises defecation (matrix similar to \code{FM} after removal of externals, only required with parallel flows).}
 \item{\code{externals} (optional) is a character vector with any compartments that should not be
 considered in the calculations}.
-\item{\code{MR} (required if \code{diagonal} is set to "model")
-is a named numeric with non-predatory mortality rates per unit time (t-1).}
+\item{\code{MR}} (optional) Mortality rates for all compartments per unit time (t-1).
+Default behaviour (MR = NULL) is calculation of mortality rates as (growth - predation)/biomass.
+Otherwise, you can provide a named numeric vector.
 }
 More detailed information about argument requirements see \code{?getJacobianEnergyFlux}.
 }
@@ -93,8 +99,6 @@ The list with model information should contain:
 LIM R-package.}
 \item{\code{setup} (optional) can be Setup(Read(<path-to-input-file>)), otherwise set-up within function.}
 \item{\code{web} (optional) named numeric with flow solutions.}
-\item{\code{diagonal} (optional) all-zero by default, can also be other numbers or calculated from model
-by setting this element to "model".}
 \item{\code{aTag}, \code{gTag}, \code{mTag}, \code{defTag}, \code{deadTag} are optional. Default tags are
 "ass", "growth", "mort", "def", and "dead" respectively.}
 }

@@ -9,7 +9,7 @@ getJacobianEnergyFlux(
   BM,
   AE,
   GE,
-  diagonal = NULL,
+  diagonal = "model",
   dead = NULL,
   externals = NULL,
   MR = NULL,
@@ -34,13 +34,11 @@ must be in the same order as the flow matrix \code{FM} after externals are exclu
 \code{GE} should be set to NA for dead/non-faunal compartments (see \code{dead} and
 \code{externals}).}
 
-\item{diagonal}{(required) Either a single value, a numeric vector or the string "model".
-Default is an all-zero diagonal.
+\item{diagonal}{(required) Either the string "model" (default), a single value, or a numeric vector.
 \itemize{
+\item The string "model" calculates the diagonal values from flux values.
 \item A single value will set all diagonal values to this number.
 \item A vector will set the diagonal to this user-specified diagonal.
-\item The string "model" calculates the diagonal values from flux values.
-This requires the argument \code{MR}.
 }}
 
 \item{dead}{(optional) List with at most two elements named \emph{names} and \emph{frac}
@@ -59,9 +57,9 @@ compartments.
 compartments, i.e. which have no biomass, that have to be removed from
 the flow matrix before calculations.}
 
-\item{MR}{(required when \code{diagonal} is set to \emph{model})
-A named numeric vector with non-predatory mortality rates for all
-compartments per unit time (t-1)).}
+\item{MR}{(optional) Mortality rates for all compartments per unit time (t-1).
+Default behaviour (MR = NULL) is calculation of mortality rates as (growth - predation)/biomass.
+Otherwise, you can provide a named numeric vector.}
 
 \item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
 
@@ -77,14 +75,18 @@ interactions in the food web.
 \description{
 This functions calculates interaction strengths from a resolved energy-flux
 food web model and uses these values as entries for a Jacobian matrix.
-The diagonal can be all-zero (default), user-defined, or calculated from the model.
+The diagonal can be calculated from the model (default), all-zero, or user-defined.
 This function is an implementation of the equations from the references listed below.
 }
 \details{
-\code{MR} can sometimes be extracted from the food web model, for example when
+If \code{MR} is set to NULL, it is calculated from the model as the non-predatory mortality:
+production minus predation divided by biomass.
+Otherwise \code{MR} can sometimes be extracted from the food web model, for example when
 natural death results in a flux from the faunal compartment to a carcass compartment.
-It can also be calculated as the inverse of the natural lifespan of the species
-(per unit time) multiplied by the biomass of the compartment.
+Diving the mortality flux by the biomass of the faunal compartment gives the specific
+mortality rate per unit time.
+Mortality rate can also be calculated as the inverse of the natural lifespan of the species
+(per unit time).
 }
 \references{
 \itemize{

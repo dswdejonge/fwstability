@@ -10,7 +10,7 @@ assessFeedback(
   k = NULL,
   output = "allLoops",
   file = NULL,
-  MR = NULL,
+  scale = TRUE,
   compnames = NULL,
   verbose = T
 )
@@ -27,7 +27,7 @@ and store them in a textfile.
 If you already have a text file with the compartments indices of each loop per line,
 you can set \code{findLoops} to FALSE (see element \code{file}. Default is FALSE.}
 
-\item{k}{(optional) Integer. Can be used if \code{findLoops} is TRUE.
+\item{k}{(optional) Integer Can be used if \code{findLoops} is TRUE.
 It indicates that you only want to search for loops of length \code{k}.
 Default is \code{NULL}, which finds all loops if \code{findLoops} is TRUE.}
 
@@ -38,8 +38,9 @@ where the loops are stored. Default is "allLoops".}
 \item{file}{(required if findLoops is FALSE) String.
 This is the path to the text file where the loops are stored.}
 
-\item{MR}{(optional) Natural mortality/death rates for scaling the
-loop weight, same unit as Jacobian matrix.}
+\item{scale}{Default is TRUE: the loop weight will be scaled to the negative
+self-effects on the diagonal. Scaled loop weight should be used if you also work
+with scaled stability values. Otherwise set to FALSE.}
 
 \item{compnames}{(optional) Vector with compartment names in same order
 as the Jacobian matrix. If it is not included the names of \code{JM}
@@ -69,20 +70,18 @@ network you might want to limit your search to loops of length k = 2
 or k = 3, as those are found to be the most important in determining
 overall feedback and stability in your system (Neutel & Thorne 2014). \cr
 
-Natural death/mortality rates (MR) can be found as the absolute
-values on the diagonal.
-Diagonal values for detritus are also regarded 'death' rates, as they
-represent self-dampening effects. \cr
-
 Feedback of a loop is the product of all interaction strengths
 in a loop (so feedback is not additative but multiplicative).
 
 Loop weight is defined as the geometric mean of all absolute
 interaction strengths in a loop of length k. It combines information on
-the feedback of the loop, with natural death rates and the length of
-the loop. The feedback is scaled by the natural death rates in the reference
-because the stability measure is also scaled by death rates. Depending on
-your stability measure you can decide to omit inclusion of death rates.
+the feedback of the loop and the length of the loop.
+If 'scale' is TRUE the loop feedback is divided by the absolute product
+of the corresponding self-dampening effects on the JM diagonal.
+The loop feedback should be scaled in the stability measure
+is also scaled by self-dampening effects. Depending on
+your stability measure you can decide to omit scaling.
+\cr
 }
 \references{
 \itemize{

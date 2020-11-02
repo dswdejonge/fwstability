@@ -24,9 +24,6 @@ Default is set to "dead". Not case sensitive.
 Default is set to "def". Not case sensitive.
 \item \code{setup} (optional) Setup(Read(lim.input)). By inclusion the function won't setup the model,
 thereby potentially saving time.
-\item \code{diagonal} (optional) Either a single value, a numeric vector or the string "model".
-Default is an all-zero diagonal. The string "model" calculates the diagonal values from flux values.
-If diagonal is set to "model" mortality must be explicity included in the LIM.
 }}
 }
 \value{
