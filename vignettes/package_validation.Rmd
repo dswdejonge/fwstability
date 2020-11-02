@@ -1,0 +1,370 @@
+---
+title: "Package_validation"
+output: html_document
+---
+## de Ruiter et al. (1995) Energetics, Patterns of Interaction Strenghts, and Stability in Real Ecosystems. Science, 269 (5228), 1257 - 1260
+
+In the Science paper by de Ruiter et al. (1995) the stability of seven food webs is assessed. The soil food web of the Lovinkhoeve Experimental Farm is singled out and a energy-flux model is provided including biomasses (kg ha-1), specific death rates (yr-1), assimilation efficiencies, and growth efficiencies for all compartments. 
+
+```{r model_data}
+# Get food web data on the compartments
+foodweb_data <- list(
+  # Compartment names
+  compartment = c(
+    "Detritus", 
+    "Roots", 
+    "Fungi",
+    "Bacteria", 
+    "Phytophagous_nematodes", 
+    "Collembola", 
+    "Cryptostigmatic_mites",
+    "Noncryptostigmatic_mites",
+    "Fungivorous_nematodes",
+    "Enchytraeids",
+    "Bacteriophagous_nematodes",
+    "Flagellates",
+    "Bacteriophagous_mites",
+    "Amoebae",
+    "Predatory_nematodes",
+    "Nematophagous_mites",
+    "Predatory_collembola",
+    "Predatory_mites"
+  ),
+  # Biomasses(kg ha-1)
+  BM = c(
+    2500,
+    300,
+    2.13,
+    227.5,
+    0.19,
+    0.47,
+    0.01,
+    0.02,
+    0.08,
+    0.43,
+    0.30,
+    0.53,
+    0.001,
+    11.53,
+    0.06,
+    0.004,
+    0.03,
+    0.0635
+  ),
+  MR = c(
+    NA,
+    1.00,
+    1.20,
+    1.20,
+    1.08,
+    1.84,
+    1.20,
+    1.84,
+    1.92,
+    5.00,
+    2.68,
+    6.00,
+    1.84,
+    6.00,
+    3.00,
+    1.84,
+    1.84,
+    1.84
+  ),
+  AE = c(
+    NA,
+    NA,
+    1.00,
+    1.00,
+    0.25,
+    0.50,
+    0.50,
+    0.50,
+    0.38,
+    0.25,
+    0.60,
+    0.95,
+    0.50,
+    0.95,
+    0.50,
+    0.90,
+    0.50,
+    0.60
+  ),
+  GE = c(
+    NA,
+    NA,
+    0.30,
+    0.30,
+    0.37,
+    0.35,
+    0.35,
+    0.35,
+    0.37,
+    0.40,
+    0.37,
+    0.40,
+    0.35,
+    0.40,
+    0.37,
+    0.35,
+    0.35,
+    0.35
+  )
+)
+names(foodweb_data$BM) <- foodweb_data$compartment
+names(foodweb_data$MR) <- foodweb_data$compartment
+names(foodweb_data$AE) <- foodweb_data$compartment
+names(foodweb_data$GE) <- foodweb_data$compartment
+
+FM <- matrix(
+  0,
+  nrow = length(foodweb_data$compartment), 
+  ncol = length(foodweb_data$compartment),
+  byrow = T
+)
+if(T){
+  FM[1,3] <- 40.8
+  FM[1,4] <- 1606
+  FM[2,5] <- 7.44
+  FM[3,6] <- 6.65
+  FM[3,7] <- 0.08
+  FM[3,8] <- 0.34
+  FM[3,9] <- 2.51
+  FM[3,10] <- 0.09
+  FM[1,10] <- 11.1
+  FM[4,10] <- 10.1
+  FM[4,11] <- 6.89
+  FM[4,12] <- 9.46
+  FM[4,13] <- 0.01
+  FM[4,14] <- 182
+  FM[11,15] <- 0.42
+  FM[4,15] <- 0.33
+  FM[12,15] <- 0.008
+  FM[12,14] <- 0.42
+  FM[14,15] <- 0.17
+  FM[5,18] <- 0.06
+  FM[5,17] <- 0.13
+  FM[5,16] <- 0.01
+  FM[5,15] <- 0.28
+  FM[6,18] <- 0.31
+  FM[7,18] <- 0.005
+  FM[8,18] <- 0.015
+  FM[9,18] <- 0.03
+  FM[9,17] <- 0.05
+  FM[9,16] <- 0.004
+  FM[9,15] <- 0.11
+  FM[13,18] <- 0.003
+  FM[11,18] <- 0.10
+  FM[11,17] <- 0.20
+  FM[11,16] <- 0.014
+  FM[15,18] <- 0.02
+  FM[15,17] <- 0.04
+  FM[15,16] <- 0.003
+  FM[16,18] <- 0.002
+  FM[17,18] <- 0.02
+}
+
+rownames(FM) <- foodweb_data$compartment
+colnames(FM) <- foodweb_data$compartment
+```
+
+Now we use this data to calculate interaction strength values to get a Jacobian matrix. The authors state that intragroup interferences i.e. the values for the diagonal of the Jacobian matrix, could not be established empirically. Therefore, the diagonal is set to zero for now (default). In the original paper the interaction strengths related to the detritus compartment were not calculated with a function specific for detritus. Therefore, the results from the paper can be duplicated by NOT defining  detritus as a dead compartment.
+
+```{r}
+model <- list(
+  type = "EF",
+  FM = FM,
+  BM = foodweb_data$BM,
+  AE = foodweb_data$AE,
+  GE = foodweb_data$GE
+)
+JM <- getJacobian(model)
+```
+
+The stability of the food web can now be found by finding the maximum real part of the eigenvalues. Remember our Jacobian matrix has an all-zero diagonal.
+```{r}
+getStability(JM)
+```
+
+It is also possible to find stability as the scalar of the natural mortality rates needed to produce a stable matrix (the method used in the original paper).
+```{r eval = FALSE}
+getStability(JM, method = "scalar", 
+             mortalities = foodweb_data$MR, dead = "Detritus")
+```
+
+Both methods are valid, altough it is clear that the actual values differ. Therefore, it is important to know what stability method has been used in order to interpret the results correctly.
+
+It is also possible to calculate values for the diagonal instead of setting them to zero.
+```{r eval = FALSE}
+JM <- getJacobian(
+  FM = FM,
+  BM = foodweb_data$BM,
+  AE = foodweb_data$AE,
+  GE = foodweb_data$GE,
+  diagonal = "model",
+  dead = list(names = "Detritus"),
+  MR = foodweb_data$MR
+)
+
+getStability(JM)
+```
+
+# Package validation
+```{r Lovinkhoeve_CP}
+# Jacobian matrix
+model <- LovinkhoeveCP
+dead <- list(
+    names = "Detritus", 
+    def = "Def")
+JM <- getJacobianEnergyFlux(
+  FM = model$FM, 
+  BM = model$BM, 
+  AE = model$AE, 
+  GE = model$GE, 
+  diagonal = "model", 
+  dead = dead, 
+  MR = model$MR)
+
+# s
+getStability(JM, method = "scalar", MR = model$MR, dead = dead$names)
+
+# eigenvalue normalized JM-0D
+JMnorm <- JM / abs(diag(JM))
+i <- names(diag(JMnorm)) %in% dead$names
+diag(JMnorm)[!i] <- 0
+getStability(JMnorm)
+```
+
+```{r Lovinkhoeve_IF}
+# Jacobian matrix
+model <- LovinkhoeveIF
+dead <- list(
+    names = "Detritus", 
+    def = "Def")
+JM <- getJacobianEnergyFlux(
+  FM = model$FM, 
+  BM = model$BM, 
+  AE = model$AE, 
+  GE = model$GE, 
+  diagonal = "model", 
+  dead = dead, 
+  MR = model$MR)
+
+# s
+getStability(JM, method = "scalar", MR = model$MR, dead = dead$names)
+
+# eigenvalue normalized JM-0D
+JMnorm <- JM / abs(diag(JM))
+i <- names(diag(JMnorm)) %in% dead$names
+diag(JMnorm)[!i] <- 0
+getStability(JMnorm)
+```
+
+# Comparison of return times
+```{r}
+# Lovinkhoeve convertional practice (per year)
+model <- LovinkhoeveCP_noDet
+model$diagonal <- "model"
+JM_CP <- getJacobian(model)
+s <- getStability(JM_CP)
+1/abs(s)
+# 0.83 years
+
+# Lovinkhoeve integrated farming (per year)
+model <- LovinkhoeveIF_noDet
+model$diagonal <- "model"
+JM_IF <- getJacobian(model)
+s <- getStability(JM_IF)
+1/abs(s)
+# 0.83 years
+
+# Wet tundra (per year)
+model <- Antarctic_tundra_wet
+model$diagonal <- "model"
+JM <- getJacobian(model)
+s <- getStability(JM)
+1/abs(s)
+# 23.7 years
+
+# Dry tundra (per year)
+model <- Antarctic_tundra_dry
+model$diagonal <- "model"
+JM <- getJacobian(model)
+s <- getStability(JM)
+1/abs(s)
+# 34.5 years
+```
+
+## 1.2. A dynamic model
+A dynamic food web model is a set of differential equations that describe the change in biomass of each food web compartment based on the biomass of other compartments and potentially other factors. It is common to use a set of (generalized) Lotka-Volterra equations for your food web model. The form of a generalized Lotka-Volterra equation is:
+$$\frac{dx_i}{dt} = x_i (r_i + \sum_{j=1}^n c_{ij}x_j) $$
+where $r_i$ is the natural per capita growth rate and $c_ij$ is the coefficient of the interaction i.e. the effect of population $j$ on population $i$. 
+
+Lets create a dynamic model based on the same food web structure and data as the linear inverse model described above. Plants have a natural growth rate as they take up CO2 for primary production. Furthermore, plants are negatively impacted by animals as they are preyed upon. Plants have a negative effect on their own population growth, and are not influenced by detritus. Growth of animals is dependen on the feeding on plants. Animals, like plants, have a negative effect on their own population growth. Detritus have natural decline by decomposition, but are positively affected by animal defecation and plant waste.
+
+The deSolve package is great for solving a system of orginary differential equations. You can write your model in R, plug in parameters, and simulate the change over time in your ecosystem.
+```{r Lotka-Volterra}
+library(deSolve)
+library(ggplot2)
+
+fwnames <- c("PLANT", "ANIMAL", "DETRITUS")
+
+# Define the set of differential equations
+LotkaVolterra <- function (Time, State, Pars) {
+  with(as.list(c(State, Pars)), {
+    dP = PLANT * (r1 - c11 * PLANT - c12 * ANIMAL)
+    dA = ANIMAL * (-r2 + c21 * PLANT - c22 * ANIMAL - c23 * DET)
+    dD = DET * (-r3 + c31 * PLANT + c32 * ANIMAL - c33 * DET)
+    return(list(c(dP, dA, dD)))
+  })
+}
+
+# Parameters to initialize model
+#Pars <- c(alpha = 2, beta = 0.5, gamma = 0.2, delta = 0.6)
+Pars <- c(
+  r1 = 10, r2 = 1, r3 = 1,
+  c11 = 0.05, c12 = 0.5,
+  c21 = 7, c22 = 0.5, c23 = 0.5,
+  c31 = 0.75, c32 = 3, c33 = 2
+)
+# Initial biomass of compartments
+State <- c(PLANT = 10, ANIMAL = 5, DET = 10)
+# Time to run the simulation
+Time <- seq(0, 50, by = 1)
+
+# Run and plot simulation
+simulation <- ode(func = LotkaVolterra, y = State, parms = Pars, times = Time)
+plot <- ggplot(as.data.frame(simulation)) +
+  geom_line(aes(x = time, y = PLANT), colour = "green") +
+  geom_line(aes(x = time, y = ANIMAL), colour = "blue") +
+  geom_line(aes(x = time, y = DET), colour = "brown")
+
+```
+
+Mathematically speaking, the Jacobian matrix contains elements $\alpha_{ij}$ which are the first-order partial derivatives of each differential function valued with initial state biomasses. The rootSolve package numerically estimates these values by perturbing the initial state values.
+
+```{r}
+library(rootSolve)
+newState <- simulation[50,2:4]
+JM <- jacobian.full(y=newState, func=LotkaVolterra, parms = Pars)
+rownames(JM) <- fwnames ; colnames(JM) <- fwnames
+print(JM)
+```
+
+This Jacobian matrix already contains diagonal values. The stability can be found from this complete Jacobian matrix.
+```{r}
+getStability(JM)
+```
+
+
+Jacobian matrix from a ODE model
+This function produces a Jacobian matrix from a model defined as a set of
+ordinary differential equations.
+@inheritParams rootSolve::jacobian.full
+@seealso The package rootSolve for full documentation on \code{\link[rootSolve]{jacobian.full}}.
+getJacobianODE <- function(y, func, parms) {
+  JM <- rootSolve::jacobian.full(y = y, func = func, parms = parms)
+  rownames(JM) <- colnames(JM)
+  return(JM)
+}

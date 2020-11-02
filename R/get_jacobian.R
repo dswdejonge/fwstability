@@ -41,7 +41,7 @@
 #' \itemize{
 #' \item The element \emph{names} is required and contains a character vector with all names of dead
 #' compartments.
-#' \item The element \emph{frac} is required if there is more than one detritus compartemnt.
+#' \item The element \emph{frac} is required if there is more than one detritus compartment.
 #' It is matrix the same size and order
 #' as the \code{FM} matrix, and contains the fraction of each flow that is defecation.
 #' If there are multiple defecation compartments, the Flowmatrix \code{FM} combined with \code{frac} is used to
@@ -151,7 +151,7 @@ removeExternals <- function(externals, FM) {
 #'
 #' This functions calculates interaction strengths from a resolved energy-flux
 #' food web model and uses these values as entries for a Jacobian matrix.
-#' The diagonal can be all-zero (default), user-defined, or calculated from the model.
+#' The diagonal can be calculated from the model (default), all-zero, or user-defined.
 #' This function is an implementation of the equations from the references listed below.
 #' @references
 #' \itemize{
@@ -176,13 +176,11 @@ removeExternals <- function(externals, FM) {
 #' must be in the same order as the flow matrix \code{FM} after externals are excluded.
 #' \code{GE} should be set to NA for dead/non-faunal compartments (see \code{dead} and
 #' \code{externals}).
-#' @param diagonal (required) Either a single value, a numeric vector or the string "model".
-#' Default is an all-zero diagonal.
+#' @param diagonal (required) Either the string "model" (default), a single value, or a numeric vector.
 #' \itemize{
+#' \item The string "model" calculates the diagonal values from flux values.
 #' \item A single value will set all diagonal values to this number.
 #' \item A vector will set the diagonal to this user-specified diagonal.
-#' \item The string "model" calculates the diagonal values from flux values.
-#' This requires the argument \code{MR}.
 #' }
 #' @param dead (optional) List with at most two elements named \emph{names} and \emph{frac}
 #' containing information on all dead compartments (like detritus and nutrients).
@@ -198,22 +196,26 @@ removeExternals <- function(externals, FM) {
 #' @param externals (optional) Character vector with all names of external
 #' compartments, i.e. which have no biomass, that have to be removed from
 #' the flow matrix before calculations.
-#' @param MR (required when \code{diagonal} is set to \emph{model})
-#' A named numeric vector with non-predatory mortality rates for all
-#' compartments per unit time (t-1)).
+#' @param MR (optional) Mortality rates for all compartments per unit time (t-1).
+#' Default behaviour (MR = NULL) is calculation of mortality rates as (growth - predation)/biomass.
+#' Otherwise, you can provide a named numeric vector.
 #' @param verbose (optional) Default is TRUE. Wether or not to print messages.
 #' @param netto (optional) Boolean. Default is NULL If TRUE, the netto Flowmatrix is used
 #' to calculate interaction strengths. This is only relevant if there are two food web compartments
 #' which act both as prey and predators to one another.
-#' @details \code{MR} can sometimes be extracted from the food web model, for example when
+#' @details If \code{MR} is set to NULL, it is calculated from the model as the non-predatory mortality:
+#' production minus predation divided by biomass.
+#' Otherwise \code{MR} can sometimes be extracted from the food web model, for example when
 #' natural death results in a flux from the faunal compartment to a carcass compartment.
-#' It can also be calculated as the inverse of the natural lifespan of the species
-#' (per unit time) multiplied by the biomass of the compartment.
+#' Diving the mortality flux by the biomass of the faunal compartment gives the specific
+#' mortality rate per unit time.
+#' Mortality rate can also be calculated as the inverse of the natural lifespan of the species
+#' (per unit time).
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
 #' @export
-getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
+getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
                         dead = NULL, externals = NULL, MR = NULL,
                         verbose = T, netto = NULL) {
 
@@ -232,10 +234,10 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = NULL,
     FMs$netto <- FM
   }
   # Message for default all-zero diagonal
-  if(is.null(diagonal)) {
-    diagonal <- 0
-    if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
-  }
+  #if(is.null(diagonal)) {
+  #  diagonal <- 0
+  #  if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
+  #}
   # Do checks for required data formats
   checkMformat(FMs$original)
   checkMformat(FMs$netto)
@@ -310,6 +312,9 @@ getNettoFM <- function(FM, deadnames) {
 #' If the LIM is resolved the flow solutions can be provided in the list element \code{web}.
 #' If the LIM is not resolved, the function will use the parsimonious (least distance) solution.
 #' }
+#' @param diagonal (required) is by default calculated from the model (= "model").
+#' Can also be set to an all-zero diagonal (= 0) or a numeric vector.
+#'
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
@@ -317,6 +322,7 @@ getNettoFM <- function(FM, deadnames) {
 #' that is the Jacobian matrix with interaction strengths, and with element \code{extracted_data}
 #' (so \code{JM$extracted_data}) that is another list with all data extracted from the LIM the
 #' Jacobian matrix is calculated from.
+#'
 #' @section Energy Flux models:
 #' Interaction strenghts can be calculated from energy flux models as presented in
 #' De Ruiter (1995) and Neutel & Thorne (2014). The energy flux model should at least include
@@ -337,17 +343,17 @@ getNettoFM <- function(FM, deadnames) {
 #' \item{\code{BM} (required) is a named numeric with biomasses for all compartments.}
 #' \item{\code{AE} (required) is a named numeric with assimilation efficiencies for living compartments.}
 #' \item{\code{GE} (required) is a named numeric with growth efficiencies for living compartments.}
-#' \item{\code{diagonal} (required) is by default an all-zero diagonal. Can also be set to other values
-#' or calculated from the model by setting it to "model".}
 #' \item{\code{dead} (optional) is a list with the elements \code{names} and \code{frac} that
 #' contains the names of dead compartments (character vector) and what fraction
 #' of each flow comprises defecation (matrix similar to \code{FM} after removal of externals, only required with parallel flows).}
 #' \item{\code{externals} (optional) is a character vector with any compartments that should not be
 #' considered in the calculations}.
-#' \item{\code{MR} (required if \code{diagonal} is set to "model")
-#' is a named numeric with non-predatory mortality rates per unit time (t-1).}
+#' \item{\code{MR}} (optional) Mortality rates for all compartments per unit time (t-1).
+#' Default behaviour (MR = NULL) is calculation of mortality rates as (growth - predation)/biomass.
+#' Otherwise, you can provide a named numeric vector.
 #' }
 #' More detailed information about argument requirements see \code{?getJacobianEnergyFlux}.
+#'
 #' @section Linear Inverse models:
 #' Linear programming can be used to quantify fluxes. Therefore, a solved linear inverse model (LIM)
 #' often already contains the elements needed to calculate interaction strengths, but they need to be
@@ -372,8 +378,6 @@ getNettoFM <- function(FM, deadnames) {
 #' LIM R-package.}
 #' \item{\code{setup} (optional) can be Setup(Read(<path-to-input-file>)), otherwise set-up within function.}
 #' \item{\code{web} (optional) named numeric with flow solutions.}
-#' \item{\code{diagonal} (optional) all-zero by default, can also be other numbers or calculated from model
-#' by setting this element to "model".}
 #' \item{\code{aTag}, \code{gTag}, \code{mTag}, \code{defTag}, \code{deadTag} are optional. Default tags are
 #' "ass", "growth", "mort", "def", and "dead" respectively.}
 #' }
@@ -390,19 +394,19 @@ getNettoFM <- function(FM, deadnames) {
 #' }
 #' @export
 getJacobian <- function(model = stop("Model input required"),
-                        verbose = T) {
+                        diagonal = "model", verbose = T) {
   if(model$type == "EF") {
     JM <- getJacobianEnergyFlux(
       FM = model$FM,
       BM = model$BM,
       AE = model$AE,
       GE = model$GE,
-      diagonal = model$diagonal,
       dead = model$dead,
       externals = model$externals,
       MR = model$MR,
       netto = model$netto,
-      verbose = verbose)
+      verbose = verbose,
+      diagonal = diagonal)
   } else if(model$type == "LIM") {
     if(is.null(model$setup)) {
       model$setup <- Setup(model$LIM)
@@ -424,9 +428,9 @@ getJacobian <- function(model = stop("Model input required"),
       dead = extracted_data$dead,
       externals = extracted_data$externals,
       MR = extracted_data$MR,
-      diagonal = model$diagonal,
       netto = model$netto,
-      verbose = verbose
+      verbose = verbose,
+      diagonal = diagonal
     )
     JM <- list(JM = JM, extracted_data = extracted_data)
   } else {

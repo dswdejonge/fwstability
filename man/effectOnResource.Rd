@@ -33,7 +33,7 @@ compartments, must be in the same order as the flow matrix.}
 \itemize{
 \item The element \emph{names} is required and contains a character vector with all names of dead
 compartments.
-\item The element \emph{frac} is required if there is more than one detritus compartemnt.
+\item The element \emph{frac} is required if there is more than one detritus compartment.
 It is matrix the same size and order
 as the \code{FM} matrix, and contains the fraction of each flow that is defecation.
 If there are multiple defecation compartments, the Flowmatrix \code{FM} combined with \code{frac} is used to

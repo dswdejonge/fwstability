@@ -4,7 +4,13 @@
 \alias{getStability}
 \title{Get the mathematical stability of a matrix.}
 \usage{
-getStability(JM, method = "eigenvalue", MR = NULL, dead_names = NULL)
+getStability(
+  JM,
+  method = "eigenvalue",
+  MR = NULL,
+  dead_names = NULL,
+  iters = 100
+)
 }
 \arguments{
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
@@ -35,6 +41,10 @@ set to NA.}
 
 \item{dead_names}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
 compartments (everything that is not fauna).}
+
+\item{iters}{(required if method is "scalar") Default is 100.
+The max number of iterations to find stability with the iterative scalar method.
+A greater number of iters will result in a higher resolution of stability value.}
 }
 \value{
 This function returns a numeric value. For the "eigenvalue" method

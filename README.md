@@ -11,6 +11,9 @@ devtools::install_github("dswdejonge/fwstability", build_vignettes = TRUE)
 # Install the fwmodel package with published energy-flux models
 # to use as examples.
 devtools::install_github("dswdejonge/fwmodels")
+
+# Read vignette:
+browseVignettes("fwstability") # click HTML
 ```
 
 # Quick start

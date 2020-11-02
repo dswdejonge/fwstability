@@ -8,9 +8,9 @@ getCriticalDiagonal <- function(JM) {
   return(result)
 }
 
-getStepSize <- function(criticalDiagonal, MR) {
+getStepSize <- function(criticalDiagonal, MR, iters) {
   scalars <- - criticalDiagonal / MR
-  stepsize <- max(scalars, na.rm = TRUE) / 100
+  stepsize <- max(scalars, na.rm = TRUE) / iters
   return(stepsize)
 }
 
@@ -102,6 +102,9 @@ getInitialStability <- function(JM) {
 #' (per unit time, t-1). The values and names must be in the same
 #' order as the Jacobian matrix, and the values for dead compartments should be
 #' set to NA.
+#' @param iters (required if method is "scalar") Default is 100.
+#' The max number of iterations to find stability with the iterative scalar method.
+#' A greater number of iters will result in a higher resolution of stability value.
 #' @param dead_names (optional if method is "scalar") Character vector with all names of detritus and nutrient
 #' compartments (everything that is not fauna).
 #' @return This function returns a numeric value. For the "eigenvalue" method
@@ -122,7 +125,7 @@ getInitialStability <- function(JM) {
 #' @examples
 #' getStability(JM)
 getStability <- function(JM, method = "eigenvalue",
-                         MR = NULL, dead_names = NULL) {
+                         MR = NULL, dead_names = NULL, iters = 100) {
   # Errors: check data format
   checkMformat(JM)
   checkNamingFormat(matrices = list(JM), vectors = list(MR))
@@ -147,7 +150,7 @@ getStability <- function(JM, method = "eigenvalue",
       to_scale <- to_scale[-which(rownames(JM) %in% dead_names)]
     }
     diag(JM)[to_scale] <- -MR[to_scale]
-    stepsize <- getStepSize(getCriticalDiagonal(JM), MR)
+    stepsize <- getStepSize(getCriticalDiagonal(JM), MR, iters)
     stability <- getScalarStability(JM, MR, stepsize, to_scale)
   } else if(method == "initial") {
     stability <- getInitialStability(JM)

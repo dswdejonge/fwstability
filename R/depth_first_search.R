@@ -10,7 +10,6 @@
 #' before as starting node.
 #' @param file String with name for textfile that will store loops.
 #' @param start Is integer with the current start node.
-#' @references Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph
 #' @return No returned value, writes .txt file to working directory.
 #' @export
 dfsall <- function(AM, node, visited, pathway, started, file, start) {
@@ -47,7 +46,6 @@ dfsall <- function(AM, node, visited, pathway, started, file, start) {
 #' before as starting node.
 #' @param file String with filename to store loops.
 #' @param start Is integer with the current start node.
-#' @references Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph
 #' @return No returned value, writes .txt file to working directory.
 #' @export
 dfsk <- function(AM, node, visited, pathway, k, started, file, start){
@@ -96,7 +94,12 @@ dfsk <- function(AM, node, visited, pathway, k, started, file, start){
 #' @param k (optional) Default is NULL. Integer of length loop to search for.
 #' @param verbose (optional) Default is TRUE. Set to FALSE to hide messages.
 #' @return Returns file name.
-#' @references Based on the answers at: https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph
+#' @references
+#' Tarjan, R. (1972). Depth-First Search and Linear Graph Algorithms.
+#' SIAM Journal on Computing, 1(2), 146–160.
+#' https://doi.org/10.1137/0201010.
+#' Implementation based on the answers at:
+#' https://stackoverflow.com/questions/546655/finding-all-cycles-in-a-directed-graph.
 #' @export
 dfs <- function(AM, output = "allLoops", k = NULL, verbose = T){
   # Check input data

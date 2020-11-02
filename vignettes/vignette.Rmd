@@ -18,8 +18,10 @@ knitr::opts_chunk$set(
 
 NOTE: The package is in the final stages of development and not yet available from CRAN. Please be aware of this when using the package in its current form.  
 
-This vignette explains how you can use the fwstability package to assess stability of energy-flux food-web models. The subsections contain details about the features of the package and the scientific background. Reading this is highly recommended so that you can interpret your results correctly. An in-depth explanation of the science of energy-flux food-web stability is found in our paper. Please cite if you are using this package:  
-Daniëlle S.W. de Jonge, Johan van de Koppel, Dick van Oevelen, Peter C. de Ruiter. Measuring stability of energy-flux food web models. In prep.
+This vignette explains how you can use the *fwstability* package to assess stability of energy-flux food-web models. The subsections contain details about the features of the package and the scientific background. Reading this is highly recommended so that you can interpret your results correctly.   
+
+An in-depth explanation of the science of energy-flux food-web stability is found in our paper. Please cite if you are using this package:  
+Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Measuring stability of energy-flux food web models. In prep.
 
 1) Quick start.    
 2) How to prepare your energy-flux food-web model for stability analysis.   
@@ -29,7 +31,7 @@ Daniëlle S.W. de Jonge, Johan van de Koppel, Dick van Oevelen, Peter C. de Ruit
 6) Some examples with published food-webs.  
 
 # 1. Quick start
-The fwstability package is in the final stages of development, and not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub. There is also the fwmodels package, that contains several published energy-flux food-web models that are used as examples in this vignette.
+The *fwstability* package is in the final stages of development, and not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub. There is also the *fwmodels* package, that contains several published energy-flux food-web models that are used as examples in this vignette.
 ```{r installation, eval=FALSE}
 # install.packages("devtools")
 # build_vignettes = TRUE builds the vignette for you: this can 
@@ -41,22 +43,24 @@ devtools::install_github("dswdejonge/fwstability", build_vignettes = TRUE)
 devtools::install_github("dswdejonge/fwmodels")
 ```
 
-If the installation was successful, we load the fwstability package (and the fwmodels package for examples).
+If the installation was successful, we load the *fwstability* package (and the *fwmodels* package for examples).
 ```{r load_libraries}
 library(fwstability)
 library(fwmodels)
 ```
 
 First, a Jacobian matrix must be created from the energy-flux model. This model must contain:  
+
 1) Biomasses for each food web comopartment (abundance per unit area/volume).  
-2) Quantified fluxes between compartments (abundance per unit area/volume per unit time).    
+2) Quantified fluxes between compartments (abundance per unit area/volume per unit time).     
 3) Energy conversion efficiencies for all living compartments (assimilation and production efficiencies, fraction 0-1).  
 4) Mortality rates (per unit time, can be calculated from mortality fluxes and biomass).  
 5) Defecation fluxes (abundance per unit area/volume per unit time, can be derived from the uptake fluxes and energy conversion efficiencies).    
+
 The energy-flux model should stick to the physiological concepts explained in this diagram:
 ![Diagram of physiology concepts used in energy-flux food web models. White boxes represent sink compartments outside the organism, whereas grey boxes represent different stages of energy or material inside the organism as they flow through. Fluxes (Fij is Flux from i to j) and the specific processes they represent are presented with a capital letter, energy conversion efficiencies with a lower case letter. Prey is population i, predator is population j, consumer of predator j is k. Q = Consumption, A = Assimilation, E = Excretion, P = Production, R = Respiration, P = Predation, M = Mortality. a = assimilation efficiency, p = production efficiency. Based on (de Ruiter et al., 1993; Hunt et al., 1987).](physiology_diagram.png)
 
-Lets take a look at the data in an example food web from the fwmodel package: a food-web of soil treated with conventional farming practices.
+Lets take a look at the data in an example food web from the *fwmodel package*: a food web of soil treated with conventional farming practices.
 ```{r Lovinkhoeve}
 # Information on the Lovinkhoeve food web model
 ?Lovinkhoeve
@@ -68,49 +72,52 @@ LovinkhoeveCP$type
 dim(LovinkhoeveCP$FM)
 rownames(LovinkhoeveCP$FM)
 
-# The biomasses (kg C ha-1) of all compartments are
+# The biomasses (kg C / ha) of all compartments are
 LovinkhoeveCP$BM
 
 # The assimilation and production (growth) efficiency of all compartments are
 LovinkhoeveCP$AE
 LovinkhoeveCP$GE
 
-# The natural death (mortality) rates (yr-1) of all compartments are
+# The natural death (mortality) rates ( /yr ) of all compartments are
 LovinkhoeveCP$MR
 
-# The calculated flow sizes between compartments (kg C ha-1 yr-1) can be viewed as
-LovinkhoeveCP$FM
+# The flow matrix contains calculated flow sizes between compartments (kg C / ha / yr).
+# The first five rows and columns of the flow matrix can be viewed as:
+LovinkhoeveCP$FM[1:5, 1:5]
 
 # Mortality and defecation fluxes can be distinguished using a matrix that
 # specifies the fraction of each flow comprised of defecation.
-LovinkhoeveCP$dead$frac
+# The first five rows and columns of this matrix can be viewed as:
+LovinkhoeveCP$dead$frac[1:5, 1:5]
 ```
 
-Now we can calculate a Jacobian matrix from the energy-flux model. The Jacobian matrix shows the per capita effect of species i (in rows) on the population growth rate of species j (in columns) in the unit per time (if the biomasses are abundance per unit area/volume and fluxes are abundance per unit area/volume per unit time). The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus).  
+Now we can calculate a Jacobian matrix from the energy-flux model. The Jacobian matrix shows the per capita effect of species i (in rows) on the population growth rate of species j (in columns) per unit time. The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus).  
 ```{r Jacobian_matrix}
 model <- LovinkhoeveCP
 
 # Documentation for the getJacobian function
 ?getJacobian
 
-# Create a Jacobian matrix, with an all-zero diagonal (default).
-JM1 <- getJacobian(model)
+# Create a Jacobian matrix, with an all-zero diagonal.
+JM1 <- getJacobian(model, diagonal = 0)
 
 # Create a Jacobian matrix, with -1 on the diagonal.
-model$diagonal <- -1
-JM2 <- getJacobian(model)
+JM2 <- getJacobian(model, diagonal = -1)
 
 # Create a Jacobian matrix, with a numeric vector as diagonal
-model$diagonal <- runif(dim(model$FM)[1], min = -1, max = 0)
-JM3 <- getJacobian(model)
+diagonal <- runif(dim(model$FM)[1], min = -1, max = 0)
+JM3 <- getJacobian(model, diagonal = diagonal)
 
-# Create a Jacobian matrix, with a diagonal calculated from the model.
+# Create a Jacobian matrix, with a diagonal calculated from the model (default).
 # The diagonal values are the upper-limit of self-dampening effects in the system.
-model$diagonal <- "model"
-JM4 <- getJacobian(model)
+JM4 <- getJacobian(model, diagonal = "model")
+
+# The first 5 rows and columns of the Jacobian matrix:
+print(JM4[1:5, 1:5])
 ```
 
-Now we can calculate stability from the Jacobian matrix. All methods are based on the concept that a Jacobian matrix is only stable if all real parts of the eigenvalues are negative. If the system is stable the system will asymptotically return to equilibrium after a small pulse perturbation. If the system is unstable the system will not return to equilibrium after a small pulse perturbation but move away from the equilibrium state. Beware that return rates and return times are NOT suitable measures to compare stability between different systems if these systems operate on different time-scales. In contrast, stability as the fraction of self-dampening necessary to stabilize a system is suitable to compare different systems.
+Now we can infer stability from the Jacobian matrix. All methods are based on the concept that a Jacobian matrix is only stable if all real parts of the eigenvalues are negative. If the system is stable the system will asymptotically return to equilibrium after a small pulse perturbation. If the system is unstable the system will not return to equilibrium after a small pulse perturbation but move away from the equilibrium state. Beware that return rates and return times are NOT suitable measures to compare stability between different systems if these systems operate on different time-scales. In contrast, stability as the fraction of self-dampening necessary to stabilize a system is suitable to compare different systems.
 ```{r stability}
 # Calculate stability with the eigenvalue method (default).
 s1 <- getStability(JM1)
@@ -126,7 +133,7 @@ print(s1)
 return_rate <- abs(s1) # per unit time
 
 # The time for the system to return to about 37% of its original state 
-# can be calculated.
+# can be calculated:
 return_time <- 1/return_rate # unit of time (e.g. days or years)
 
 # Calculate stability with the scalar method.
@@ -189,8 +196,8 @@ General tips for setting up a LIM:
 - In order to prevent certain processes to be quantified as zero, include minimum constraints. This is especially important if you later want to normalize the Jacobian matrix, because this process does not allow zeroes on the diagonal. For example, if you don't set a minimum constraint for non-predatory mortality, the parsimonious solution might set this flow to zero. This is not realistic and it the occurence of these zeroes may hamper your future calculations.
 - The inclusion of biomasses in the LIM is not required to be able to solve the model. However, biomasses *are* required for all internal compartments in order to calculate the Jacobian matrix. If there are compartments that do not have biomasses in the LIM, they must either be quantified anyway or excluded from the getJacobian() function by including them as 'externals'.
 
-Specifying your compartments in a LIM input file can look like this:  
-*****  
+Specifying your compartments in a LIM input file can look like this:   
+
 \#\# EXTERNALS  
 CO2  
 EXPORT  
@@ -202,10 +209,10 @@ Animal = 50 {g C m-2}
 deadDetritus = 1000 {g C m-2} ! contains the default "dead" tag  
 xxxDetritus  = 1000 {g C m-2} ! chosen tag "xxx" is equally valid if you specify this for the fwstability package.  
 \#\# END COMPARTMENTS  
-*****  
+
 
 Specifying flows can look like this:  
-*****  
+
 \#\# FLOWS  
 NetPrimProd     : CO2 -> Plant  
 animalGrazPlant : Plant -> Animal  
@@ -216,10 +223,11 @@ animalYYY       : Animal -> EXPORT ! equally valid mortality tag, if specified f
 plantMort       : Plant -> deadDetritus   
 animalDef       : Animal -> deadDetritus  
 detritusMineralization: deadDetritus -> CO2  
-\#\# END FLOWS  
-*****  
+\#\# END FLOWS   
+
+
 Make sure you use the compartment names as specified in "COMPARTMENT", so including the tag for dead compartments. The name of defecation and mortality flows should only contain the name of the compartment and the tag. If it contains more words, like "thisAnimalMort" the package ignores this flow. If, for some reason, you want to include multiple parallel defecation or mortality flows, you need to define a variable (in the VARIABLE section) that includes the sum of all defecation and mortality flows. Like this:  
-*****   
+
 \#\# FLOWS  
 animalDefOne       : Animal -> deadDetritusOne    
 animalDefTwo       : Animal -> deadDetritusTwo  
@@ -232,7 +240,7 @@ animalDef       = animalDefOne + animalDefTwo ! Sum all defecation flows
 animalAss       = animalIngestion - animalDef ! Default assimilation tag "ass"  
 animalGrowth    = animalAss * animalGrowthEfficiency ! Default growht tag "growth"  
 \#\# END VARIABLES  
-*****  
+
 
 When your LIM input file is done, you can read it into R, and optionally solve it with the LIM package. 
 ```{r}
@@ -290,15 +298,14 @@ For a working example, please refer to 5.3 A complex application.
 ## 2.2. Energy flux model
 If you don't use a linear inverse model (LIM) to mass-balance your system, or your LIM is not formatted correctly to be used by the fwstability package, you will need to extract the necessary data first. In order to obtain a Jacobian matrix you need:  
 
-- a named flowmatrix containing the total flow of material/energy between compartments.   
-- a named vector with biomasses for all compartments (including the dead ones).  
-- a named vector with assimilation efficiencies for all non-dead compartments. An organism assimilates (A) the part of all ingested food (I) that is not defecated (D): $A = I-D$. So, assimilation efficiency (AE) is the assimilated amount of food (A) divided by the total of ingested food (I): $AE = A/I $. (see diagram under quick start)  
-- a named vector with growth efficiencies for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$. (see diagram under quick start)  
-- if you have dead compartments in your system, you should specify a list containg two elements with the names of dead compartments (element "names"), a matrix with the fraction of each flow that constitutes defecation (element "frac").
-- a character vector containing the names of external compartments (these are removed from the flowmatrix before the calculations).  
-- a numeric vector with mortality rates (in the same unit as the flowmatrix). This information is obligatory if you want to calculate diagonal values for the Jacobian matrix from the flux values. Perhaps this is already included in your model as a flow from the organism into a detritus or carrion compartment. Beware that these mortality rates must represent *non-predatory* mortality! Mortality rates can be searched for in literature or calculated as the inverse of the natural lifespan (per unit time) and multiplied by the biomass of the compartment to obtain the same unit as in the flowmatrix. Mortality rates can heavily influence your stability results, so it is wise to use high-confidence data in your model.    
+- a named **flow matrix** containing the total flow of material/energy between compartments.   
+- a named vector with **biomasses** for all compartments (including the dead ones).  
+- a named vector with **assimilation efficiencies** for all non-dead compartments. An organism assimilates (A) the part of all ingested food (I) that is not defecated (D): $A = I-D$. So, assimilation efficiency (AE) is the assimilated amount of food (A) divided by the total of ingested food (I): $AE = A/I$. (see diagram under quick start)  
+- a named vector with **growth efficiencies** for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$. (see diagram under quick start)  
+- if you have **dead compartments** in your system, you should specify a list containg two elements with the names of dead compartments (element "names"), a matrix with the fraction of each flow that constitutes defecation (element "frac").
+- a character vector containing the names of **external compartments** (these are removed from the flowmatrix before the calculations).  
 
-The above information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the getJacbianEnergyFlux function. Please review the format of the examples in the fwmodels package to understand how to format your data.  
+The above information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the *getJacbianEnergyFlux* function. Please review the format of the examples in the *fwmodels* package to understand how to format your data.  
 
 If you have a LIM with the wrong data format, the functions getFlowMatrix and getVariables may still be of use to easily calculate the needed data. The function getFlowMatrix is similar to the function Flowmatrix from the LIM package, but enhanced so that it also works if parallel flows exist between the same two compartments. The function getVariables returns a named list with the values of all defined variables calculated from the food web flows. So, for example, if you have defined variables related to assimilation but for some reason didn't use the tag system, you can easily extract the variables values and find your assimilation efficiency.
 
@@ -315,9 +322,11 @@ print(vars)
 ```
 
 # 3. Obtaining a Jacobian matrix
-Mathematically speaking, the Jacobian matrix contains the first order partial derivatives of a set of differential equations. If the differential equations describe the change in biomass over time for a set of food web compartments, the Jacobian elements can be interpreted as interaction strengths: the effect of population i on population j. In the fwstability package population i that exerts an effect is in rows, and population j that receives the effect is in columns. If you want to, you can change this by transposing the matrix. If the differential equations describe the total change in biomass per time unit $dBiomass/dt$, then the unit of the Jacobian matrix is per unit time and is also called the Community matrix. If the differential equations describe something else (like the per capita change in biomass per unit time), the unit of the Jacobian matrix will also be different (for example per unit biomass per unit time) and is therefore more difficult to ecologically interpret.  
+Mathematically speaking, the Jacobian matrix contains the first order partial derivatives of a set of differential equations. If the differential equations describe the change in biomass over time for a set of food web compartments, the Jacobian elements can be interpreted as interaction strengths: the effect of population i on population j.  
 
-An example of working with units: If you have a food web model with flows in the unit g Carbon $m^{-2} d^{-1}$ and biomass in g Carbon $m^{-2}$, the interaction strengths will have the unit $d^{-1}$.
+In the *fwstability* package population i that exerts an effect is in rows, and population j that receives the effect is in columns. If you want to, you can change this by transposing the matrix. If the differential equations describe the total change in biomass per time unit $\frac{dBiomass}{dt}$, then the unit of the Jacobian matrix is per unit time and is also called the Community matrix. If the differential equations describe something else (like the per capita change in biomass per unit time), the unit of the Jacobian matrix will also be different (for example per unit biomass per unit time) and is therefore more difficult to ecologically interpret.  
+
+An example of working with units: If you have a food web model with flows in the unit *g Carbon* $m^{-2} d^{-1}$ and biomass in *g Carbon* $m^{-2}$, the interaction strengths will have the unit $d^{-1}$.
 
 In order to translate the energy-flux food-web model from the static domain to the dynamic domain, the system is described in Lotka-Volterra type equations and fluxes are equated to elements of these differential equations. For full explanation, please refer to the paper. In the getJacobian function, the effect of a predator $j$ on its prey $i$ ($\alpha_{ij}$) is calculated as:
 $$\alpha_{ij}=-\frac{F_{ij}}{x{j}}$$
@@ -333,7 +342,7 @@ $$\alpha_{do}=\frac{1}{x_o}(\sum_{i=1}^n(1-a_i)F_{oi}\epsilon_{id}+F_{od}$$
 
 The detritus functions used to construct Jacobian matrices in previous literature (de Ruiter 1995, Neutel et al. 2002, Neutel et al. 2007, Neutel & Thorne 2014) were only taking into consideration one detritus compartment. The presented equations used in this package allow the inclusion of multiple detritus compartments in the food-web, including linear ontogeny of detritus. For details, review our paper.  
 
-The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is to set all values to zero. Diagonal values can also be calculated from the energy-flux model. Diagonal values for fauna are found as their non-predatory mortality (Neutel & Thorne, 2014):
+The diagonal of a Jacobian matrix represents intraspecific interactions. The default diagonal of the function getJacobian() is calculated from the model. Diagonal values can also be set to a single chosen value or numeric vector. Diagonal values for fauna are found as their non-predatory mortality (Neutel & Thorne, 2014):
 $$\alpha_{ii}=-\frac{\sum_{j=1}^n a_i p_i F_{ji}-\sum_{j=1}^n F_{ij}}{x_i}$$
 and for detritus as:
 $$\alpha_{dd}=-\frac{1}{x_d} \sum_{j=1}^n (a_j F_{dj}+\sum_{o=1}^nF_{do})$$
@@ -342,54 +351,58 @@ The function for detritus diagonal values is adjusted from Neutel & Thorne (2014
 The getJacobian function should be used like this:
 ```{r eval=FALSE}
 # If you have an energy-flux model:
-JM <- getJacobian(model = list(
-  type = "EF",
-  # a named square flowmatrix with fluxes between all compartments
-  FM = FM, 
-  # a named numeric vector with biomasses for all compartments
-  BM = BM, 
-  # a named numeric vector with assimilation efficiencies for all compartments
-  AE = AE,
-  # a named numeric vector with growth efficiencies for all compartments
-  GE = GE,
-  # how to treat the diagonal. Default is 0; can also be a numeric vector or "model"
-  diagonal = 0,
-  # info on the dead (detritus) compartments
-  dead = list(
-    # character vector with names of all dead (detritus) compartments
-    names = dead_names,
-    # a matrix with the fraction defecation of each flow in the flowmatrix
-    frac = frac_matrix
-  ),
-  # a character vector with the names of external compartments
-  # that should not be included in the calculatinons,
-  externals = externals, 
-  # a named numeric vector with mortality rates (per unit time);
-  # only required if you want the diagonal to be "model"
-  MR = MR 
-))
+JM <- getJacobian(
+  model = list(
+    type = "EF",
+    # a named square flowmatrix with fluxes between all compartments
+    FM = FM, 
+    # a named numeric vector with biomasses for all compartments
+    BM = BM, 
+    # a named numeric vector with assimilation efficiencies for all compartments
+    AE = AE,
+    # a named numeric vector with growth efficiencies for all compartments
+    GE = GE,
+    # info on the dead (detritus) compartments
+    dead = list(
+      # character vector with names of all dead (detritus) compartments
+      names = dead_names,
+      # a matrix with the fraction defecation of each flow in the flowmatrix
+      frac = frac_matrix
+    ),
+    # a character vector with the names of external compartments
+    # that should not be included in the calculatinons,
+    externals = externals, 
+    # a named numeric vector with mortality rates (per unit time);
+    # only required if you want the diagonal to be "model"
+    MR = MR 
+    ),
+  # how to treat the diagonal. Default is "model", can also be a number or numeric vector
+  diagonal = "model"
+)
 
 # If you have a Linear Inverse Model formatted correctly with tags
-getJacobian(model = list(
-  type = "LIM",
-  # A read-in LIM model
-  LIM = Read(path_to_lim_file),
-  # Optionally a setup LIM model
-  setup = Setup(Read(path_to_lim_file)),
-  # A named numeric vector with all flow solutions.
-  # If not given the least sum of squares solution is found.
-  web = flow_solutions,
-  # how to treat the diagonal. Default is 0; can also be a numeric vector or "model"
-  diagonal = 0,
-  # tag in the LIM assigned to the total assimilation of each compartment
-  aTag = "ass",
-  # tag in the LIM assigned to the total growth (production) of each compartment
-  gTag = "growth",
-  # tag in the LIM assigned to the total mortality of each compartment
-  mTag = "mort",
-  # tag in the LIM included in the compartment name of dead (detritus) compartments
-  deadTag = "dead"
-))
+getJacobian(
+  model = list(
+    type = "LIM",
+    # A read-in LIM model
+    LIM = Read(path_to_lim_file),
+    # Optionally a setup LIM model
+    setup = Setup(Read(path_to_lim_file)),
+    # A named numeric vector with all flow solutions.
+    # If not given the least sum of squares solution is found.
+    web = flow_solutions,
+    # tag in the LIM assigned to the total assimilation of each compartment
+    aTag = "ass",
+    # tag in the LIM assigned to the total growth (production) of each compartment
+    gTag = "growth",
+    # tag in the LIM assigned to the total mortality of each compartment
+    mTag = "mort",
+    # tag in the LIM included in the compartment name of dead (detritus) compartments
+    deadTag = "dead"
+    ),
+  # how to treat the diagonal. Default is "model", can also be a number or numeric vector
+  diagonal = "model",
+)
 ```
 For working examples, please review the examples given in 5. Examples from literature.
 
@@ -406,28 +419,31 @@ return_time <- 1/return_rate # unit of time (e.g. days or years)
 The diagonal of the Jacobian matrix is strongly correlated to stability (the sum of the diagonal values equals the sum of eigenvalues). Therefore, it is important to know what values are on the diagonal before you interpret your results. If you calculated the diagonal values from the model, they represent upper-limits of self-dampening effects. In other words, it is the maximum amount of buffering effect the system can provide to stabilize. If the system is unstable even with upper-limit diagonal values, the natural state of the system is unstable and will collapse.  
 
 There are two important pieces of information to consider if you are interpreting return times:  
-1) The return time does NOT indicate the return time back to equilibrium, but the time to return to about 37% ($1/e$) of the equilibrium state. The reason for this is mathematical and has to do with natural logarithms, and is explained more in depth in our paper.  
+
+1) The return time does NOT indicate the return time back to equilibrium, but the time to return to about 37% ($1/e$) of the equilibrium state. The reason for this is mathematical and has to do with natural logarithms, and is explained more in depth in our paper.   
 2) Although return rates and return times can be useful information to review, they are NOT suitable to compared relative stability between ecosystems. Ecosystems can operate on different time-scales, which makes a comparison between return rates and return times not 'fair'. In other words, system A can be much slower to return to equilibrium than system B, but only because system A simply includes many slow-living organisms. If time-dependency is removed from system A and B and stability is evaluated again, system A might turn out to actually be more stable than B despite its longer absolute return times.  
 
-In ecology, it is useful and powerful to compare stability between two or more systems. In order to allow such comparison of relative stability, time dependency must be removed. In this case stability is not defined as the slowest return rate to equilibrium (per unit time), but redefined as the dimensionless minimum fraction of self-dampening effect necessary to stabilize the matrix. There are two ways to achieve this:  
-1) Stablity can be found as the minimum scalar of natural mortality rates needed to stabilize the system. This method is included as the 'scalar' method in the getStability function, and is based on iteratively increasing the fraction of natural mortality rates used as the Jacobian diagonal with a certain step-size until the Jacobian matrix is found to be stable. This method requires a vector with natural mortality rates and the names of all dead (detritus) compartments.    
-2) The Jacobian matrix is normalized by dividing each interaction strength by absolute value of the the corresponding diagonal value (per unit time divided by per unit time is dimensionless). Then, all diagonal values - except for detritus compartments - are set to zero (self-dampening effects are removed) and the dominant eigenvalue is found again. The matrix can be normalized with the normalizeJacobian function. This matrix requires a fully quantified diagonal with negative, non-zero, values.  
+
+In ecology, it is useful and powerful to compare stability between two or more systems. In order to allow such comparison of relative stability, time dependency must be removed. In this case stability is not defined as the slowest return rate to equilibrium (per unit time), but redefined as the dimensionless minimum fraction of self-dampening effect necessary to stabilize the matrix. There are two ways to achieve this:    
+
+1) Option 1: Stablity can be found as the minimum scalar of natural mortality rates needed to stabilize the system. This method is included as the **'scalar'** method in the getStability function, and is based on iteratively increasing the fraction of natural mortality rates used as the Jacobian diagonal with a certain step-size until the Jacobian matrix is found to be stable. This method requires a vector with natural mortality rates and the names of all dead (detritus) compartments.    
+2) Option 2: The Jacobian matrix is **normalized** by dividing each interaction strength by absolute value of the the corresponding diagonal value (per unit time divided by per unit time is dimensionless). Then, all diagonal values - except for detritus compartments - are set to zero (self-dampening effects are removed) and the **dominant eigenvalue** is found. The matrix can be normalized with the *normalizeJacobian* function. This matrix requires a fully quantified diagonal with negative, non-zero, values.  
 
 In both cases it is assumed detritus feedbacks are constant and cannot be scaled.  
 
-Both these values can be interpreted as  the fraction of maximum possible self-dampening effects needed to stabilize the matrix (Neutel & Thorne, 2014). In other words, we expect this value to lie between 0 and 1. If the value is larger than 1 it means more than available self-dampening is needed to stabilize the matrix, thus the system as it is will collapse. These time-independent stability measure can be interpreted as a biological tipping point, and can be used to compare relative stability between systems. If the system has less self-dampening than the fraction self-dampening as indicated by the stability measure, it will collapse.
+Both these values can be interpreted as  the fraction of maximum possible self-dampening effects needed to stabilize the matrix (Neutel & Thorne, 2014). In other words, we expect this value to lie between 0 and 1. If the value is larger than 1 it means more than available self-dampening is needed to stabilize the matrix, thus the system as it is will collapse. These time-independent stability measure can be interpreted as a biological tipping point, and can be used to compare relative stability between systems. If the system has less self-dampening than the fraction self-dampening as indicated by the stability measure, it will collapse.  
 
-The scalar method (1) is used in the first papers reviewing stability of different systems. However, the iterative algorithmic implementation is more time-consuming and the resolution of the stability value depends on the step-size of the iterations. Therefore, we recommend finding the dominant eigenvalue of the normalized all-zero Jacobian matrix (2) instead of the scalar method. 
+The scalar method (1) is used in the first papers reviewing stability of different systems. However, the iterative algorithmic implementation is more time-consuming and the resolution of the stability value depends on the step-size of the iterations. Therefore, we recommend finding the dominant eigenvalue of the normalized zero-diagonal Jacobian matrix (2) instead of the scalar method.  
 
 Finding time-independent measures of stability:
 ```{r eval=FALSE}
 # Using the scalar method
-# You need to provided mortality rates (MR) and
+# You need to provide mortality rates (MR) and
 # a character vector with names of dead compartments.
 s <- getStability(JM, method = "scalar", MR, dead_names)
 
-# Finding the dominant eigenvalue of a normalized all-zero Jacobian
-# This method requires a quantified non-zero diagonal (model$diagonal = "model") and
+# Finding the dominant eigenvalue of a normalized zero-diagonal Jacobian
+# This method requires a quantified non-zero diagonal and
 # a character vector with names of dead compartments.
 JMnorm <- normalizeJacobian(JM, dead_names)
 s <- getStability(JMnorm)
@@ -546,9 +562,9 @@ We now use the flow values to calculate interaction strengths between all compar
 # type, FM, BM, AE, GE, MR.
 # The model does not have external or dead compartments.
 # Later we will calculate stability as the scalar of natural mortality rates, so we will
-# simply set the diagonal to zero (default)
-JM_CP <- getJacobian(model = LovinkhoeveCP_noDet)
-JM_IF <- getJacobian(model = LovinkhoeveIF_noDet)
+# simply set the diagonal to zero for now
+JM_CP <- getJacobian(model = LovinkhoeveCP_noDet, diagonal = 0)
+JM_IF <- getJacobian(model = LovinkhoeveIF_noDet, diagonal = 0)
 ```
 
 The diagonal is used as a variable to find stability, where stability is defined as the minimum scalar of natural mortality rates needed to stabilize the food web model.
@@ -587,11 +603,10 @@ model$dead$frac[,model$dead$names]
 # from the model.
 # Information present in the model already:
 names(model)
-# We only still need to specify the diagonal treatment.
-model$diagonal <- "model"
 
-# Calculate the Jacobian matrix from the energy flux model
-JM <- getJacobian(model)
+# Calculate the Jacobian matrix from the energy flux model 
+# with a diagonal calculated from the model
+JM <- getJacobian(model, diagonal = "model")
 
 # Calculate stability using the scalar method.
 # The result is the fraction of self-dampening effects needed to stabilize the system.
@@ -608,8 +623,7 @@ getStability(JMnorm[1:22, 1:22])
 We repeat the analysis as done on the dry tundra food web on the wet tundra food web.
 ```{r Antarctic_wet_tundra}
 model <- Antarctic_tundra_wet
-model$diagonal <- "model"
-JM <- getJacobian(model)
+JM <- getJacobian(model, diagonal = "model")
 
 # scalar stability
 getStability(JM, method = "scalar", MR = model$MR, dead_names = model$dead$names)
@@ -638,7 +652,9 @@ Defecation, mortality, assimilation, and growth were already defined in the mode
 - BacAss = BacUpt  
 Finally, the naming of defecation and mortality fluxes was moved from the 'variable' section to the 'flows' section, so that the names including the tags for mortality and defecation could be processed by the function.
 
-```{r upper_submarine_canyon}
+The code takes a long time to execute, and is therefore not evaluated for building the vignette.
+
+```{r upper_submarine_canyon, eval=FALSE}
 # load the LIM library
 library(LIM)
 
@@ -706,14 +722,13 @@ model <- list(
   LIM = readLIM,
   setup = LIM,
   web = most_likely_solution,
-  diagonal = "model", # we want a diagonal with values calculated from the model
   aTag = "Ass",
   gTag = "Prod",
   mTag = "Mort",
   defTag = "DetProd"
 )
 
-JM <- getJacobian(model)
+JM <- getJacobian(model, diagonal = "model")
 s <- getStability(JM$JM)
 if(s < 0){
   return_rate <- abs(s)
@@ -729,9 +744,9 @@ upper_solutions <- xs$X
 colnames(upper_solutions) <- Flows$flow
 ```
 
-The upper canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
+The upper canyon has a stability of 'print(s)', thus an asymptotic rate of return of 'print(return_rate)'. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in 'print(return_time)' days, thus 'print(return_months)' months or 'print(return_years)' years.
 
-```{r middle_submarine_canyon}
+```{r middle_submarine_canyon, eval=FALSE}
 # load the LIM library
 library(LIM)
 
@@ -800,14 +815,13 @@ model <- list(
   LIM = readLIM,
   setup = LIM,
   web = most_likely_solution,
-  diagonal = "model", # we want a diagonal with values calculated from the model
   aTag = "Ass",
   gTag = "Prod",
   mTag = "Mort",
   defTag = "DetProd"
 )
 
-JM <- getJacobian(model)
+JM <- getJacobian(model, diagonal = "model")
 s <- getStability(JM$JM)
 if(s < 0){
   return_rate <- abs(s)
@@ -823,9 +837,9 @@ middle_solutions <- xs$X
 colnames(middle_solutions) <- Flows$flow
 ```
 
-The middle canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
+The middle canyon has a stability of 'print(s)', thus an asymptotic rate of return of 'print(return_rate)'. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in ' print(return_time)' days, thus 'print(return_months)' months or ' print(return_years)' years.
 
-```{r lower_submarine_canyon}
+```{r lower_submarine_canyon, eval=FALSE}
 # load the LIM library
 library(LIM)
 
@@ -893,14 +907,13 @@ model <- list(
   LIM = readLIM,
   setup = LIM,
   web = most_likely_solution,
-  diagonal = "model", # we want a diagonal with values calculated from the model
   aTag = "Ass",
   gTag = "Prod",
   mTag = "Mort",
   defTag = "DetProd"
 )
 
-JM <- getJacobian(model)
+JM <- getJacobian(model, diagonal = "model")
 s <- getStability(JM$JM)
 if(s < 0){
   return_rate <- abs(s)
@@ -916,11 +929,11 @@ lower_solutions <- xs$X
 colnames(lower_solutions) <- Flows$flow
 ```
 
-The lower canyon has a stability of `r print(s)`, thus an asymptotic rate of return of `r print(return_rate)`. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in `r print(return_time)` days, thus `r print(return_months)` months or `r print(return_years)` years.
+The lower canyon has a stability of 'print(s)', thus an asymptotic rate of return of 'print(return_rate)'. The system with full self-dampening effects (upper limit) will return to equilibrium after a small pulse perturbation in ' print(return_time)' days, thus 'print(return_months)' months or ' print(return_years)' years.
 
 However, the return times cannot simply be compared directly because the ecosystems operate on somewhat different time scales. Therefore, we first normalize the matrices and set the diagonal to all-zeroes, except for the detritus compartments. Also, it is more thorough to calculate stability for each of the 100 solutions, and then take the mean of stability (in stead of calculating the stability for the mean flow solution).
 
-```{r canyon_iterate_normalize}
+```{r canyon_iterate_normalize, eval=FALSE}
 dead_names <- c("DEADLDET", "DEADSDET", "DEADRDET", "DEADDOC")
 
 # Upper
@@ -1015,7 +1028,7 @@ for(i in 1:dim(lower_solutions)[1]){
 ```
 
 Assess the distribution of stability values.
-```{r summary_stabilities}
+```{r summary_stabilities, eval=FALSE}
 hist(stabilities_upper)
 hist(stabilities_middle)
 hist(stabilities_lower)
@@ -1031,7 +1044,7 @@ summary(stabilities_lower) ; sd(stabilities_lower)
 ```
 
 Calculate a network index that can be used to quantify network complexity: weighted connectance. Subsequently, assess the distribution of calculated values.
-```{r stability_characteristics}
+```{r stability_characteristics, eval=FALSE}
 # Weighted connectance
 Cw_upper <- numeric(length = length(JMs_upper))
 Cw_middle <- numeric(length = length(JMs_upper))

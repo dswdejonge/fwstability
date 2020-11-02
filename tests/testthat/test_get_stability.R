@@ -16,6 +16,8 @@ test_that("the default getStability provides the correct answer", {
                stability)
   expect_equal(getStability(JM),
                stability)
+  expect_equal(getStability(t(JM)),
+               stability)
 })
 
 
@@ -28,6 +30,9 @@ test_that("the scalar getStability provides the correct answer", {
   expect_equal(getStability(JM, method = "scalar", MR = MR) > 2.068 &
                getStability(JM, method = "scalar", MR = MR) < 2.069,
                TRUE)
+  expect_equal(getStability(t(JM), method = "scalar", MR = MR) > 2.068 &
+                 getStability(t(JM), method = "scalar", MR = MR) < 2.069,
+               TRUE)
 })
 
 # Correct answer - including dead compartment
@@ -39,11 +44,16 @@ test_that("the scalar getStability provides the correct answer including detritu
   expect_equal(getStability(JM, method = "scalar",
                             MR = MRNA, dead = "DETRITUS"),
                stability)
+  expect_equal(getStability(t(JM), method = "scalar",
+                            MR = MRNA, dead = "DETRITUS"),
+               stability)
 })
 
 # Method 3: Initial
 stability <- 0.5*max(Re(eigen(JM + t(JM))$values))
 test_that("the initial getStability provides the correct answer", {
   expect_equal(getStability(JM, method = "initial"),
+               stability)
+  expect_equal(getStability(t(JM), method = "initial"),
                stability)
 })

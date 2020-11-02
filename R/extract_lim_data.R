@@ -290,9 +290,6 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
 #' Default is set to "def". Not case sensitive.
 #' \item \code{setup} (optional) Setup(Read(lim.input)). By inclusion the function won't setup the model,
 #' thereby potentially saving time.
-#' \item \code{diagonal} (optional) Either a single value, a numeric vector or the string "model".
-#' Default is an all-zero diagonal. The string "model" calculates the diagonal values from flux values.
-#' If diagonal is set to "model" mortality must be explicity included in the LIM.
 #' }
 #' @details In order for this function to work, the LIM must be set-up in a specific way.
 #' The flows and variables representing assimilation, growth, defecation, and mortality of an organism
