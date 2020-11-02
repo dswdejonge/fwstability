@@ -1,8 +1,10 @@
 ---
-title: "Assessing energy-flux food-web stability with the fwstability R-package."
+title: "Inferring stability of energy-flux food-webs with the fwstability R-package."
 author: "D.S.W. de Jonge"
 date: "`r date()`"
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
 vignette: >
   %\VignetteIndexEntry{vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -16,27 +18,22 @@ knitr::opts_chunk$set(
 )
 ```
 
-NOTE: The package is in the final stages of development and not yet available from CRAN. Please be aware of this when using the package in its current form.  
+NOTE: The *fwstability* package is in the final stages of development and not yet available from CRAN. Please be aware of this when using the package in its current form.  
 
-This vignette explains how you can use the *fwstability* package to assess stability of energy-flux food-web models. The subsections contain details about the features of the package and the scientific background. Reading this is highly recommended so that you can interpret your results correctly.   
+The *fwstability* package is developed to infer food-web stability from energy-flux models. Basically, an energy-flux food-web model shows the transfer of energy or materials from one species to another when they eat each other. These models are steady-state and mass-balanced. Mathematical methods have been developed to transform these steady-state models to the dynamic realm in order to infer stability. This package implements these mathematical methods, so that you can easily infer stability from your energy-flux food-web model.  
 
-An in-depth explanation of the science of energy-flux food-web stability is found in our paper. Please cite if you are using this package:  
-Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Measuring stability of energy-flux food web models. In prep.
+This package was introduced in our paper as cited below. This paper also provides an in-depth explanation of the science behind energy-flux food-web stability. Please cite if you are using this package:  
 
-1) Quick start.    
-2) How to prepare your energy-flux food-web model for stability analysis.   
-3) How to derive the Jacobian matrix.    
-4) How to conduct stability analysis.   
-5) How to assess your food-web for characteristics related to stability.     
-6) Some examples with published food-webs.  
+Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In prep.  
+
+This vignette provides you a quick start, and a more detailed explanation about the methods. Reading the vignette is highly recommended so that you can interpret your results correctly.   
 
 # 1. Quick start
-The *fwstability* package is in the final stages of development, and not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub. There is also the *fwmodels* package, that contains several published energy-flux food-web models that are used as examples in this vignette.
+The *fwstability* package is not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub.  
+
+There is also the *fwmodels* package, that contains several published energy-flux food-web models that are used as examples in this vignette.
 ```{r installation, eval=FALSE}
 # install.packages("devtools")
-# build_vignettes = TRUE builds the vignette for you: this can 
-# take some time as it includes some more complex calculations. 
-# You can skip building the vignette by using build_vignettes = FALSE.
 devtools::install_github("dswdejonge/fwstability", build_vignettes = TRUE)
 
 # To use the example food-webs, install the fwmodels package as well
@@ -49,50 +46,66 @@ library(fwstability)
 library(fwmodels)
 ```
 
-First, a Jacobian matrix must be created from the energy-flux model. This model must contain:  
+First, you must prepare your energy-flux food-web model to be used by the package. A hypothetical example of what your data can look like:  
+```{r eval=FALSE}
+# 1. Biomasses for each food web compartment (abundance per unit area/volume).
+compartments <- c("detritus", "speciesA", "speciesB")
+biomasses <- c(30, 20, 10) # e.g. grams per square meter
+names(biomasses) <- compartments
 
-1) Biomasses for each food web comopartment (abundance per unit area/volume).  
-2) Quantified fluxes between compartments (abundance per unit area/volume per unit time).     
-3) Energy conversion efficiencies for all living compartments (assimilation and production efficiencies, fraction 0-1).  
-4) Mortality rates (per unit time, can be calculated from mortality fluxes and biomass).  
-5) Defecation fluxes (abundance per unit area/volume per unit time, can be derived from the uptake fluxes and energy conversion efficiencies).    
+# 2. Quantified fluxes between compartments (abundance per unit area/volume per unit time).
+detritus_to_speciesA <- 10
+speciesA_to_detritus <- 3
+speciesA_to_speciesB <- 7
+speciesB_to_detritus <- 7
 
-The energy-flux model should stick to the physiological concepts explained in this diagram:
-![Diagram of physiology concepts used in energy-flux food web models. White boxes represent sink compartments outside the organism, whereas grey boxes represent different stages of energy or material inside the organism as they flow through. Fluxes (Fij is Flux from i to j) and the specific processes they represent are presented with a capital letter, energy conversion efficiencies with a lower case letter. Prey is population i, predator is population j, consumer of predator j is k. Q = Consumption, A = Assimilation, E = Excretion, P = Production, R = Respiration, P = Predation, M = Mortality. a = assimilation efficiency, p = production efficiency. Based on (de Ruiter et al., 1993; Hunt et al., 1987).](physiology_diagram.png)
+flowmatrix <- matrix(data = 0, 
+                     nrow = length(compartments), 
+                     ncol = length(compartments))
+row.names(flowmatrix) <- compartments
+colnames(flowmatrix) <- compartments
 
-Lets take a look at the data in an example food web from the *fwmodel package*: a food web of soil treated with conventional farming practices.
-```{r Lovinkhoeve}
-# Information on the Lovinkhoeve food web model
-?Lovinkhoeve
+flowmatrix["detritus", "speciesA"] <- detritus_to_speciesA
+flowmatrix["speciesA", "detritus"] <- speciesA_to_detritus
+flowmatrix["speciesA", "speciesB"] <- speciesA_to_speciesB
+flowmatrix["speciesB", "detritus"] <- speciesB_to_detritus
 
-# This food web model is an energy flux ("EF") model
-LovinkhoeveCP$type
+# 3. Energy conversion efficiencies for all living compartments
+# (assimilation and production efficiencies, fraction 0-1).  
+assimilation_eff <- c(NA, 0.8, 0.7)
+growth_eff <- c(NA, 0.6, 0.4)
+names(assimilation_eff) <- compartments
+names(growth_eff) <- compartments
 
-# This food web model consists of 17 compartments.
-dim(LovinkhoeveCP$FM)
-rownames(LovinkhoeveCP$FM)
-
-# The biomasses (kg C / ha) of all compartments are
-LovinkhoeveCP$BM
-
-# The assimilation and production (growth) efficiency of all compartments are
-LovinkhoeveCP$AE
-LovinkhoeveCP$GE
-
-# The natural death (mortality) rates ( /yr ) of all compartments are
-LovinkhoeveCP$MR
-
-# The flow matrix contains calculated flow sizes between compartments (kg C / ha / yr).
-# The first five rows and columns of the flow matrix can be viewed as:
-LovinkhoeveCP$FM[1:5, 1:5]
-
-# Mortality and defecation fluxes can be distinguished using a matrix that
-# specifies the fraction of each flow comprised of defecation.
-# The first five rows and columns of this matrix can be viewed as:
-LovinkhoeveCP$dead$frac[1:5, 1:5]
+# 4. Information on dead compartments, if any
+# 4.a. The names of all dead compartments
+dead_names <- "detritus"
+# 4.b. The fraction of each flow which comprises defecation
+frac_matrix <- matrix(data = 0,
+                      nrow = length(compartments), 
+                      ncol = length(compartments))
+row.names(frac_matrix) <- compartments
+colnames(frac_matrix) <- compartments
+frac_matrix["speciesA", "detritus"] <- flowmatrix["detritus", "speciesA"] * 
+  (1-assimilation_eff["speciesA"]) / flowmatrix["speciesA", "detritus"]
+frac_matrix["speciesB", "detritus"] <- flowmatrix["speciesA", "speciesB"] * 
+  (1-assimilation_eff["speciesB"]) / flowmatrix["speciesB", "detritus"]
 ```
 
-Now we can calculate a Jacobian matrix from the energy-flux model. The Jacobian matrix shows the per capita effect of species i (in rows) on the population growth rate of species j (in columns) per unit time. The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus).  
+Combine all information into a named list as follows:
+```{r eval = FALSE}
+mymodel = list(
+    type = "EF", # EF stands for energy flux
+    FM = flowmatrix, 
+    BM = biomasses, 
+    AE = assimilation_eff,
+    GE = growth_eff,
+    dead = list(
+      names = dead_names,
+      frac = frac_matrix))
+```
+
+Now we can calculate a Jacobian matrix from the energy-flux model. The Jacobian matrix shows the per unit biomass effect of species i (in rows) on the population growth rate of species j (in columns) per unit time. In other words, the Jacobian matrix shows you the interaction strengths between species. The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus). We use an example food web from the *fwmodels* package.   
 ```{r Jacobian_matrix}
 model <- LovinkhoeveCP
 
@@ -117,7 +130,7 @@ JM4 <- getJacobian(model, diagonal = "model")
 print(JM4[1:5, 1:5])
 ```
 
-Now we can infer stability from the Jacobian matrix. All methods are based on the concept that a Jacobian matrix is only stable if all real parts of the eigenvalues are negative. If the system is stable the system will asymptotically return to equilibrium after a small pulse perturbation. If the system is unstable the system will not return to equilibrium after a small pulse perturbation but move away from the equilibrium state. Beware that return rates and return times are NOT suitable measures to compare stability between different systems if these systems operate on different time-scales. In contrast, stability as the fraction of self-dampening necessary to stabilize a system is suitable to compare different systems.
+Now we can infer stability from the Jacobian matrix. All methods are based on the concept that a Jacobian matrix is only stable if all real parts of the eigenvalues are negative. If the system is stable the system will asymptotically return to equilibrium after a small pulse perturbation. If the system is unstable the system will not return to equilibrium after a small pulse perturbation but move away from the equilibrium state. Beware that return rates and return times are NOT suitable measures to compare stability between different systems if these systems operate on different time-scales. If you want to compare relative stability between different systems, you should measure stability as the fraction of self-dampening necessary to stabilize the system.
 ```{r stability}
 # Calculate stability with the eigenvalue method (default).
 s1 <- getStability(JM1)
@@ -163,6 +176,9 @@ print(s3)
 ```
 
 # 2. Preparing a food web model for stability analysis
+Your energy-flux model should always stick to the physiological concepts explained in this diagram:  
+![Diagram of physiology concepts used in energy-flux food web models. White boxes represent sink compartments outside the organism, whereas grey boxes represent different stages of energy or material inside the organism as they flow through. Fluxes (Fij is Flux from i to j) and the specific processes they represent are presented with a capital letter, energy conversion efficiencies with a lower case letter. Prey is population i, predator is population j, consumer of predator j is k. Q = Consumption, A = Assimilation, E = Excretion, P = Production, R = Respiration, P = Predation, M = Mortality. a = assimilation efficiency, p = production efficiency. Based on (de Ruiter et al., 1993; Hunt et al., 1987).](physiology_diagram.png)
+
 ## 2.1. A linear inverse model
 In a linear inverse model (LIM) all processes in a food web are captured by a set of linear equations. These linear equations can be either equalities (the outcome of an equation should equal another value) or inequalities (the outcome of an equation should be equal or greater than another value). The equations can parameterized with known data, but often not all processes are studied well enough to quantify. The unknowns in the equations can then be found with linear programming, thereby fully quantifying your model. A simple example of a linear optimization problem can be found on \link{Wikipedia}[https://en.wikipedia.org/wiki/Linear_programming#Example].  
 
@@ -305,7 +321,66 @@ If you don't use a linear inverse model (LIM) to mass-balance your system, or yo
 - if you have **dead compartments** in your system, you should specify a list containg two elements with the names of dead compartments (element "names"), a matrix with the fraction of each flow that constitutes defecation (element "frac").
 - a character vector containing the names of **external compartments** (these are removed from the flowmatrix before the calculations).  
 
-The above information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It can also be used directly into the *getJacbianEnergyFlux* function. Please review the format of the examples in the *fwmodels* package to understand how to format your data.  
+The above information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It will look like this:
+```{r eval = FALSE}
+model = list(
+    # EF stands for energy flux
+    type = "EF",
+    # a named square flowmatrix with fluxes between all compartments
+    FM = FM, 
+    # a named numeric vector with biomasses for all compartments
+    BM = BM, 
+    # a named numeric vector with assimilation efficiencies for all compartments
+    AE = AE,
+    # a named numeric vector with growth efficiencies for all compartments
+    GE = GE,
+    # info on the dead (detritus) compartments
+    dead = list(
+      # character vector with names of all dead (detritus) compartments
+      names = dead_names,
+      # a matrix with the fraction defecation of each flow in the flowmatrix
+      frac = frac_matrix
+    ),
+    # optional: a character vector with the names of external compartments
+    # that should not be included in the calculatinons,
+    externals = externals, 
+    # optional: a named numeric vector with mortality rates (per unit time);
+    MR = MR 
+    )
+```
+
+
+Lets take a look at the data in an example food web from the *fwmodel package*: a food web of soil treated with conventional farming practices.
+```{r Lovinkhoeve}
+# Information on the Lovinkhoeve food web model
+?Lovinkhoeve
+
+# This food web model is an energy flux ("EF") model
+LovinkhoeveCP$type
+
+# This food web model consists of 17 compartments.
+dim(LovinkhoeveCP$FM)
+rownames(LovinkhoeveCP$FM)
+
+# The biomasses (kg C / ha) of all compartments are
+LovinkhoeveCP$BM
+
+# The assimilation and production (growth) efficiency of all compartments are
+LovinkhoeveCP$AE
+LovinkhoeveCP$GE
+
+# The natural death (mortality) rates ( /yr ) of all compartments are
+LovinkhoeveCP$MR
+
+# The flow matrix contains calculated flow sizes between compartments (kg C / ha / yr).
+# The first five rows and columns of the flow matrix can be viewed as:
+LovinkhoeveCP$FM[1:5, 1:5]
+
+# Mortality and defecation fluxes can be distinguished using a matrix that
+# specifies the fraction of each flow comprised of defecation.
+# The first five rows and columns of this matrix can be viewed as:
+LovinkhoeveCP$dead$frac[1:5, 1:5]
+```
 
 If you have a LIM with the wrong data format, the functions getFlowMatrix and getVariables may still be of use to easily calculate the needed data. The function getFlowMatrix is similar to the function Flowmatrix from the LIM package, but enhanced so that it also works if parallel flows exist between the same two compartments. The function getVariables returns a named list with the values of all defined variables calculated from the food web flows. So, for example, if you have defined variables related to assimilation but for some reason didn't use the tag system, you can easily extract the variables values and find your assimilation efficiency.
 
