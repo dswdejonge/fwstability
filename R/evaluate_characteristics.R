@@ -308,13 +308,16 @@ getCw <- function(FM) {
 #' @export
 getLoopWeight <- function(IS, d = NULL) {
   k <- length(IS)
+  if(TRUE %in% (d >= 0)){
+    message("Cannot scale feedback: positive or 0 values on the diagonal")
+    d <- NULL
+  }
   if(is.null(d)){
     message("Loop weight not scaled to death rates.")
     LW <- abs(prod(IS)) ^ (1 / k)
   } else {
-    if(!all(d > 0, na.rm = T)){stop("Death rates should all be positive.")}
     if(k != length(d)){stop("Vector IS and vector d should be same length.")}
-    LW <- abs(prod(IS) / prod(d, na.rm = T)) ^ (1 / k)
+    LW <- abs(prod(IS) / prod(abs(d), na.rm = T)) ^ (1 / k)
   }
   return(LW)
 }
@@ -373,7 +376,7 @@ maxNrLoops <- function(n, k = NULL) {
 #' and store them in a textfile.
 #' If you already have a text file with the compartments indices of each loop per line,
 #' you can set \code{findLoops} to FALSE (see element \code{file}. Default is FALSE.
-#' @param k (optional) Integer. Can be used if \code{findLoops} is TRUE.
+#' @param k (optional) Integer Can be used if \code{findLoops} is TRUE.
 #' It indicates that you only want to search for loops of length \code{k}.
 #' Default is \code{NULL}, which finds all loops if \code{findLoops} is TRUE.
 #' @param output (required if findLoops is TRUE) String.
@@ -381,8 +384,9 @@ maxNrLoops <- function(n, k = NULL) {
 #' where the loops are stored. Default is "allLoops".
 #' @param file (required if findLoops is FALSE) String.
 #' This is the path to the text file where the loops are stored.
-#' @param MR (optional) Natural mortality/death rates for scaling the
-#' loop weight, same unit as Jacobian matrix.
+#' @param scale Default is TRUE: the loop weight will be scaled to the negative
+#' self-effects on the diagonal. Scaled loop weight should be used if you also work
+#' with scaled stability values. Otherwise set to FALSE.
 #' @param compnames (optional) Vector with compartment names in same order
 #' as the Jacobian matrix. If it is not included the names of \code{JM}
 #' are used as compartment names. If the \code{JM} is not named, the output will
@@ -413,20 +417,18 @@ maxNrLoops <- function(n, k = NULL) {
 #' or k = 3, as those are found to be the most important in determining
 #' overall feedback and stability in your system (Neutel & Thorne 2014). \cr
 #'
-#' Natural death/mortality rates (MR) can be found as the absolute
-#' values on the diagonal.
-#' Diagonal values for detritus are also regarded 'death' rates, as they
-#' represent self-dampening effects. \cr
-#'
 #' Feedback of a loop is the product of all interaction strengths
 #' in a loop (so feedback is not additative but multiplicative).
 #'
 #' Loop weight is defined as the geometric mean of all absolute
 #' interaction strengths in a loop of length k. It combines information on
-#' the feedback of the loop, with natural death rates and the length of
-#' the loop. The feedback is scaled by the natural death rates in the reference
-#' because the stability measure is also scaled by death rates. Depending on
-#' your stability measure you can decide to omit inclusion of death rates.
+#' the feedback of the loop and the length of the loop.
+#' If 'scale' is TRUE the loop feedback is divided by the absolute product
+#' of the corresponding self-dampening effects on the JM diagonal.
+#' The loop feedback should be scaled in the stability measure
+#' is also scaled by self-dampening effects. Depending on
+#' your stability measure you can decide to omit scaling.
+#' \cr
 #' @return Returns a dataframe with all loops noted as
 #' compName1->compName2->compNamek (column "loop"),
 #' with feedbacks (column "fdb") and loop weights (column "lw") of
@@ -434,7 +436,7 @@ maxNrLoops <- function(n, k = NULL) {
 #' @export
 assessFeedback <- function(JM, findLoops = F, k = NULL,
                            output = "allLoops", file = NULL,
-                           MR = NULL, compnames = NULL,
+                           scale = TRUE, compnames = NULL,
                            verbose = T) {
   if(findLoops) {
     maxL <- maxNrLoops(dim(JM)[1], k)
@@ -450,10 +452,11 @@ assessFeedback <- function(JM, findLoops = F, k = NULL,
   allLoops <- lapply(allLoops, function(x) as.numeric(x))
 
   if(verbose) {message("Find feedback and loop weight for all loops...")}
+  if(is.null(compnames)) {compnames <- rownames(JM)}
   if(is.null(compnames)) {
     loopnames <- unlist(lapply(allLoops, function(x) paste(x, collapse = "->")))
   } else {
-    loopnames <- lapply(allLoops, function(x) compnames[x])
+    loopnames <- lapply(allLoops, function(x) compnames[as.numeric(x)])
     loopnames <- unlist(lapply(loopnames, function(x) paste(x, collapse = "->")))
   }
   result <- data.frame(loop = loopnames, fdb = NA, lw = NA)
@@ -464,7 +467,10 @@ assessFeedback <- function(JM, findLoops = F, k = NULL,
       ncol = 2, nrow = length(pathway)-1)
     IS <- JM[coords]
     result$fdb[i] <- getFeedback(IS)
-    result$lw[i] <- getLoopWeight(IS, d = MR)
+    if(scale){
+      d = diag(JM)[coords[,1]]
+    }else{d = NULL}
+    result$lw[i] <- getLoopWeight(IS, d = d)
   }
   if(verbose) {message("Done.")}
   return(result)

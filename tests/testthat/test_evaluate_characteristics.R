@@ -162,15 +162,15 @@ test_that("The getCw provides the correct answer", {
 })
 
 loop <- c(-1, 2, 3)
-d <- c(0.5, 0.2, 0.1)
+d <- c(-0.5, -0.2, -0.1)
 d2 <- d[1:2]
 d3 <- c(-0.5, 0.2, 0.1)
-d4 <- c(NA, 0.2, 0.1)
+d4 <- c(NA, -0.2, -0.1)
 test_that("The getLoopWeight provides the correct answer", {
   expect_equal(getLoopWeight(loop), abs(prod(loop))^(1/length(loop)))
   expect_equal(getLoopWeight(loop, d), abs(prod(loop)/prod(d))^(1/length(loop)))
   expect_error(getLoopWeight(loop, d2), "Vector IS and vector d should be same length.")
-  expect_error(getLoopWeight(loop, d3), "Death rates should all be positive.")
+  expect_message(getLoopWeight(loop, d3), "Cannot scale feedback: positive or 0 values on the diagonal")
   expect_equal(getLoopWeight(loop, d4), abs(prod(loop)/prod(d4, na.rm = T))^(1/length(loop)))
 })
 test_that("The getFeedback provides the correct answer", {
