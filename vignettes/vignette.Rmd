@@ -548,25 +548,30 @@ df <- assessLinksPerm(JM, perms = 100, threshold = 0.01)
 ```
 
 ## Feedback loops
-Different scientific publications have shown that looking at individual interaction strengths might not be very insightful to understand stability of systems. It is often better to look at the patterning of interaction strengths, specifically in feedback loops. Therefore, the function assessFeedback is added that wraps multiple functions:  
-- First it finds all loops (of a certain length k if specified) in your network. The indices of each loop (eg 1 > 2 > 3 > 1) are stored in a textfile. Finding these loops is done with a recursive depth-first-search function. Beware that it can take a really long time to find all loops in a large network! In that case it might be better to only review loops of length 2 and 3, that are known to most heavily influence stability (see works by Neutel).  
-- Then for each loop it finds the feedback i.e. the product of all interaction strengths, and the loop weight i.e. the geometric mean of all absolute interaction strengths in the loop.  
-The functions returns a dataframe with all loops noted as 'compName1->compName2->compNamek' (column "loop"), with feedbacks (column "fdb") and loop weights (column "lw") of those loops.  
+Different scientific publications have shown that looking at individual interaction strengths might not be very insightful to understand stability of systems. It is often better to look at the patterning of interaction strengths, specifically in feedback loops. Therefore, the function *assessFeedback* is added that wraps multiple functions:   
+
+- First it finds all loops (of a certain length k if specified) in your network. The indices of each loop (eg 1 > 2 > 3 > 1) are stored in a textfile. Finding these loops is done with a recursive depth-first-search function. Beware that it can take a really long time to find all loops in a large network! In that case it might be better to only review loops of length 2 and 3, that are known to most heavily influence stability (see works by Neutel).   
+- Then for each loop it finds the feedback i.e. the product of all interaction strengths, and the loop weight i.e. the geometric mean of all absolute interaction strengths in the loop.   
+
+The function returns a dataframe with all loops noted as 'compName1->compName2->compNamek' (column "loop"), with feedbacks (column "fdb") and loop weights (column "lw") of those loops.  
 
 How to use this function:
 ```{r eval=FALSE}
 # The following statements finds ALL loops in the system,
-# stores these in the textfile "allLoops.txt",
-# finds the loop feedback and loop weight the latter
-# being scaled according to the mortality rates MR (which makes
-# sense if you also scaled your stability values),
-# and returns a dataframe where the loops are printed with their
-# compartment names (using the argument compnames) and not only 
-# their indices.
-loops <- assessFeedback(JM, findLoops = TRUE, MR, compnames)
+# stores these in the textfile "allLoops.txt" (default output name),
+# and finds each loop feedback and scaled loop weight.
+loops.df <- assessFeedback(JM, findLoops = TRUE)
+
+# If you only want to review loops of a certain length
+loops.df <- assessFeedback(JM, k = 3, findLoops = TRUE)
+
+# If you don't want to scale your loop weight 
+# (e.g when you also don't scale your stability values)
+loops.df <- assessFeedback(JM, findLoops = TRUE, scale = FALSE)
 ```
 
-If you have a really large network, it might not be useful to find all loops in the system, and to only focus on loops of length 2 and 3. You can do this as follows:
+If you have a really large network, it might not be useful to find all loops in the system, and to only focus on loops of length 2 and 3. You can do this by using the depth-first search algorithm (*dfs*) seperately from the *assessFeeback* function, and then run the *assessFeedback* runction by reading in the files created by the *dfs* function calls:  
+
 ```{r eval=FALSE}
 # Create an adjacency matrix that indicates which interactions exist,
 # i.e. only 0 and 1 in stead of quantified interaction strengths.
@@ -579,8 +584,8 @@ file_name_loop2 <- dfs(AM, k = 2, verbose)
 file_name_loop3 <- dfs(AM, k = 3, verbose)
 
 # Evaluate loop feedback and weight for these loops of length 2 and 3.
-loops2 <- assessFeedback(JM, findLoops = FALSE, file = file_name_loop2, MR, compnames)
-loops3 <- assessFeedback(JM, findLoops = FALSE, file = file_name_loop3, MR, compnames)
+loops2 <- assessFeedback(JM, findLoops = FALSE, file = file_name_loop2)
+loops3 <- assessFeedback(JM, findLoops = FALSE, file = file_name_loop3)
 ```
 
 It is also possible to assess the skewness of fluxes, which is known to be related to stabiliy, through calculating weighted connectance (van Altena et al. 2016). A lower value indicates a more skewed flux distribution, which is found to be correlated to less stable systems.
