@@ -48,7 +48,7 @@ library(fwmodels)
 ```
 
 ## 1.2. Prepare data
-First, you must prepare your energy-flux food-web model to be used by the package. A hypothetical example of what your data can look like:  
+First, you must prepare your energy-flux food-web model to be used by the package. See section 2 for the requirements in the physiology of the food-web model. A hypothetical example of what your data can look like:  
 ```{r eval=FALSE}
 # 1. Biomasses for each food web compartment (abundance per unit area/volume).
 compartments <- c("detritus", "speciesA", "speciesB")
@@ -108,29 +108,31 @@ mymodel = list(
 ```
 
 ## 1.3. Jacobian matrix
-Now we can calculate a Jacobian matrix from the energy-flux model. The Jacobian matrix shows the per unit biomass effect of species i (in rows) on the population growth rate of species j (in columns) per unit time. In other words, the Jacobian matrix shows you the interaction strengths between species. The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus). We use an example food web from the *fwmodels* package.   
+Now we can estimate a Jacobian matrix from the energy-flux model (see section 3 and our article for more detail). The Jacobian matrix shows the per unit biomass effect of species i (in rows) on the population growth rate of species j (in columns) per unit time. In other words, the Jacobian matrix shows you the interaction strengths between species. The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus). We use an example food web from the *fwmodels* package.   
+
+We recommend using the default diagonal, i.e. calculated from the model (example JM1 below):
 ```{r Jacobian_matrix}
 model <- LovinkhoeveCP
 
 # Documentation for the getJacobian function
 ?getJacobian
 
+# Create a Jacobian matrix, with a diagonal calculated from the model (default).
+# The diagonal values are the upper-limit of self-dampening effects in the system.
+JM1 <- getJacobian(model, diagonal = "model")
+
 # Create a Jacobian matrix, with an all-zero diagonal.
-JM1 <- getJacobian(model, diagonal = 0)
+JM2 <- getJacobian(model, diagonal = 0)
 
 # Create a Jacobian matrix, with -1 on the diagonal.
-JM2 <- getJacobian(model, diagonal = -1)
+JM3 <- getJacobian(model, diagonal = -1)
 
 # Create a Jacobian matrix, with a numeric vector as diagonal
 diagonal <- runif(dim(model$FM)[1], min = -1, max = 0)
-JM3 <- getJacobian(model, diagonal = diagonal)
+JM4 <- getJacobian(model, diagonal = diagonal)
 
-# Create a Jacobian matrix, with a diagonal calculated from the model (default).
-# The diagonal values are the upper-limit of self-dampening effects in the system.
-JM4 <- getJacobian(model, diagonal = "model")
-
-# The first 5 rows and columns of the Jacobian matrix:
-print(JM4[1:5, 1:5])
+# The preview of the first 5 rows and columns of the Jacobian matrix:
+print(JM1[1:5, 1:5])
 ```
 
 ## 1.4. Infer stability
