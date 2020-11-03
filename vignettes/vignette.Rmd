@@ -31,6 +31,7 @@ This vignette provides you a quick start, and a more detailed explanation about 
 # 1. Quick start
 The *fwstability* package is not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub.  
 
+## 1.1. Install and load
 There is also the *fwmodels* package, that contains several published energy-flux food-web models that are used as examples in this vignette.
 ```{r installation, eval=FALSE}
 # install.packages("devtools")
@@ -46,6 +47,7 @@ library(fwstability)
 library(fwmodels)
 ```
 
+## 1.2. Prepare data
 First, you must prepare your energy-flux food-web model to be used by the package. A hypothetical example of what your data can look like:  
 ```{r eval=FALSE}
 # 1. Biomasses for each food web compartment (abundance per unit area/volume).
@@ -105,6 +107,7 @@ mymodel = list(
       frac = frac_matrix))
 ```
 
+## 1.3. Jacobian matrix
 Now we can calculate a Jacobian matrix from the energy-flux model. The Jacobian matrix shows the per unit biomass effect of species i (in rows) on the population growth rate of species j (in columns) per unit time. In other words, the Jacobian matrix shows you the interaction strengths between species. The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus). We use an example food web from the *fwmodels* package.   
 ```{r Jacobian_matrix}
 model <- LovinkhoeveCP
@@ -130,6 +133,7 @@ JM4 <- getJacobian(model, diagonal = "model")
 print(JM4[1:5, 1:5])
 ```
 
+## 1.4. Infer stability
 Now we can infer stability from the Jacobian matrix. All methods are based on the concept that a Jacobian matrix is only stable if all real parts of the eigenvalues are negative. If the system is stable the system will asymptotically return to equilibrium after a small pulse perturbation. If the system is unstable the system will not return to equilibrium after a small pulse perturbation but move away from the equilibrium state. Beware that return rates and return times are NOT suitable measures to compare stability between different systems if these systems operate on different time-scales. If you want to compare relative stability between different systems, you should measure stability as the fraction of self-dampening necessary to stabilize the system.
 ```{r stability}
 # Calculate stability with the eigenvalue method (default).
