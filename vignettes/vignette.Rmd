@@ -136,49 +136,59 @@ print(JM1[1:5, 1:5])
 ```
 
 ## 1.4. Infer stability
-Now we can infer stability from the Jacobian matrix. All methods are based on the concept that a Jacobian matrix is only stable if all real parts of the eigenvalues are negative. If the system is stable the system will asymptotically return to equilibrium after a small pulse perturbation. If the system is unstable the system will not return to equilibrium after a small pulse perturbation but move away from the equilibrium state. Beware that return rates and return times are NOT suitable measures to compare stability between different systems if these systems operate on different time-scales. If you want to compare relative stability between different systems, you should measure stability as the fraction of self-dampening necessary to stabilize the system.
+Now we can infer stability from the Jacobian matrix. All methods are based on the concept that a Jacobian matrix is *only stable if all real parts of the eigenvalues are negative*.  
+
+If the system is stable the system will asymptotically return to equilibrium after a small pulse perturbation. If the system is unstable the system will not return to equilibrium after a small pulse perturbation, but move away from the equilibrium state.  
+
+Method s1 (below) finds the dominant eigenvalue of the Jacobian matrix. If positive, the system is NOT stable. If negative the system is stable. In a stable system the dominant eigenvalue represent the return rate to equilibrium. Method s1 is NOT suitable to compare relative stability between different systems if these systems operate on different time-scales.
+
+Method s2 (below) also finds the dominant eigenvalue, but from a normalized Jacobian matrix with an all-zero diagonal (except for detritus). A normalized JM is unitless, and can therefore be used to compare relative stability between systems. The value of s2 is expected to lie between 0 and 1, and represents the minimum fraction of self-dampening necessary to stabilize the system. A lower value of s2 means a more stable system. If s2 > 1, more than available self-dampening is necessary for a stable system. Hence, the system is inherently unstable. We recommend this method.
+
+Method s3 (below) is the scalar method, used in early publication (e.g. de Ruiter et al. 1997). The value of s3 can be interpreted the same as s2 (Neutel & Thorne 2014), however, the resolution of s2 is probably better than the resolution of s3, and s2 is quicker to calculate.
+
+Both method s2 and s3 assume the JM without self-dampening effects on the diagonal is unstable.
+
+
 ```{r stability}
-# Calculate stability with the eigenvalue method (default).
+# --- Method s1 ---
+# Calculate stability with the eigenvalue method (default),
+# from a Jacobian matrix with unit per time.
 s1 <- getStability(JM1)
-
+# If s1 is positive, the system is NOT stable.
 # If s1 is negative, the system is stable.
-# s1 and the derived return rates and return times are NOT suitable to 
-# compare stability among different systems.
-print(s1)
 
-# The unit of s1 is per unit time if the unit of the 
-# Jacobian matrix is also per unit time.
-# The asymptotic return rate is the absolute value of s.
-return_rate <- abs(s1) # per unit time
+# If s1 is stable, the asymptotic return rate is:
+return_rate <- abs(s1) # per unit time (e.g. per day)
 
-# The time for the system to return to about 37% of its original state 
-# can be calculated:
+# If s1 is stable, the time for the system to return 
+# to about 37% of its original state is:
 return_time <- 1/return_rate # unit of time (e.g. days or years)
 
+# BEWARE: s1 and the derived return rates and return times 
+# are NOT suitable to compare relative stability among different systems.
+
+# --- Method s2 ---
+# Calcalate stability with the eigenvalue method (default),
+# from a normalized Jacobian matrix with an all-zero diagonal.
+# Normalize JM (JM must have quantified diagonal):
+JMnorm <- normalizeJacobian(JM1, dead_names = model$dead$names)
+# Find dominant eigenvalue:
+s2 <- getStability(JMnorm)
+# s2 is expected to lie between 0 and 1
+# s2 represents the minimum fraction of available self-dampening 
+# necessary to stabilize the system.
+
+# --- Method 3 ---
 # Calculate stability with the scalar method.
 # Natural mortality rates (MR in per unit time) and the names of all
 # dead (i.e. detritus) compartments are necessary.
-s2 <- getStability(JM1, method = "scalar", 
+s3 <- getStability(JM2, method = "scalar", 
                    MR = model$MR, dead_names = model$dead$names)
 
-# This method assumes the JM without self-dampening effects on the diagonal
-# is unstable. The value of s2 is the fraction of self-dampening necessary
-# needed to stabilize the matrix.
-# This value is suitable to compare stability between different systems.
-print(s2)
-
-# Calcalate stability with the eigenvalue method 
-# performed on a normalized JM with an all-zero diagonal (except dead compartments).
-# To normalize the diagonal must be quantified.
-JMnorm <- normalizeJacobian(JM4, dead_names = model$dead$names)
-s3 <- getStability(JMnorm)
-
-# The value of s3 is found to be very similar to s2 (Neutel & Thorne 2014), and
-# thus also represents the fraction of self-dampening necessary to stabilize the system.
-# This value is suitable to compare stability between different systems. 
-# The resolution of s3 is probably better than the resolution of s2, and quicker to calculate.
-# Therefore, we recommend using s3 as the standard stability measure.
-print(s3)
+# If the diagonal is calculated from the model, 
+# the diagonal can be used as MR
+s3 <- getStability(JM1, method = "scalar", 
+                   MR = abs(diag(JM1)), dead_names = model$dead$names)
 ```
 
 # 2. Preparing a food web model for stability analysis
