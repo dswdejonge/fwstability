@@ -6,7 +6,7 @@ Authors@R:
            family = "de Jonge",
            role = c("aut", "cre"),
            email = "mail@dswdejonge.com")
-Description: The package can be used to estimate stability and biological tipping points from energy-flux food web models. It takes in an energy-flux food web model with fluxes, conversion efficiencies, and information on mortality and excretion, and uses this to calculate interaction strengths. These interaction strengths are the elements of a Jacobian matrix that can be used in stability analysis.
+Description: The package can be used to estimate stability and biological tipping points from energy-flux food-web models. It takes an energy-flux food-web model with fluxes, conversion efficiencies, and information on mortality and excretion, and uses this to calculate interaction strengths. These interaction strengths are the elements of a Jacobian matrix that can be used in stability analysis.
 License: GNU GPL 3.0
 Encoding: UTF-8
 LazyData: true
@@ -17,6 +17,5 @@ Suggests:
     testthat,
     ineq
 VignetteBuilder: 
-	knitr,
-	LIM
+	knitr
 RoxygenNote: 7.0.2
