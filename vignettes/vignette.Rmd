@@ -19,8 +19,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-NOTE: The *fwstability* package is in the final stages of development and not yet available from CRAN. Please be aware of this when using the package in its current form.  
-
 The *fwstability* package is developed to infer food-web stability from energy-flux models. Basically, an energy-flux food-web model shows the transfer of energy or materials from one species to another when they eat each other. These models are steady-state and mass-balanced. Mathematical methods have been developed to transform these steady-state models to the dynamic realm in order to infer stability. This package implements these mathematical methods, so that you can easily infer stability from your energy-flux food-web model.  
 
 This package was introduced in our paper as cited below. This paper also provides an in-depth explanation of the science behind energy-flux food-web stability. Please cite if you are using this package:  
@@ -35,7 +33,10 @@ The *fwstability* package is not yet available from CRAN. If you wish to use the
 ## 1.1. Install and load
 There is also the *fwmodels* package, that contains several published energy-flux food-web models that are used as examples in this vignette.
 ```{r installation, eval=FALSE}
-# install.packages("devtools")
+# if you don't have the devtools package yet:
+install.packages("devtools")
+
+# Install the fwstability package
 devtools::install_github("dswdejonge/fwstability", build_vignettes = TRUE)
 
 # To use the example food-webs, install the fwmodels package as well
@@ -49,7 +50,11 @@ library(fwmodels)
 ```
 
 ## 1.2. Prepare data
-First, you must prepare your energy-flux food-web model to be used by the package. See section 2 for the requirements in the physiology of the food-web model. A hypothetical example of what your data can look like:  
+First, you must prepare your energy-flux food-web model to be used by the package. See section 2 for the requirements in the physiology of the food-web model.  
+
+A case that perhaps requires some extra explanation is the 'frac_matrix'. This matrix has the same size as the flow matrix and indicates the fraction of each flow that comprises defecation. Take the example where there is a material flow from Species A to Detritus of 2 units due to defecation, and another of 8 units due to mortality of the population. The total flow between Species A and Detritus is 10 units (this is the value present in the flow matrix). Of those total 10 units, 2 units are caused by defecation. Therefore, the frac_matrix will have the value 2/10 = 0.2. If there is *only* a flux between Species A and Detritus due to defecation, the fraction will be 1. For all flows which are not comprised of defecation at all, for example when Species A eats Species B, the fraction in the frac_matrix will be 0. 
+
+A hypothetical example of what your data can look like:  
 ```{r eval=FALSE}
 # 1. Biomasses for each food web compartment (abundance per unit area/volume).
 compartments <- c("detritus", "speciesA", "speciesB")
@@ -84,15 +89,26 @@ names(growth_eff) <- compartments
 # 4.a. The names of all dead compartments
 dead_names <- "detritus"
 # 4.b. The fraction of each flow which comprises defecation
+# frac_matrix needs to be the same size and the flow matrix
 frac_matrix <- matrix(data = 0,
                       nrow = length(compartments), 
                       ncol = length(compartments))
 row.names(frac_matrix) <- compartments
 colnames(frac_matrix) <- compartments
-frac_matrix["speciesA", "detritus"] <- flowmatrix["detritus", "speciesA"] * 
-  (1-assimilation_eff["speciesA"]) / flowmatrix["speciesA", "detritus"]
-frac_matrix["speciesB", "detritus"] <- flowmatrix["speciesA", "speciesB"] * 
-  (1-assimilation_eff["speciesB"]) / flowmatrix["speciesB", "detritus"]
+
+# Defecation is the part of ingested food (food source -> species) 
+# which is NOT assimilated (1 - assimilation efficiency)
+# For more explanation about physiology, see Section 2.
+defecation_by_speciesA <- flowmatrix["detritus", "speciesA"] * 
+  (1-assimilation_eff["speciesA"])
+defecation_by_speciesB <- flowmatrix["speciesA", "speciesB"] * 
+  (1-assimilation_eff["speciesB"])
+# You can simply divide the defecation flow by the total flow 
+# between compartments to obtain the value for the frac_matrix
+frac_matrix["speciesA", "detritus"] <- defecation_by_speciesA / 
+  flowmatrix["speciesA", "detritus"]
+frac_matrix["speciesB", "detritus"] <- defecation_by_speciesB / 
+  flowmatrix["speciesB", "detritus"]
 ```
 
 Combine all information into a named list as follows:
@@ -331,12 +347,16 @@ For a working example, please refer to 5.3 A complex application.
 ## 2.2. Energy flux model
 If you don't use a linear inverse model (LIM) to mass-balance your system, or your LIM is not formatted correctly to be used by the fwstability package, you will need to extract the necessary data first. In order to obtain a Jacobian matrix you need:  
 
-- a named **flow matrix** containing the total flow of material/energy between compartments.   
-- a named vector with **biomasses** for all compartments (including the dead ones).  
-- a named vector with **assimilation efficiencies** for all non-dead compartments. An organism assimilates (A) the part of all ingested food (I) that is not defecated (D): $A = I-D$. So, assimilation efficiency (AE) is the assimilated amount of food (A) divided by the total of ingested food (I): $AE = A/I$. (see diagram under quick start)  
-- a named vector with **growth efficiencies** for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$. (see diagram under quick start)  
-- if you have **dead compartments** in your system, you should specify a list containg two elements with the names of dead compartments (element "names"), a matrix with the fraction of each flow that constitutes defecation (element "frac").
-- a character vector containing the names of **external compartments** (these are removed from the flowmatrix before the calculations).  
+A named **flow matrix** containing the total flow of material/energy between compartments.   
+
+A named vector with **biomasses** for all compartments (including the dead ones).  
+A named vector with **assimilation efficiencies** for all non-dead compartments. An organism assimilates (A) the part of all ingested food (I) that is not defecated (D): $A = I-D$. So, assimilation efficiency (AE) is the assimilated amount of food (A) divided by the total of ingested food (I): $AE = A/I$. (see diagram under quick start)  
+
+A named vector with **growth efficiencies** for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$. (see diagram under quick start)  
+
+If you have **dead compartments** in your system, you should specify a list containg two elements with the names of dead compartments (element "names"), and a matrix with the fraction of each flow that constitutes defecation (element "frac"). This matrix has the same size as the flow matrix and indicates the fraction of each flow that comprises defecation. Take the example where there is a material flow from Species A to Detritus of 2 units due to defecation, and another of 8 units due to mortality of the population. The total flow between Species A and Detritus is 10 units (this is the value present in the flow matrix). Of those total 10 units, 2 units are caused by defecation. Therefore, the frac_matrix will have the value 2/10 = 0.2. If there is *only* a flux between Species A and Detritus due to defecation, the fraction will be 1. For all flows which are not comprised of defecation at all, for example when Species A eats Species B, the fraction in the frac_matrix will be 0. 
+
+A character vector containing the names of **external compartments** (these are removed from the flowmatrix before the calculations).  
 
 The above information should be combined in a list that also contains the element "type" which is set to "EF" (short for energy flux) so that it can be parsed into the getJacobian function. It will look like this:
 ```{r eval = FALSE}
