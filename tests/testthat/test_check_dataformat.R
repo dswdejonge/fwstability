@@ -23,6 +23,21 @@ JM <- matrix(c(0,
 rownames(JM) <- fwnames[1:3]
 colnames(JM) <- fwnames[1:3]
 
+# Test input
+test_that("example is proper and order doesn't mater", {
+  expect_equal(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE,
+                                     dead = dead, externals = "CO2", diagonal = 0),
+               JM)
+  expect_equal(getJacobianEnergyFlux(FM = FM, BM = BM[c(3,2,1)], AE = AE, GE = GE,
+                                     dead = dead, externals = "CO2", diagonal = 0),
+               JM)
+  expect_equal(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE[c(3,2,1)], GE = GE,
+                                     dead = dead, externals = "CO2", diagonal = 0),
+               JM)
+  expect_equal(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE[c(3,2,1)],
+                                     dead = dead, externals = "CO2", diagonal = 0),
+               JM)
+})
 
 # Incomplete data
 test_that("the function only executes when the dead and external compartments have an existing name", {
@@ -115,20 +130,19 @@ AE3 <- AE; names(AE3) <- c("A", "B", "C")
 GE3 <- GE; names(GE3) <- c("A", "B", "C")
 
 test_that("all vectors and matrices have the same names", {
+  # This test also gives an R base warning message
   expect_error(getJacobianEnergyFlux(FM = FM5, BM = BM, AE = AE, GE = GE, dead = dead),
-               "The names and their order must be equal in all named vectors and matrices.")
+               "The names must be equal in all named vectors and matrices.")
   expect_error(getJacobianEnergyFlux(FM = FM6, BM = BM, AE = AE, GE = GE, dead = dead),
                "Input matrix must have same names in rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM7, BM = BM, AE = AE, GE = GE, dead = dead),
                "Input matrix must have same names in rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM4, AE = AE, GE = GE, dead = dead, externals = "CO2"),
-               "The names and their order must be equal in all named vectors and matrices.")
-  expect_error(getJacobianEnergyFlux(FM = FM, BM = BM5, AE = AE, GE = GE, dead = dead, externals = "CO2"),
-               "The names and their order must be equal in all named vectors and matrices.")
+               "The names must be equal in all named vectors and matrices.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE3, GE = GE, dead = dead, externals = "CO2"),
-               "The names and their order must be equal in all named vectors and matrices.")
+               "The names must be equal in all named vectors and matrices.")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE3, dead = dead, externals = "CO2"),
-               "The names and their order must be equal in all named vectors and matrices.")
+               "The names must be equal in all named vectors and matrices.")
 })
 
 # Error: biomasses have incorrect values
@@ -255,14 +269,13 @@ test_that("the scalar method only works with a correct mortality vector", {
                "the MR vector contains values equal or smaller than zero, or is non-numeric")
   expect_error(getStability(JM, method = "scalar", MR = mort8),
                "the MR vector contains values equal or smaller than zero, or is non-numeric")
+  # This test also gives an R base warning message
   expect_error(getStability(JM, method = "scalar", MR = mort2),
-               "The names and their order must be equal in all named vectors and matrices.")
+               "The names must be equal in all named vectors and matrices.")
   expect_error(getStability(JM, method = "scalar", MR = mort3),
                "All required vectors must be named.")
-  expect_error(getStability(JM, method = "scalar", MR = mort4),
-               "The names and their order must be equal in all named vectors and matrices.")
   expect_error(getStability(JM, method = "scalar", MR = mort5),
-               "The names and their order must be equal in all named vectors and matrices.")
+               "The names must be equal in all named vectors and matrices.")
 })
 
 # Error: the name of dead compartment is non-existent

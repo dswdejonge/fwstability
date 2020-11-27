@@ -223,7 +223,7 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
   if(!is.null(externals)) {
     checkExternalsFormat(externals, FM)
     FM <- removeExternals(externals, FM)
-    }
+  }
   # Use netto FM if necessary
   FMs <- list()
   if(!is.null(netto) && netto){
@@ -233,17 +233,25 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
     FMs$original <- FM
     FMs$netto <- FM
   }
-  # Message for default all-zero diagonal
-  #if(is.null(diagonal)) {
-  #  diagonal <- 0
-  #  if(verbose) {message("fwstab: Diagonal by default set to all-zero.")}
-  #}
   # Do checks for required data formats
   checkMformat(FMs$original)
   checkMformat(FMs$netto)
   checkNamingFormat(
     matrices = list(FMs$original, FMs$netto, dead$frac),
     vectors = list(BM, AE, GE))
+  # Force correct order
+  fwnames <- rownames(FM)
+  FMs$original <- FMs$original[fwnames, fwnames] # order cols, rows
+  FMs$netto <- FMs$netto[fwnames, fwnames] # order cols, rows
+  BM <- BM[fwnames]
+  AE <- AE[fwnames]
+  GE <- GE[fwnames]
+  if(!is.null(dead)){
+    dead$frac <- dead$frac[fwnames,fwnames]
+  }
+  if(!is.null(MR)){
+    MR <- MR[fwnames]
+  }
   checkBMformat(BM)
   checkDiagonalFormat(diagonal, correct_length = length(BM))
   checkCEformat(CE = list(AE, GE))

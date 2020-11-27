@@ -29,9 +29,7 @@ checkNamingFormat <- function(matrices = NULL, vectors = NULL) {
       stop("All required matrices must be named.")
     }
     if(!all(n %in% rownames(m) & rownames(m) %in% n)) {
-      stop("The names and their order must be equal in all named vectors and matrices.")
-    }else if(FALSE %in% (n == rownames(m))){
-      stop("The names and their order must be equal in all named vectors and matrices.")
+      stop("The names must be equal in all named vectors and matrices.")
     }
   }
   for(v in vectors) {
@@ -39,8 +37,8 @@ checkNamingFormat <- function(matrices = NULL, vectors = NULL) {
     if(is.null(names(v))) {
       stop("All required vectors must be named.")
     }
-    if(!all(n == names(v))) {
-      stop("The names and their order must be equal in all named vectors and matrices.")
+    if(!all(n %in% names(v) & names(v) %in% n )) {
+      stop("The names must be equal in all named vectors and matrices.")
     }
   }
 }
