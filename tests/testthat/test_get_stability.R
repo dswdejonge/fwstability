@@ -27,11 +27,11 @@ names(MR) <- c("DETRITUS", "PLANT", "ANIMAL")
 stability <- 2.068195
 
 test_that("the scalar getStability provides the correct answer", {
-  expect_equal(getStability(JM, method = "scalar", MR = MR) > 2.068 &
-               getStability(JM, method = "scalar", MR = MR) < 2.069,
+  expect_equal(getStability(JM, method = "scalar", MR = MR) > 2.06 &
+               getStability(JM, method = "scalar", MR = MR) < 2.07,
                TRUE)
-  expect_equal(getStability(t(JM), method = "scalar", MR = MR) > 2.068 &
-                 getStability(t(JM), method = "scalar", MR = MR) < 2.069,
+  expect_equal(getStability(t(JM), method = "scalar", MR = MR) > 2.06 &
+                 getStability(t(JM), method = "scalar", MR = MR) < 2.07,
                TRUE)
 })
 
