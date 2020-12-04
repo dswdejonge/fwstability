@@ -123,7 +123,7 @@ getInitialStability <- function(JM) {
 #' }
 #' @export
 #' @examples
-#' getStability(JM)
+#' \dontrun{getStability(JM)}
 getStability <- function(JM, method = "eigenvalue",
                          MR = NULL, dead_names = NULL, iters = 100) {
   # Errors: check data format
