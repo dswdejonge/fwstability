@@ -53,16 +53,24 @@ library(fwmodels)
 ## 1.2. Prepare data
 First, you must prepare your energy-flux food-web model to be used by the package. See section 2 for the requirements in the physiology of the food-web model.  
 
-A case that perhaps requires some extra explanation is the 'frac_matrix'. This matrix has the same size as the flow matrix and indicates the fraction of each flow that comprises defecation. Take the example where there is a material flow from Species A to Detritus of 2 units due to defecation, and another of 8 units due to mortality of the population. The total flow between Species A and Detritus is 10 units (this is the value present in the flow matrix). Of those total 10 units, 2 units are caused by defecation. Therefore, the frac_matrix will have the value 2/10 = 0.2. If there is *only* a flux between Species A and Detritus due to defecation, the fraction will be 1. For all flows which are not comprised of defecation at all, for example when Species A eats Species B, the fraction in the frac_matrix will be 0. 
+The flowmatrix always has source compartments in rows, and sink compartments in columns. In other words, the value in each cell is the flow moving from the row compartment toward to the column compartment.  
+
+A case that perhaps requires some extra explanation is the 'frac_matrix'. This matrix has the same size as the flow matrix and indicates the fraction of each flow that comprises defecation. Take the example where there is a material flow from Species A to Detritus of 2 units due to defecation, and another of 8 units due to mortality of the population. The total flow between Species A and Detritus is 10 units (this is the value present in the flow matrix). Of those total 10 units, 2 units are caused by defecation. Therefore, the frac_matrix will have the value 2/10 = 0.2. If there is *only* a flux between Species A and Detritus due to defecation, the fraction will be 1. For all flows which are not comprised of defecation at all, for example when Species A eats Species B, the fraction in the frac_matrix will be 0.  
+
+Dead compartment are all compartments that are not alive, e.g. detritus, nutrients, etc. Information about these compartments should be included in a model element called 'dead'.  
+
+External compartments are compartments from which material is imported into and exported from the model, and which can be disregarded for inferring interaction strengths and stability. If present, their names can be included in a model element called 'externals'.  
 
 A hypothetical example of what your data can look like:  
 ```{r eval=FALSE}
-# 1. Biomasses for each food web compartment (abundance per unit area/volume).
+# 1. Biomasses for each food web compartment 
+# (e.g. abundance per unit area).
 compartments <- c("detritus", "speciesA", "speciesB")
 biomasses <- c(30, 20, 10) # e.g. grams per square meter
 names(biomasses) <- compartments
 
-# 2. Quantified fluxes between compartments (abundance per unit area/volume per unit time).
+# 2. Quantified fluxes between compartments 
+# (e.g. abundance per unit area per unit time).
 detritus_to_speciesA <- 10
 speciesA_to_detritus <- 3
 speciesA_to_speciesB <- 7
@@ -126,10 +134,17 @@ mymodel = list(
 ```
 
 ## 1.3. Jacobian matrix
-Now we can estimate a Jacobian matrix from the energy-flux model (see section 3 and our article for more detail). The Jacobian matrix shows the per unit biomass effect of species i (in rows) on the population growth rate of species j (in columns) per unit time. In other words, the Jacobian matrix shows you the interaction strengths between species. The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus). We use an example food web from the *fwmodels* package.   
+Now we can estimate a Jacobian matrix from the energy-flux model (see section 3 and our article for more detail).  
 
-We recommend using the default diagonal, i.e. calculated from the model (example JM1 below):
+The Jacobian matrix shows the per unit biomass effect of species i (in rows) on the population growth rate of species j (in columns) per unit time. In other words, the Jacobian matrix shows you the interaction strengths between species. Thus, the unit of the JM is 'per unit time'.  
+
+The diagonal values are intraspecific effects, thus the density-dependent effects a compartment has on itself (works for both species and detritus).  
+
+We use an example food web from the *fwmodels* package. We recommend using the default diagonal, i.e. calculated from the model (example JM1 below):  
 ```{r Jacobian_matrix}
+library(fwstability)
+library(fwmodels)
+
 model <- LovinkhoeveCP
 
 # Documentation for the getJacobian function
@@ -186,7 +201,7 @@ return_time <- 1/return_rate # unit of time (e.g. days or years)
 # are NOT suitable to compare relative stability among different systems.
 
 # --- Method s2 ---
-# Calcalate stability with the eigenvalue method (default),
+# Calculate stability with the eigenvalue method (default),
 # from a normalized Jacobian matrix with an all-zero diagonal.
 # Normalize JM (JM must have quantified diagonal):
 JMnorm <- normalizeJacobian(JM1, dead_names = model$dead$names)
