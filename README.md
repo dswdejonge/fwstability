@@ -1,15 +1,13 @@
 # fwstability
 R-package to calculate food web (fw) stability from an energy-flux model.
 
-NOTE: Package is in development, please be aware when using code in its current form.
-
 # Installation
 ```r
-# Install the fwstability package
+# To install the development version of the fwstability package:
 devtools::install_github("dswdejonge/fwstability", build_vignettes = TRUE)
 
-# Install the fwmodel package with published energy-flux models
-# to use as examples.
+# You can also install the fwmodel package with 
+# published energy-flux models to use as examples:
 devtools::install_github("dswdejonge/fwmodels")
 
 # Read vignette:

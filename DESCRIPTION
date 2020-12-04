@@ -1,12 +1,12 @@
 Package: fwstability
-Title: Calculate Food Web Stability
-Version: 0.0.0.9000
+Title: Infer Food-Web Stability
+Version: 1.0.0
 Authors@R: 
     person(given = "Danielle",
            family = "de Jonge",
            role = c("aut", "cre"),
            email = "mail@dswdejonge.com")
-Description: The package can be used to estimate stability and biological tipping points from energy-flux food-web models. It takes an energy-flux food-web model with fluxes, conversion efficiencies, and information on mortality and excretion, and uses this to calculate interaction strengths. These interaction strengths are the elements of a Jacobian matrix that can be used in stability analysis.
+Description: The package can be used to infer interaction strengths, stability, and biological tipping points from energy-flux food-web models.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
