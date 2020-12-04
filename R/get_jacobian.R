@@ -346,12 +346,13 @@ getNetMatrixFM <- function(FM, deadnames) {
 #' De Ruiter (1995) and Neutel & Thorne (2014). The energy flux model should at least include
 #' quantified flows, compartment biomasses, and conversion efficiencies.
 #' If you want to calculate the intraspecific interactions, i.e. the diagonal values, from the
-#' model, then non-predatory mortality rates should also be included. Beware that these model-derived
-#' diagonal values represent an \bold{upperbound}. It is the maximum amount of self-dampening possible
-#' in the respective populations.
+#' model, then non-predatory mortality are necessary.
+#' Non-predatory mortality rates can be calculated from the model or parsed manually.
+#' Beware that these model-derived diagonal values represent an \bold{upperbound}.
+#' It is the maximum amount of self-dampening possible in the respective populations.
 #' If your model includes dead compartments, like detritus or nutrients, it is highly recommended to
 #' also include these in the special argument \code{dead}. Conversion efficiences are not needed for
-#' dead compartments, and you can include information on defecation into these compartments.
+#' dead compartments, and you should include information on defecation into these compartments.
 #' Interaction strengths of dead compartments are calculated in another way than for living compartments.
 #' Inclusion of recycling processes may impact your stability results (Wilson & Wolkovich, 2011).\cr
 #' The list with model information should contain:

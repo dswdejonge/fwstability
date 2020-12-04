@@ -28,7 +28,8 @@ Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevel
 This vignette provides you a quick start, and a more detailed explanation about the methods. Reading the vignette is highly recommended so that you can interpret your results correctly.   
 
 # 1. Quick start
-The *fwstability* package is not yet available from CRAN. If you wish to use the package as it currently is, you can download it from GitHub.  
+
+![](Summary_figure.png)
 
 ## 1.1. Install and load
 There is also the *fwmodels* package, that contains several published energy-flux food-web models that are used as examples in this vignette.
@@ -208,9 +209,12 @@ s3 <- getStability(JM1, method = "scalar",
                    MR = abs(diag(JM1)), dead_names = model$dead$names)
 ```
 
+
 # 2. Preparing a food web model for stability analysis
-Your energy-flux model should always stick to the physiological concepts explained in this diagram:  
-![Diagram of physiology concepts used in energy-flux food web models. White boxes represent sink compartments outside the organism, whereas grey boxes represent different stages of energy or material inside the organism as they flow through. Fluxes (Fij is Flux from i to j) and the specific processes they represent are presented with a capital letter, energy conversion efficiencies with a lower case letter. Prey is population i, predator is population j, consumer of predator j is k. Q = Consumption, A = Assimilation, E = Excretion, P = Production, R = Respiration, P = Predation, M = Mortality. a = assimilation efficiency, p = production efficiency. Based on (de Ruiter et al., 1993; Hunt et al., 1987).](physiology_diagram.png)
+Your energy-flux model should always stick to the physiological concepts explained in this diagram:   
+
+![Diagram of physiology concepts used in energy-flux food web models. White boxes represent sink compartments outside the organism, whereas grey boxes represent different stages of energy or material inside the organism as they flow through. Fluxes (Fij is Flux from i to j) and the specific processes they represent are presented with a capital letter, energy conversion efficiencies with a lower case letter. Prey is population i, predator is population j, consumer of predator j is k. Q = Consumption, A = Assimilation, E = Excretion, P = Production, R = Respiration, P = Predation, M = Mortality. a = assimilation efficiency, p = production efficiency. Based on (de Ruiter et al., 1993; Hunt et al., 1987).](physiology_diagram.png)  
+
 
 ## 2.1. A linear inverse model
 In a linear inverse model (LIM) all processes in a food web are captured by a set of linear equations. These linear equations can be either equalities (the outcome of an equation should equal another value) or inequalities (the outcome of an equation should be equal or greater than another value). The equations can parameterized with known data, but often not all processes are studied well enough to quantify. The unknowns in the equations can then be found with linear programming, thereby fully quantifying your model. A simple example of a linear optimization problem can be found on \link{Wikipedia}[https://en.wikipedia.org/wiki/Linear_programming#Example].  
