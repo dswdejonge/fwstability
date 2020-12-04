@@ -15,9 +15,9 @@ fwnames <- c("PLANT", "WORM", "ANT", "CO2")
 FM <- matrix(c(0, 3, 2, 1, 5, 0, 3, 0, 0, 5, 0, 0, 0, 0, 1, 0), nrow = 4, ncol = 4)
 rownames(FM) <- fwnames
 colnames(FM) <- fwnames
-BM <- c(30, 20, 10) ; names(BM) <- fwnames[1:3]
-AE <- c(0.1, 0.2, 0.3) ; names(AE) <- fwnames[1:3]
-GE <- c(0.1, 0.2, 0.3) ; names(GE) <- fwnames[1:3]
+BM <- c(30, 20, 10, 500) ; names(BM) <- fwnames
+AE <- c(0.1, 0.2, 0.3, NA) ; names(AE) <- fwnames
+GE <- c(0.1, 0.2, 0.3, NA) ; names(GE) <- fwnames
 model <- list(
   type = "EF", FM = FM, BM = BM, AE = AE, GE = GE, externals = "CO2"
 

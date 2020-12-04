@@ -224,6 +224,15 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
   if(!is.null(externals)) {
     checkExternalsFormat(externals, FM)
     FM <- removeExternals(externals, FM)
+    BM <- BM[!(names(BM) %in% externals)]
+    AE <- AE[!(names(AE) %in% externals)]
+    GE <- GE[!(names(GE) %in% externals)]
+    if(!is.null(dead)){
+      dead$frac <- removeExternals(externals, dead$frac)
+    }
+    if(!is.null(MR)){
+      MR <- MR[!(names(MR) %in% externals)]
+    }
   }
   # Use netMatrix FM if necessary
   checkMformat(FM)
