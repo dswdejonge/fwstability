@@ -14,7 +14,7 @@ getJacobianEnergyFlux(
   externals = NULL,
   MR = NULL,
   verbose = T,
-  netto = NULL
+  netMatrix = TRUE
 )
 }
 \arguments{
@@ -63,7 +63,7 @@ Otherwise, you can provide a named numeric vector.}
 
 \item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
 
-\item{netto}{(optional) Boolean. Default is NULL If TRUE, the netto Flowmatrix is used
+\item{netMatrix}{(optional) Boolean. Default is TRUE: the netMatrix is used
 to calculate interaction strengths. This is only relevant if there are two food web compartments
 which act both as prey and predators to one another.}
 }

@@ -96,7 +96,7 @@ the function assumes natural mortality equals production
 (AE x GE x Consumption) minus predation (flux to all other faunal compartments).
 }
 \examples{
-getStability(JM)
+\dontrun{getStability(JM)}
 }
 \references{
 \itemize{

@@ -7,7 +7,7 @@
 effectOnResource(FMs, BM, AE, dead = NULL)
 }
 \arguments{
-\item{FMs}{(required) A list with two elements \code{original} and \code{netto}, both
+\item{FMs}{(required) A list with two elements \code{original} and \code{netMatrix}, both
 containing a square flowmatrix, with source compartments as rows, sink compartments as columns.
 \itemize{
 \item{
@@ -16,9 +16,10 @@ with the function \code{getFlowMatrix},
 i.e. can contain a flow from A to B, and a flow from B to A.
 }
 \item{
-the list element \code{netto} should contain an adjusted version of the original matrix with only
-netto flows, which can be obtained with the function \code{getNettoFM},
-i.e. a netto flow is the absolute result of flow A to B minus flow B to A.
+the list element \code{netMatrix} should contain an adjusted version of the original matrix with only
+net flows, which can be obtained with the function \code{getNetMatrixFM},
+i.e. a netMatrix flow is the absolute result of flow A to B minus flow B to A in the correct direction.
+The net flow is only calculated for flows between live compartments, not for dead ones.
 }
 }}
 
