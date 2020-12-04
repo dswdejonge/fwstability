@@ -1,3 +1,5 @@
 ^stability\.Rproj$
 ^\.Rproj\.user$
 ^fwstability\.Rproj$
+^cran-comments\.md$
+^revdep$
