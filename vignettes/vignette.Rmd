@@ -520,7 +520,7 @@ getJacobian(
   diagonal = "model",
 )
 ```
-For working examples, please review the examples given in 5. Examples from literature.
+
 
 # 4. Stability analysis
 A Jacobian matrix is only stable if all real parts of the eigenvalues are negative. Therefore, the stability of a Jacobian matrix can be measured as the maximum real value of the eigenvalues, also called the dominant eigenvalue. A negative value indicates a stable matrix, a positive value indicates an unstable matrix. If the dominant eigenvalue is negative (thus stable), the absolute value of the dominant eigenvalue is the rate of return of the slowest trajectory back to equilibrium. If the Jacobian matrix has the unit per unit time, the rate of return is also per unit time. The return rate can be used to calculate return time.  
@@ -564,7 +564,7 @@ s <- getStability(JM, method = "scalar", MR, dead_names)
 JMnorm <- normalizeJacobian(JM, dead_names)
 s <- getStability(JMnorm)
 ```
-For working examples, please review 6. Examples from literature.
+
 
 # 5. Analysize food web for (de)stabilizing characteristics
 It can be useful for your research to review other network characteristics, to try to understand why stability between systems differ. This package does NOT provide a comprehensive set of functions to do such analysis, but it does provide a starting point.  
