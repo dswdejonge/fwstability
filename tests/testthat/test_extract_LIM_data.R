@@ -35,8 +35,11 @@ test_that("the right conversion efficiencies are extracted", {
 })
 
 test_that("the right Jacobian matrix is produced from the LIM", {
-  expect_equal(getJacobian(model, diagonal = 0)$JM, JM)
-  # Use netto FM
-  expect_equal(getJacobian(model1, diagonal = 0)$JM, JM1)
+  # Net Matrix
+  expect_equal(getJacobian(model, diagonal = 0)$JM, JM1)
+  expect_equal(getJacobian(model2, diagonal = 0), JM1)
+  # Not with Net Matrix
+  expect_equal(getJacobian(model, diagonal = 0, netMatrix = F)$JM, JM)
+  expect_equal(getJacobian(model2, diagonal = 0, netMatrix = F), JM)
 })
 
