@@ -8,7 +8,7 @@ assessLinksFixed(
   JM,
   method = "eigenvalue",
   MR = NULL,
-  dead = NULL,
+  dead_names = NULL,
   func = function(x) {     return(x * 2) }
 )
 }
@@ -38,6 +38,9 @@ A named numeric vector containing mortality of the faunal compartments
 (per unit time, t-1). The values and names must be in the same
 order as the Jacobian matrix, and the values for dead compartments should be
 set to NA.}
+
+\item{dead_names}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
+compartments (everything that is not fauna).}
 
 \item{func}{(required) Function describing how to alter each interaction strength to
 assess the effect on stability of the respective link. Default is doubling each

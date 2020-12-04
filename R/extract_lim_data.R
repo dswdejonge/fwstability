@@ -32,7 +32,7 @@ getTag <- function(vars, tag) {
 #' @export
 getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
   if(is.null(lim)) {
-    lim <- Setup(readLIM)
+    lim <- LIM::Setup(readLIM)
   }
   flows <- readLIM$flows[,1:2]
   flowmatrix <- lim$Flowmatrix
@@ -41,9 +41,9 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
       message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
     }
     if(!is.null(lim$Cost) || !is.null(lim$Profit)) {
-      web <- Linp(lim)$X
+      web <- LIM::Linp(lim)$X
     } else {
-      web <- Lsei(lim, parsimonious = TRUE)$X
+      web <- LIM::Lsei(lim, parsimonious = TRUE)$X
     }
   }
   X <- as.vector(web)
@@ -81,7 +81,7 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
 #' @export
 getVariables <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
   if(is.null(lim)){
-    lim <- Setup(readLIM)
+    lim <- LIM::Setup(readLIM)
   }
   vars <- numeric(lim$NVariables)
   pars <- readLIM$pars$val
@@ -91,9 +91,9 @@ getVariables <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
       message("fwstab: No model solutions given, LIM resolved by minimizing sum of squares.")
     }
     if(!is.null(lim$Cost) || !is.null(lim$Profit)) {
-      web <- Linp(lim)$X
+      web <- LIM::Linp(lim)$X
     } else {
-      web <- Lsei(lim, parsimonious = TRUE)$X
+      web <- LIM::Lsei(lim, parsimonious = TRUE)$X
     }
   }
   for (i in 1:lim$NVariables) {

@@ -4,7 +4,7 @@
 \alias{assessComps}
 \title{Assess stability effect of each compartment.}
 \usage{
-assessComps(JM, method = "eigenvalue", MR = NULL, dead = NULL)
+assessComps(JM, method = "eigenvalue", MR = NULL, dead_names = NULL)
 }
 \arguments{
 \item{JM}{(required) A square named Jacobian matrix with numeric values representing the effect of one compartment (rows)
@@ -32,6 +32,9 @@ A named numeric vector containing mortality of the faunal compartments
 (per unit time, t-1). The values and names must be in the same
 order as the Jacobian matrix, and the values for dead compartments should be
 set to NA.}
+
+\item{dead_names}{(optional if method is "scalar") Character vector with all names of detritus and nutrient
+compartments (everything that is not fauna).}
 }
 \value{
 Returns a dataframe with absolute and relative changes in stability for removal

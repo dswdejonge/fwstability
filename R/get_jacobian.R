@@ -294,9 +294,9 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
   JM <- eff.on.consumer + eff.on.resource
   if(all(diagonal == "model")) {
     if(is.null(MR)){
-      MR <- getMortalityRates(FM = FM, AE = AE, GE = GE, BM = BM, dead = dead$names)
+      MR <- getMortalityRates(FM = FM, AE = AE, GE = GE, BM = BM, dead_names = dead$names)
     }
-    diagonal <- getDiagonal(MR = MR, BM = BM, dead = dead$names, FM = FMs$original, AE = AE)
+    diagonal <- getDiagonal(MR = MR, BM = BM, dead_names = dead$names, FM = FMs$original, AE = AE)
   }
   diag(JM) <- diagonal
 
@@ -428,7 +428,7 @@ getJacobian <- function(model = stop("Model input required"),
       diagonal = diagonal)
   } else if(model$type == "LIM") {
     if(is.null(model$setup)) {
-      model$setup <- Setup(model$LIM)
+      model$setup <- LIM::Setup(model$LIM)
     }
     if(is.null(model$web)) {
       if(verbose) {
