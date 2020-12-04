@@ -14,9 +14,9 @@ test_that("the Flowmatrix function works with parallel flows", {
   expect_equal(getFlowMatrix(readLIM, web = lim_solved$X), FM)
 })
 
-test_that("the getNettoFM provides correct answer", {
-  expect_equal(getNettoFM(FM, c("DEADLABILE", "DEADREFRAC")), FM1)
-})
+# test_that("the getNettoFM provides correct answer", {
+#   expect_equal(getNettoFM(FM, c("DEADLABILE", "DEADREFRAC")), FM1)
+# })
 
 test_that("the getVariables function gives right answer", {
   expect_equal(getVariables(readLIM, web = lim_solved$X), variables)
