@@ -2,7 +2,7 @@ context("Jacobian matrix creation")
 
 source("models/model_regular.R")
 test_that("the function works without optional arguments", {
-  expect_equal(getJacobian(model, diagonal = 0), JM)
+  expect_equal(getJacobian(model, diagonal = 0, netMatrix = F), JM)
   # netto FM
   expect_equal(getJacobian(model1, diagonal = 0), JM1)
 })
@@ -29,7 +29,7 @@ test_that("a matrix with dead compartments gets normalized correctly", {
 
 source("models/model_externals.R")
 test_that("correct JM created with external compartments", {
-  expect_equal(getJacobian(model, diagonal = 0), JM)
+  expect_equal(getJacobian(model, diagonal = 0, netMatrix = F), JM)
 })
 
 source("models/model_dead_externals.R")

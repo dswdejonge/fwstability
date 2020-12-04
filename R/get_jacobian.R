@@ -18,7 +18,7 @@
 #' and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 #' 651–661. https://doi.org/10.1111/ele.12266
 #' }
-#' @param FMs (required) A list with two elements \code{original} and \code{netto}, both
+#' @param FMs (required) A list with two elements \code{original} and \code{netMatrix}, both
 #' containing a square flowmatrix, with source compartments as rows, sink compartments as columns.
 #' \itemize{
 #' \item{
@@ -27,9 +27,10 @@
 #' i.e. can contain a flow from A to B, and a flow from B to A.
 #' }
 #' \item{
-#' the list element \code{netto} should contain an adjusted version of the original matrix with only
-#' netto flows, which can be obtained with the function \code{getNettoFM},
-#' i.e. a netto flow is the absolute result of flow A to B minus flow B to A.
+#' the list element \code{netMatrix} should contain an adjusted version of the original matrix with only
+#' net flows, which can be obtained with the function \code{getNetMatrixFM},
+#' i.e. a netMatrix flow is the absolute result of flow A to B minus flow B to A in the correct direction.
+#' The net flow is only calculated for flows between live compartments, not for dead ones.
 #' }
 #' }
 #' @param BM (required) Numeric vector with biomasses of all compartments,
@@ -53,7 +54,7 @@
 effectOnResource <- function(FMs, BM, AE, dead = NULL){
   # As a matrix is by default divided by row (which now contain the sources,
   # but we want to divide by consumer), the matrix must be transposed first.
-  result <- -(t(FMs$netto) / BM)
+  result <- -(t(FMs$netMatrix) / BM)
 
   if(!is.null(dead)){
     dead_i <- which(rownames(FMs$original) %in% dead$names)
@@ -200,7 +201,7 @@ removeExternals <- function(externals, FM) {
 #' Default behaviour (MR = NULL) is calculation of mortality rates as (growth - predation)/biomass.
 #' Otherwise, you can provide a named numeric vector.
 #' @param verbose (optional) Default is TRUE. Wether or not to print messages.
-#' @param netto (optional) Boolean. Default is NULL If TRUE, the netto Flowmatrix is used
+#' @param netMatrix (optional) Boolean. Default is TRUE: the netMatrix is used
 #' to calculate interaction strengths. This is only relevant if there are two food web compartments
 #' which act both as prey and predators to one another.
 #' @details If \code{MR} is set to NULL, it is calculated from the model as the non-predatory mortality:
@@ -217,32 +218,33 @@ removeExternals <- function(externals, FM) {
 #' @export
 getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
                         dead = NULL, externals = NULL, MR = NULL,
-                        verbose = T, netto = NULL) {
+                        verbose = T, netMatrix = TRUE) {
 
   # Remove externals
   if(!is.null(externals)) {
     checkExternalsFormat(externals, FM)
     FM <- removeExternals(externals, FM)
   }
-  # Use netto FM if necessary
+  # Use netMatrix FM if necessary
+  checkMformat(FM)
+  checkDeadFormat(dead, FM)
   FMs <- list()
-  if(!is.null(netto) && netto){
+  if(netMatrix){
     FMs$original <- FM
-    FMs$netto <- getNettoFM(FM, dead$names)
+    FMs$netMatrix <- getNetMatrixFM(FM, dead$names)
   } else {
     FMs$original <- FM
-    FMs$netto <- FM
+    FMs$netMatrix <- FM
   }
   # Do checks for required data formats
-  checkMformat(FMs$original)
-  checkMformat(FMs$netto)
+  checkMformat(FMs$netMatrix)
   checkNamingFormat(
-    matrices = list(FMs$original, FMs$netto, dead$frac),
+    matrices = list(FMs$original, FMs$netMatrix, dead$frac),
     vectors = list(BM, AE, GE))
   # Force correct order
   fwnames <- rownames(FM)
   FMs$original <- FMs$original[fwnames, fwnames] # order cols, rows
-  FMs$netto <- FMs$netto[fwnames, fwnames] # order cols, rows
+  FMs$netMatrix <- FMs$netMatrix[fwnames, fwnames] # order cols, rows
   BM <- BM[fwnames]
   AE <- AE[fwnames]
   GE <- GE[fwnames]
@@ -255,7 +257,6 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
   checkBMformat(BM)
   checkDiagonalFormat(diagonal, correct_length = length(BM))
   checkCEformat(CE = list(AE, GE))
-  checkDeadFormat(dead, FM)
   # Set AE and GE to NA for dead compartments if necessary
   if(!is.null(dead)) {
     if(!all(is.na(AE[dead$names])) |
@@ -267,7 +268,7 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
   }
 
   # Get interaction strengths
-  eff.on.consumer <- effectOnConsumer(FMs$netto, BM, AE, GE)
+  eff.on.consumer <- effectOnConsumer(FMs$netMatrix, BM, AE, GE)
   eff.on.resource <- effectOnResource(FMs, BM, AE, dead)
 
   # Set interaction strength to 0 if NA
@@ -293,14 +294,14 @@ getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
   return(JM)
 }
 
-getNettoFM <- function(FM, deadnames) {
-  netto <- FM - t(FM)
-  netto[which(netto < 0)] <- 0
+getNetMatrixFM <- function(FM, deadnames) {
+  netMatrix <- FM - t(FM)
+  netMatrix[which(netMatrix < 0)] <- 0
   if(!is.null(deadnames)){
-    netto[deadnames,] <- FM[deadnames,]
-    netto[,deadnames] <- FM[,deadnames]
+    netMatrix[deadnames,] <- FM[deadnames,]
+    netMatrix[,deadnames] <- FM[,deadnames]
   }
-  return(netto)
+  return(netMatrix)
 }
 
 #' Jacobian matrix from an energy-flux model
@@ -402,7 +403,7 @@ getNettoFM <- function(FM, deadnames) {
 #' }
 #' @export
 getJacobian <- function(model = stop("Model input required"),
-                        diagonal = "model", verbose = T) {
+                        diagonal = "model", verbose = T, netMatrix = T) {
   if(model$type == "EF") {
     JM <- getJacobianEnergyFlux(
       FM = model$FM,
@@ -412,7 +413,7 @@ getJacobian <- function(model = stop("Model input required"),
       dead = model$dead,
       externals = model$externals,
       MR = model$MR,
-      netto = model$netto,
+      netMatrix = netMatrix,
       verbose = verbose,
       diagonal = diagonal)
   } else if(model$type == "LIM") {
@@ -436,7 +437,7 @@ getJacobian <- function(model = stop("Model input required"),
       dead = extracted_data$dead,
       externals = extracted_data$externals,
       MR = extracted_data$MR,
-      netto = model$netto,
+      netMatrix = netMatrix,
       verbose = verbose,
       diagonal = diagonal
     )

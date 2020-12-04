@@ -77,7 +77,7 @@ checkDeadFormat <- function(dead, FM) {
     } else if(length(dead) > 2) {
       stop(paste("the list \"dead\" should have 2 elements at most"))
     } else if(FALSE %in% (dead$names %in% colnames(FM))) {
-      stop("the names of the dead compartments are unknown")
+      stop("the names of the dead compartments do not match the  names of the FM")
     } else if(FALSE %in% (dim(FM) == dim(dead$frac))){
       stop("the FM and dead$frac matrix must have the same dimensions (check for external compartments in your dead$frac matrix)")
     } else {

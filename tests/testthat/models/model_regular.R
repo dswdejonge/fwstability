@@ -60,5 +60,4 @@ JM1 <- matrix(c(0,
 ), nrow = 3, ncol = 3)
 rownames(JM1) <- fwnames ; colnames(JM1) <- fwnames
 model1 <- model
-model1$netto <- T
 ###

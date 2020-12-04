@@ -43,7 +43,7 @@ test_that("example is proper and order doesn't mater", {
 test_that("the function only executes when the dead and external compartments have an existing name", {
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE,
                            dead = list(names = "CARCASS", frac = FM[1:3,1:3]), externals = "CO2"),
-               "the names of the dead compartments are unknown")
+               "the names of the dead compartments do not match the  names of the FM")
   expect_error(getJacobianEnergyFlux(FM = FM, BM = BM, AE = AE, GE = GE,
                            dead = dead, externals = "CARCASS"),
                "the names of the external compartments are unknown")
@@ -132,7 +132,7 @@ GE3 <- GE; names(GE3) <- c("A", "B", "C")
 test_that("all vectors and matrices have the same names", {
   # This test also gives an R base warning message
   expect_error(getJacobianEnergyFlux(FM = FM5, BM = BM, AE = AE, GE = GE, dead = dead),
-               "The names must be equal in all named vectors and matrices.")
+               "the names of the dead compartments do not match the  names of the FM")
   expect_error(getJacobianEnergyFlux(FM = FM6, BM = BM, AE = AE, GE = GE, dead = dead),
                "Input matrix must have same names in rows and columns.")
   expect_error(getJacobianEnergyFlux(FM = FM7, BM = BM, AE = AE, GE = GE, dead = dead),
