@@ -15,6 +15,8 @@ if not specified, the model is solved first, using Ldei.}
 
 \item{lim}{(optional) The set-up linear problem.
 Can be achieved with \code{lim <- Setup(readLIM)}.}
+
+\item{verbose}{(optional) Should the function provide messages?}
 }
 \value{
 Returns a named numeric matrix.

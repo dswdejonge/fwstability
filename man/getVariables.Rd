@@ -14,6 +14,8 @@ Can be achieved with \code{readLIM <- Read("path_to_input_file")}}
 if not specified, the model is solved first, using Lsei.}
 
 \item{lim}{(option) A LIM that has been set up with the function (Setup(readLIM)).}
+
+\item{verbose}{(optional) Should the function provide messages?}
 }
 \value{
 Returns a named vector with all variables.

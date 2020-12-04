@@ -25,6 +25,8 @@ Default is set to "def". Not case sensitive.
 \item \code{setup} (optional) Setup(Read(lim.input)). By inclusion the function won't setup the model,
 thereby potentially saving time.
 }}
+
+\item{verbose}{(optional) Should the function provide messages?}
 }
 \value{
 Returns a list with flowmatrix \code{FM}, biomasses \code{BM}, conversion efficiencies

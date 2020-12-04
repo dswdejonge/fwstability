@@ -15,6 +15,8 @@ getMR(BM, web, vars, mTag = NULL, verbose = T)
 
 \item{mTag}{(optional) Tag assigned to the flows or variables containing the natural, i.e.
 non-predatory, mortality. Default is set to "mort". Not case sensitive.}
+
+\item{verbose}{(optional) Should the function provide messages?}
 }
 \value{
 Returns a named vector with mortality rates (per unit time).

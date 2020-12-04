@@ -18,6 +18,8 @@ Default is set to "ass". Not case sensitive.}
 
 \item{gTag}{(optional) Tag assigned to the variables representing growth.
 Default is set to "growth". Not case sensitive.}
+
+\item{verbose}{(optional) Should the function provide messages?}
 }
 \value{
 Returns a list with element "AE" (named vector with assimilation efficiencies) and element

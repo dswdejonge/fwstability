@@ -19,6 +19,8 @@ Can be achieved with \code{readLIM <- Read("path_to_input_file")}}
 
 \item{defTag}{(optional) Tag assigned to the flows representing defecation.
 Default is set to "def". Not case sensitive.}
+
+\item{verbose}{(optional) Should the function provide messages?}
 }
 \value{
 Returns a list with two elements:

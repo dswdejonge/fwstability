@@ -25,6 +25,7 @@ getTag <- function(vars, tag) {
 #' if not specified, the model is solved first, using Ldei.
 #' @param lim (optional) The set-up linear problem.
 #' Can be achieved with \code{lim <- Setup(readLIM)}.
+#' @param verbose (optional) Should the function provide messages?
 #' @details This function is very similar to the \code{Flowmatrix} function from the LIM package.
 #' The major difference is that this function also provides the right answer if multiple parallel flows occur
 #' between the same two compartments.
@@ -75,6 +76,7 @@ getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
 #' @param web (optional) The solved (food) web problem, i.e. the values of the unknowns;
 #' if not specified, the model is solved first, using Lsei.
 #' @param lim (option) A LIM that has been set up with the function (Setup(readLIM)).
+#' @param verbose (optional) Should the function provide messages?
 #' @details Variables in the LIM can be defined as the sum of flows, other variables and parameters.
 #' This function calculates the value of these variables based on the flow solutions and LIM parameters.
 #' @return Returns a named vector with all variables.
@@ -123,6 +125,7 @@ getVariables <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
 #' Default is set to "ass". Not case sensitive.
 #' @param gTag (optional) Tag assigned to the variables representing growth.
 #' Default is set to "growth". Not case sensitive.
+#' @param verbose (optional) Should the function provide messages?
 #' @details In order for this function to work, the LIM must be set-up in a specific way.
 #' The variables representing total assimilation and growth of an organism must be named as:
 #' "compartmentTag" or "tagCompartment" (not case sensitive).
@@ -181,6 +184,7 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = T) {
 #' @param vars (required) A named numeric vector with the LIM variables.
 #' @param mTag (optional) Tag assigned to the flows or variables containing the natural, i.e.
 #' non-predatory, mortality. Default is set to "mort". Not case sensitive.
+#' @param verbose (optional) Should the function provide messages?
 #' @details In order for this function to work, the LIM must be set-up in a specific way.
 #' The flows or variables representing total natural mortality of an organism must be named as:
 #' "compartmentTag" or "tagCompartment" (not case sensitive).
@@ -219,6 +223,7 @@ getMR <- function(BM, web, vars, mTag = NULL, verbose = T) {
 #' @param FM (optional) A flow matrix with flows from source in rows to sink in columns.
 #' @param defTag (optional) Tag assigned to the flows representing defecation.
 #' Default is set to "def". Not case sensitive.
+#' @param verbose (optional) Should the function provide messages?
 #' @details In order for this function to work, the LIM must be set-up in a specific way.
 #' The flows representing defecation of an organism must be named as:
 #' "compartmentTag" or "tagCompartment" (not case sensitive).
@@ -291,6 +296,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
 #' \item \code{setup} (optional) Setup(Read(lim.input)). By inclusion the function won't setup the model,
 #' thereby potentially saving time.
 #' }
+#' @param verbose (optional) Should the function provide messages?
 #' @details In order for this function to work, the LIM must be set-up in a specific way.
 #' The flows and variables representing assimilation, growth, defecation, and mortality of an organism
 #' must be named as: "compartmentTag" or "tagCompartment" (not case sensitive).

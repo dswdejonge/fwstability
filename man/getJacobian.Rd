@@ -28,6 +28,12 @@ If the LIM is not resolved, the function will use the parsimonious (least distan
 
 \item{diagonal}{(required) is by default calculated from the model (= "model").
 Can also be set to an all-zero diagonal (= 0) or a numeric vector.}
+
+\item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
+
+\item{netMatrix}{(optional) Boolean. Default is TRUE: the netMatrix is used
+to calculate interaction strengths. This is only relevant if there are two food web compartments
+which act both as prey and predators to one another.}
 }
 \value{
 This function returns a matrix containing interaction strengths, i.e. the

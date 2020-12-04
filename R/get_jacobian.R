@@ -332,7 +332,10 @@ getNetMatrixFM <- function(FM, deadnames) {
 #' }
 #' @param diagonal (required) is by default calculated from the model (= "model").
 #' Can also be set to an all-zero diagonal (= 0) or a numeric vector.
-#'
+#' @param verbose (optional) Default is TRUE. Wether or not to print messages.
+#' @param netMatrix (optional) Boolean. Default is TRUE: the netMatrix is used
+#' to calculate interaction strengths. This is only relevant if there are two food web compartments
+#' which act both as prey and predators to one another.
 #' @return This function returns a matrix containing interaction strengths, i.e. the
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.

@@ -27,10 +27,6 @@ Order of names must be equal to MR.}
 A named numeric vector with assimilation efficiencies of all compartments.
 Must be in the same order as MR.
 Must be a fraction i.e. between 0 and 1.}
-
-\item{GE}{(required if \code{MR} is NULL)
-A named numeric vector with growth (production) efficiencies of all compartments.
-Must be a fraction i.e. between 0 and 1.}
 }
 \value{
 This function returns a named numeric vector with diagonal values for the
