@@ -23,7 +23,7 @@ The *fwstability* package is developed to infer food-web stability from energy-f
 
 This package was introduced in our paper as cited below. This paper also provides an in-depth explanation of the science behind energy-flux food-web stability. Please cite if you are using this package:  
 
-Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In prep.  
+Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In preperation.  
 
 This vignette provides you a quick start, and a more detailed explanation about the methods. Reading the vignette is highly recommended so that you can interpret your results correctly.   
 
@@ -675,6 +675,7 @@ de Ruiter, P. C., Neutel, A. M., & Moore, J. C. (1995). Energetics, Patterns of 
 de Ruiter, P. C., Van Veen, J. A., Moore, J. C., Brussaard, L., & Hunt, H. W. (1993). Calculation of nitrogen mineralization in soil food webs. Plant and Soil, 157(2), 263–273. https://doi.org/10.1007/BF00011055  
 
 Drazen, J. C., & Sutton, T. T. (2017). Dining in the Deep: The Feeding Ecology of Deep-Sea Fishes. Annual Review of Marine Science, 9(1), 337–366. https://doi.org/10.1146/annurev-marine-010816-060543
+
 Fath, B. D., Scharler, U. M., Ulanowicz, R. E., & Hannon, B. (2007). Ecological network analysis: network construction. Ecological Modelling, 208(1), 49–55. https://doi.org/10.1016/j.ecolmodel.2007.04.029  
 
 Heal, O. W., & MacLean, S. F. (1975). Comparative productivity in ecosystems - secondary productivity. In W. H. Van Dobben & R. H. Lowe-McConnell (Eds.), Unifying Concepts in Ecology (pp. 89–108). The Hague: Dr. W. Junk.  
@@ -692,9 +693,11 @@ Jacquet, C., Moritz, C., Morissette, L., Legagneux, P., Massol, F., Archambault,
 Kuiper, J. J., Van Altena, C., de Ruiter, P. C., Van Gerven, L. P. A. A., Janse, J. H., & Mooij, W. M. (2015). Food-web stability signals critical transitions in temperate shallow lakes. Nature Communications, 6, 1–7. https://doi.org/10.1038/ncomms8727  
 
 Landi, P., Minoarivelo, H. O., Brännström, Å., Hui, C., & Dieckmann, U. (2018). Complexity and stability of ecological networks: a review of the theory. Population Ecology, 60(4), 319–345. https://doi.org/10.1007/s10144-018-0628-3
+
 Latham, L. G. (2006). Network flow analysis algorithms. Ecological Modelling, 192(3–4), 586–600. https://doi.org/10.1016/j.ecolmodel.2005.07.029  
 
 Logofet, D. O. (1993). Matrices and Graphs: Stability Problems in Mathematical Ecology. Boca Raton, FL: CRCPress.
+
 May, R. M. (1972). Will a large network be stable? Nature, 238, 37–38. https://doi.org/10.1038/238413a0  
 
 Montoya, J. M., Woodward, G., Emmerson, M. C., & Solé, R. V. (2009). Press Perturbations and Indirect Effects in Real Food Webs. Ecology, 90(9), 2426–2433.  
@@ -726,7 +729,8 @@ Soetaert, K. (2009b). rootSolve: Nonlinear root finding, equilibrium and steady-
 
 Soetaert, K., & Herman, P. M. J. (2009). A Practical Guide to Ecological Modelling. Using R as a Simulation Platform. Springer.  
 
-Soetaert, K., & Van Oevelen, D. (2010). Package LIM , implementing linear inverse models in R, 37.
+Soetaert, K., & Van Oevelen, D. (2010). Package LIM, implementing linear inverse models in R, 37.
+
 van Altena, C., Hemerik, L., & de Ruiter, P. C. (2016). Food web stability and weighted connectance: the complexity-stability debate revisited. Theoretical Ecology, 9(1), 49–58. https://doi.org/10.1007/s12080-015-0291-7  
 
 van Oevelen, D., Soetaert, K., Garcia, R., de Stigter, H. C., Cunha, M. R., Pusceddu, A., & Danovaro, R. (2011). Canyon conditions impact carbon flows in food webs of three sections of the Nazaré canyon. Deep-Sea Research Part II: Topical Studies in Oceanography, 58(23–24), 2461–2476. https://doi.org/10.1016/j.dsr2.2011.04.009  
