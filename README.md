@@ -22,7 +22,7 @@ Neutel, A. M., Heesterbeek, J. A. P., Van De Koppel, J., Hoenderboom, G., Vos, A
 
 Neutel, A. M., & Thorne, M. A. S. (2014). Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity and stability. Ecology Letters, 17(6), 651–661. https://doi.org/10.1111/ele.12266  
 
-Soetaert, K., & Van Oevelen, D. (2010). Package LIM, implementing linear inverse models in R, 37.
+Soetaert, K., & Van Oevelen, D. (2010). Package LIM, implementing linear inverse models in R.
 
 # Installation
 ```r
