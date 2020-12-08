@@ -3,3 +3,5 @@
 ^fwstability\.Rproj$
 ^cran-comments\.md$
 ^revdep$
+^\.DS_Store$
+^DS_Store$
