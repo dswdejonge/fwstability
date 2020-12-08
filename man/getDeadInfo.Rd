@@ -2,7 +2,7 @@
 % Please edit documentation in R/extract_lim_data.R
 \name{getDeadInfo}
 \alias{getDeadInfo}
-\title{Gets list with information on dead comparments.}
+\title{Gets list with information on dead compartments.}
 \usage{
 getDeadInfo(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = T)
 }
@@ -30,7 +30,7 @@ Returns a list with two elements:
 }
 }
 \description{
-This function determines for each dead compartment wether or not defecation occurs into it, and,
+This function determines for each dead compartment whether or not defecation occurs into it, and,
 if parallel flows occur, what fraction of each flow is defecation.
 }
 \details{

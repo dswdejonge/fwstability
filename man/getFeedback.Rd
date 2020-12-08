@@ -17,7 +17,7 @@ This function calculates the feedback of a loop.
 }
 \details{
 Feedback of a loop is the product of all interaction strengths
-in a loop (so feedback is not additative but multiplicative).
+in a loop (so feedback is not additive but multiplicative).
 }
 \references{
 \itemize{

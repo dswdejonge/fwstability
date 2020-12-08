@@ -116,7 +116,7 @@ getVariables <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
 
 #' Get conversion efficiencies from a LIM.
 #'
-#' This function calculates assimilation and growth efficiences from a given LIM.
+#' This function calculates assimilation and growth efficiencies from a given LIM.
 #' @references \code{\link{LIM}} package, Soetaert & van Oevelen 2015.
 #' @param FM (required) A flow matrix with flows from source in rows to sink in columns.
 #' @param vars (required) A named vector with the values of variables defined in the LIM.
@@ -210,9 +210,9 @@ getMR <- function(BM, web, vars, mTag = NULL, verbose = T) {
   return(MR)
 }
 
-#' Gets list with information on dead comparments.
+#' Gets list with information on dead compartments.
 #'
-#' This function determines for each dead compartment wether or not defecation occurs into it, and,
+#' This function determines for each dead compartment whether or not defecation occurs into it, and,
 #' if parallel flows occur, what fraction of each flow is defecation.
 #' @references \code{\link{LIM}} package, Soetaert & van Oevelen 2015.
 #' @param dead (required) A list with the element "names" that contains a character vector with
@@ -282,7 +282,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
 #' \itemize{
 #' \item \code{LIM} (required) should contain a read-in LIM. Achieved through \code{Read(<path-to-input-file>)}
 #' \item \code{web} (optional) can contain a named numeric vector with flow solutions.
-#' If the LIM is not resolved, the function will use the parsiomious (least distance) solution.
+#' If the LIM is not resolved, the function will use the parsimonious (least distance) solution.
 #' \item \code{aTag} (optional) Tag assigned to the variables representing the assimilated amount of material.
 #' Default is set to "ass". Not case sensitive.
 #' \item \code{gTag} (optional) Tag assigned to the variables representing growth.

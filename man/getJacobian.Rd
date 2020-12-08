@@ -29,7 +29,7 @@ If the LIM is not resolved, the function will use the parsimonious (least distan
 \item{diagonal}{(required) is by default calculated from the model (= "model").
 Can also be set to an all-zero diagonal (= 0) or a numeric vector.}
 
-\item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
+\item{verbose}{(optional) Default is TRUE. Whether or not to print messages.}
 
 \item{netMatrix}{(optional) Boolean. Default is TRUE: the netMatrix is used
 to calculate interaction strengths. This is only relevant if there are two food web compartments
@@ -59,7 +59,7 @@ Non-predatory mortality rates can be calculated from the model or parsed manuall
 Beware that these model-derived diagonal values represent an \bold{upperbound}.
 It is the maximum amount of self-dampening possible in the respective populations.
 If your model includes dead compartments, like detritus or nutrients, it is highly recommended to
-also include these in the special argument \code{dead}. Conversion efficiences are not needed for
+also include these in the special argument \code{dead}. Conversion efficiencies are not needed for
 dead compartments, and you should include information on defecation into these compartments.
 Interaction strengths of dead compartments are calculated in another way than for living compartments.
 Inclusion of recycling processes may impact your stability results (Wilson & Wolkovich, 2011).\cr
@@ -110,7 +110,7 @@ LIM R-package.}
 \item{\code{aTag}, \code{gTag}, \code{mTag}, \code{defTag}, \code{deadTag} are optional. Default tags are
 "ass", "growth", "mort", "def", and "dead" respectively.}
 }
-More information on the requirments of the arguments see \code{?extractLIMdata}
+More information on the requirements of the arguments see \code{?extractLIMdata}
 }
 
 \references{

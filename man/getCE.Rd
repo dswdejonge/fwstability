@@ -26,7 +26,7 @@ Returns a list with element "AE" (named vector with assimilation efficiencies) a
 "GE" (named vector with growth efficiencies).
 }
 \description{
-This function calculates assimilation and growth efficiences from a given LIM.
+This function calculates assimilation and growth efficiencies from a given LIM.
 }
 \details{
 In order for this function to work, the LIM must be set-up in a specific way.

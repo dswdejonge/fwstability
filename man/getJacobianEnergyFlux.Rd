@@ -61,7 +61,7 @@ the flow matrix before calculations.}
 Default behaviour (MR = NULL) is calculation of mortality rates as (growth - predation)/biomass.
 Otherwise, you can provide a named numeric vector.}
 
-\item{verbose}{(optional) Default is TRUE. Wether or not to print messages.}
+\item{verbose}{(optional) Default is TRUE. Whether or not to print messages.}
 
 \item{netMatrix}{(optional) Boolean. Default is TRUE: the netMatrix is used
 to calculate interaction strengths. This is only relevant if there are two food web compartments

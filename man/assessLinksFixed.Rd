@@ -2,7 +2,7 @@
 % Please edit documentation in R/evaluate_characteristics.R
 \name{assessLinksFixed}
 \alias{assessLinksFixed}
-\title{Assess stabiliy effect of a fixed link alteration}
+\title{Assess stability effect of a fixed link alteration}
 \usage{
 assessLinksFixed(
   JM,
@@ -44,7 +44,7 @@ compartments (everything that is not fauna).}
 
 \item{func}{(required) Function describing how to alter each interaction strength to
 assess the effect on stability of the respective link. Default is doubling each
-interaction strength (interaction strenght *2).}
+interaction strength (interaction strength *2).}
 }
 \value{
 Returns a dataframe with absolute and relative changes in stability for alteration
@@ -57,7 +57,7 @@ in a Jacobian matrix according to a fixed function on stability .
 \details{
 If the change in stability (delta) is negative, the system becomes more stable if
 the respective interaction strength is altered in the Jacobian matrix
-(all other interaction strenghts keep their original value).
+(all other interaction strengths keep their original value).
 The system becomes less stable if delta is positive. \cr
 Using the method 'scalar' might be somewhat slower than the method 'eigenvalue'.
 }

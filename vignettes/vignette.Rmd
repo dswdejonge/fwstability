@@ -23,7 +23,7 @@ The *fwstability* package is developed to infer food-web stability from energy-f
 
 This package was introduced in our paper as cited below. This paper also provides an in-depth explanation of the science behind energy-flux food-web stability. Please cite if you are using this package:  
 
-Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In preperation.  
+Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In preparation.  
 
 This vignette provides you a quick start, and a more detailed explanation about the methods. Reading the vignette is highly recommended so that you can interpret your results correctly.   
 
@@ -251,9 +251,9 @@ You can use the default tags, but it is also possible to use your own tags. In t
 
 Rules and tips for using tags:   
 
-- The official componentname is the name given in the 'stocks' section. Sometimes, stock values are already given in the 'parameter' section and then assigned to the defined stocks in the 'stocks' section. Be aware not to tag the compartments in the 'parameter' section as these are not the official stock names used throughout the rest of the model analysis.  
-- Flows that represent defecation and mortality **must be named in the 'flows' section and include the defecation or mortality tag**. If defecation and mortality are combined in the same flow, they should still be declared seperately (so you get the same flow twice, but with a different name).  
-- The variables representing total defecation, mortality, assimilation, and growth should be **named by combining the component name and tag only**. The code subtracts the tag from the name of the variable and uses it to place the data with the right compartment. So, a variable containing total rabbit mortality should be named "rabbitMort". If you would name it "thisisRabbitMort" it is not recognized due to the superfluous text. It is possible to specify multiple mortality flows, e.g. if the carcass of the rabbit consists of both high-energy and low-enegy material which you want to seperate into two separate carcass compartments. In this case it is necessary to define rabbitMort as the sum of these flows in the variable section of the model.  
+- The official component name is the name given in the 'stocks' section. Sometimes, stock values are already given in the 'parameter' section and then assigned to the defined stocks in the 'stocks' section. Be aware not to tag the compartments in the 'parameter' section as these are not the official stock names used throughout the rest of the model analysis.  
+- Flows that represent defecation and mortality **must be named in the 'flows' section and include the defecation or mortality tag**. If defecation and mortality are combined in the same flow, they should still be declared separately (so you get the same flow twice, but with a different name).  
+- The variables representing total defecation, mortality, assimilation, and growth should be **named by combining the component name and tag only**. The code subtracts the tag from the name of the variable and uses it to place the data with the right compartment. So, a variable containing total rabbit mortality should be named "rabbitMort". If you would name it "thisisRabbitMort" it is not recognized due to the superfluous text. It is possible to specify multiple mortality flows, e.g. if the carcass of the rabbit consists of both high-energy and low-energy material which you want to separate into two separate carcass compartments. In this case it is necessary to define rabbitMort as the sum of these flows in the variable section of the model.  
 - **Tags are not case sensitive**. So, RABBITmort and RaBbItMoRt are both valid.  
 - **The tag may occur anywhere in the string** (so, it does not have to be added specifically at the beginning or ending of the name of the compartment/flow/variable). Ensure that the rest of names do not accidentally contain a tag! For example, if you include the Indian wild ass (*Equus hemionus khur*) in your foodweb, a variable representing its respiration called respirationAss will be interpreted as the assimilation variable of an unknown compartment 'respiration' because it contains the default assimilation tag "ass".    
 - Dead compartments, defecation, and mortality can be omitted from your model if you don't want to include them (for example make them all export to an external compartment). However, including assimilation and growth is required for all non-dead compartments. If you have no growth or assimilation data (for example for bacteria) you can assume the full ingestion is used for assimilation and/or growth and define your variable accordingly.  
@@ -261,7 +261,7 @@ Rules and tips for using tags:
 General tips for setting up a LIM:  
 
 - It is recommended to be consistent in your naming of flows and variables so later you can easily extract data. For naming flows for example: sourceProcessSink.  
-- In order to prevent certain processes to be quantified as zero, include minimum constraints. This is especially important if you later want to normalize the Jacobian matrix, because this process does not allow zeroes on the diagonal. For example, if you don't set a minimum constraint for non-predatory mortality, the parsimonious solution might set this flow to zero. This is not realistic and it the occurence of these zeroes may hamper your future calculations.
+- In order to prevent certain processes to be quantified as zero, include minimum constraints. This is especially important if you later want to normalize the Jacobian matrix, because this process does not allow zeroes on the diagonal. For example, if you don't set a minimum constraint for non-predatory mortality, the parsimonious solution might set this flow to zero. This is not realistic and it the occurrence of these zeroes may hamper your future calculations.
 - The inclusion of biomasses in the LIM is not required to be able to solve the model. However, biomasses *are* required for all internal compartments in order to calculate the Jacobian matrix. If there are compartments that do not have biomasses in the LIM, they must either be quantified anyway or excluded from the getJacobian() function by including them as 'externals'.
 
 Specifying your compartments in a LIM input file can look like this:   
@@ -373,7 +373,7 @@ A named vector with **assimilation efficiencies** for all non-dead compartments.
 
 A named vector with **growth efficiencies** for all non-dead compartments. The part of assimilated food (A) that is not respired (R) is used for growth or secondary production (G): $G = A-R$. Therefore, the growth efficiency (GE) is the total growth (G) divided by the assimilated part of food (A): $GE = G/A$. (see diagram under quick start)  
 
-If you have **dead compartments** in your system, you should specify a list containg two elements with the names of dead compartments (element "names"), and a matrix with the fraction of each flow that constitutes defecation (element "frac"). This matrix has the same size as the flow matrix and indicates the fraction of each flow that comprises defecation. Take the example where there is a material flow from Species A to Detritus of 2 units due to defecation, and another of 8 units due to mortality of the population. The total flow between Species A and Detritus is 10 units (this is the value present in the flow matrix). Of those total 10 units, 2 units are caused by defecation. Therefore, the frac_matrix will have the value 2/10 = 0.2. If there is *only* a flux between Species A and Detritus due to defecation, the fraction will be 1. For all flows which are not comprised of defecation at all, for example when Species A eats Species B, the fraction in the frac_matrix will be 0. 
+If you have **dead compartments** in your system, you should specify a list containing two elements with the names of dead compartments (element "names"), and a matrix with the fraction of each flow that constitutes defecation (element "frac"). This matrix has the same size as the flow matrix and indicates the fraction of each flow that comprises defecation. Take the example where there is a material flow from Species A to Detritus of 2 units due to defecation, and another of 8 units due to mortality of the population. The total flow between Species A and Detritus is 10 units (this is the value present in the flow matrix). Of those total 10 units, 2 units are caused by defecation. Therefore, the frac_matrix will have the value 2/10 = 0.2. If there is *only* a flux between Species A and Detritus due to defecation, the fraction will be 1. For all flows which are not comprised of defecation at all, for example when Species A eats Species B, the fraction in the frac_matrix will be 0. 
 
 A character vector containing the names of **external compartments** (these are removed from the flowmatrix before the calculations).  
 
@@ -557,7 +557,7 @@ There are two important pieces of information to consider if you are interpretin
 
 In ecology, it is useful and powerful to compare stability between two or more systems. In order to allow such comparison of relative stability, time dependency must be removed. In this case stability is not defined as the slowest return rate to equilibrium (per unit time), but redefined as the dimensionless minimum fraction of self-dampening effect necessary to stabilize the matrix. There are two ways to achieve this:    
 
-1) Option 1: Stablity can be found as the minimum scalar of natural mortality rates needed to stabilize the system. This method is included as the **'scalar'** method in the getStability function, and is based on iteratively increasing the fraction of natural mortality rates used as the Jacobian diagonal with a certain step-size until the Jacobian matrix is found to be stable. This method requires a vector with natural mortality rates and the names of all dead (detritus) compartments.    
+1) Option 1: Stability can be found as the minimum scalar of natural mortality rates needed to stabilize the system. This method is included as the **'scalar'** method in the getStability function, and is based on iteratively increasing the fraction of natural mortality rates used as the Jacobian diagonal with a certain step-size until the Jacobian matrix is found to be stable. This method requires a vector with natural mortality rates and the names of all dead (detritus) compartments.    
 2) Option 2: The Jacobian matrix is **normalized** by dividing each interaction strength by absolute value of the the corresponding diagonal value (per unit time divided by per unit time is dimensionless). Then, all diagonal values - except for detritus compartments - are set to zero (self-dampening effects are removed) and the **dominant eigenvalue** is found. The matrix can be normalized with the *normalizeJacobian* function. This matrix requires a fully quantified diagonal with negative, non-zero, values.  
 
 In both cases it is assumed detritus feedbacks are constant and cannot be scaled.  
@@ -581,7 +581,7 @@ s <- getStability(JMnorm)
 ```
 
 
-# 5. Analysize food web for (de)stabilizing characteristics
+# 5. Analyze food web for (de)stabilizing characteristics
 It can be useful for your research to review other network characteristics, to try to understand why stability between systems differ. This package does NOT provide a comprehensive set of functions to do such analysis, but it does provide a starting point.  
 
 ## Effect individual compartments and links
@@ -626,7 +626,7 @@ loops.df <- assessFeedback(JM, k = 3, findLoops = TRUE)
 loops.df <- assessFeedback(JM, findLoops = TRUE, scale = FALSE)
 ```
 
-If you have a really large network, it might not be useful to find all loops in the system, and to only focus on loops of length 2 and 3. You can do this by using the depth-first search algorithm (*dfs*) seperately from the *assessFeeback* function, and then run the *assessFeedback* runction by reading in the files created by the *dfs* function calls:  
+If you have a really large network, it might not be useful to find all loops in the system, and to only focus on loops of length 2 and 3. You can do this by using the depth-first search algorithm (*dfs*) separately from the *assessFeeback* function, and then run the *assessFeedback* function by reading in the files created by the *dfs* function calls:  
 
 ```{r eval=FALSE}
 # Create an adjacency matrix that indicates which interactions exist,
@@ -644,7 +644,7 @@ loops2 <- assessFeedback(JM, findLoops = FALSE, file = file_name_loop2)
 loops3 <- assessFeedback(JM, findLoops = FALSE, file = file_name_loop3)
 ```
 
-It is also possible to assess the skewness of fluxes, which is known to be related to stabiliy, through calculating weighted connectance (van Altena et al. 2016). A lower value indicates a more skewed flux distribution, which is found to be correlated to less stable systems.
+It is also possible to assess the skewness of fluxes, which is known to be related to stability, through calculating weighted connectance (van Altena et al. 2016). A lower value indicates a more skewed flux distribution, which is found to be correlated to less stable systems.
 ```{r eval=FALSE}
 Cw <- getCw(FM)
 ```
@@ -702,7 +702,7 @@ May, R. M. (1972). Will a large network be stable? Nature, 238, 37–38. https:/
 
 Montoya, J. M., Woodward, G., Emmerson, M. C., & Solé, R. V. (2009). Press Perturbations and Indirect Effects in Real Food Webs. Ecology, 90(9), 2426–2433.  
 
-Moore, J. C., Berlow, E. L., Coleman, D. C., De Suiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600. https://doi.org/10.1111/j.1461-0248.2004.00606.x  
+Moore, J. C., Berlow, E. L., Coleman, D. C., De Ruiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600. https://doi.org/10.1111/j.1461-0248.2004.00606.x  
 
 Moore, J. C., & de Ruiter, P. C. (2012). Energetic Food Webs (First). Oxford, UK: Oxford University Press.  
 

@@ -50,7 +50,7 @@ is varied.}
 \item{threshold}{(required) Default is 0.01. The Jacobian matrix is set at this fraction below
 the stability threshold before starting permutations.}
 
-\item{seed}{(required) Default is 1. Set seed to allow reproducability of results.}
+\item{seed}{(required) Default is 1. Set seed to allow reproducibility of results.}
 }
 \value{
 Returns a dataframe with the probability (0 to 1) of destabilizing the system for each
@@ -73,12 +73,12 @@ Every pair of interaction strengths is then randomly varied between 0 and 2aij a
 number of times. The probability that the food web becomes unstable is the total count of
 unstable matrices divided by the total number of permutations.
 \cr
-Using the method 'scalar' to asses stablity might be somewhat slower than the method 'eigenvalue'.
+Using the method 'scalar' to asses stability might be somewhat slower than the method 'eigenvalue'.
 \cr
 Beware that where \code{assessLinksFixed} reports the **absolute and relative** effect on stability
 of altering **one** interaction strength according to a **fixed** function,
 this function \code{assessLinksPerm} reports the **probability** that the matrix becomes unstable
-when a **pair** of interaction strenghts in altered between 0 and 2 time the original interaction
+when a **pair** of interaction strengths in altered between 0 and 2 time the original interaction
 strength a certain number of times.
 }
 \references{

@@ -5,7 +5,7 @@ Energy-flux food-web models comprise of compartments of biomass and flows of ene
 
 Please cite if you are using this package:  
 
-Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In preperation.  
+Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In preparation.  
 
 # Important literature
 The following list of references are central in this package. For a full overview of relevant literature, please review the vignette.
@@ -14,7 +14,7 @@ de Ruiter, P. C., Neutel, A. M., & Moore, J. C. (1995). Energetics, Patterns of 
 
 May, R. M. (1972). Will a large network be stable? Nature, 238, 37–38. https://doi.org/10.1038/238413a0  
 
-Moore, J. C., Berlow, E. L., Coleman, D. C., De Suiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600. https://doi.org/10.1111/j.1461-0248.2004.00606.x  
+Moore, J. C., Berlow, E. L., Coleman, D. C., De Ruiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600. https://doi.org/10.1111/j.1461-0248.2004.00606.x  
 
 Neutel, A. M., Heesterbeek, J. A. P., & Ruiter, P. C. De. (2002). Stability in Real Food Webs: Weak Links in Long Loops. Science, 296(5570), 1120–1123. https://doi.org/10.1126/science.1068326  
 

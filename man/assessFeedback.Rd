@@ -71,7 +71,7 @@ or k = 3, as those are found to be the most important in determining
 overall feedback and stability in your system (Neutel & Thorne 2014). \cr
 
 Feedback of a loop is the product of all interaction strengths
-in a loop (so feedback is not additative but multiplicative).
+in a loop (so feedback is not additive but multiplicative).
 
 Loop weight is defined as the geometric mean of all absolute
 interaction strengths in a loop of length k. It combines information on

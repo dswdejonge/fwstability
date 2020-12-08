@@ -11,7 +11,7 @@ extractLIMdata(model, verbose = T)
 \itemize{
 \item \code{LIM} (required) should contain a read-in LIM. Achieved through \code{Read(<path-to-input-file>)}
 \item \code{web} (optional) can contain a named numeric vector with flow solutions.
-If the LIM is not resolved, the function will use the parsiomious (least distance) solution.
+If the LIM is not resolved, the function will use the parsimonious (least distance) solution.
 \item \code{aTag} (optional) Tag assigned to the variables representing the assimilated amount of material.
 Default is set to "ass". Not case sensitive.
 \item \code{gTag} (optional) Tag assigned to the variables representing growth.

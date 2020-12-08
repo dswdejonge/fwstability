@@ -200,7 +200,7 @@ removeExternals <- function(externals, FM) {
 #' @param MR (optional) Mortality rates for all compartments per unit time (t-1).
 #' Default behaviour (MR = NULL) is calculation of mortality rates as (growth - predation)/biomass.
 #' Otherwise, you can provide a named numeric vector.
-#' @param verbose (optional) Default is TRUE. Wether or not to print messages.
+#' @param verbose (optional) Default is TRUE. Whether or not to print messages.
 #' @param netMatrix (optional) Boolean. Default is TRUE: the netMatrix is used
 #' to calculate interaction strengths. This is only relevant if there are two food web compartments
 #' which act both as prey and predators to one another.
@@ -332,7 +332,7 @@ getNetMatrixFM <- function(FM, deadnames) {
 #' }
 #' @param diagonal (required) is by default calculated from the model (= "model").
 #' Can also be set to an all-zero diagonal (= 0) or a numeric vector.
-#' @param verbose (optional) Default is TRUE. Wether or not to print messages.
+#' @param verbose (optional) Default is TRUE. Whether or not to print messages.
 #' @param netMatrix (optional) Boolean. Default is TRUE: the netMatrix is used
 #' to calculate interaction strengths. This is only relevant if there are two food web compartments
 #' which act both as prey and predators to one another.
@@ -354,7 +354,7 @@ getNetMatrixFM <- function(FM, deadnames) {
 #' Beware that these model-derived diagonal values represent an \bold{upperbound}.
 #' It is the maximum amount of self-dampening possible in the respective populations.
 #' If your model includes dead compartments, like detritus or nutrients, it is highly recommended to
-#' also include these in the special argument \code{dead}. Conversion efficiences are not needed for
+#' also include these in the special argument \code{dead}. Conversion efficiencies are not needed for
 #' dead compartments, and you should include information on defecation into these compartments.
 #' Interaction strengths of dead compartments are calculated in another way than for living compartments.
 #' Inclusion of recycling processes may impact your stability results (Wilson & Wolkovich, 2011).\cr
@@ -403,7 +403,7 @@ getNetMatrixFM <- function(FM, deadnames) {
 #' \item{\code{aTag}, \code{gTag}, \code{mTag}, \code{defTag}, \code{deadTag} are optional. Default tags are
 #' "ass", "growth", "mort", "def", and "dead" respectively.}
 #' }
-#' More information on the requirments of the arguments see \code{?extractLIMdata}
+#' More information on the requirements of the arguments see \code{?extractLIMdata}
 #' @seealso \code{\link{getJacobianEnergyFlux}}, \code{\link{extractLIMdata}}.
 #' @references \itemize{
 #' \item{de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257

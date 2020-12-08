@@ -2,7 +2,7 @@
 % Please edit documentation in R/evaluate_characteristics.R
 \name{averageMutualInfo}
 \alias{averageMutualInfo}
-\title{Get averague mutual information.}
+\title{Get average mutual information.}
 \usage{
 averageMutualInfo(FM)
 }

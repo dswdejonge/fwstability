@@ -36,14 +36,14 @@ assessComps <- function(JM, method = "eigenvalue",
 }
 
 
-#' Assess stabiliy effect of a fixed link alteration
+#' Assess stability effect of a fixed link alteration
 #'
 #' This function assesses the effect of altering each interaction strength
 #' in a Jacobian matrix according to a fixed function on stability .
 #' @inheritParams getStability
 #' @param func (required) Function describing how to alter each interaction strength to
 #' assess the effect on stability of the respective link. Default is doubling each
-#' interaction strength (interaction strenght *2).
+#' interaction strength (interaction strength *2).
 #' @references \itemize{
 #' \item{
 #' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction
@@ -55,7 +55,7 @@ assessComps <- function(JM, method = "eigenvalue",
 #' of each interaction strength in the Jacobian matrix.
 #' @details If the change in stability (delta) is negative, the system becomes more stable if
 #' the respective interaction strength is altered in the Jacobian matrix
-#' (all other interaction strenghts keep their original value).
+#' (all other interaction strengths keep their original value).
 #' The system becomes less stable if delta is positive. \cr
 #' Using the method 'scalar' might be somewhat slower than the method 'eigenvalue'.
 #' @export
@@ -90,7 +90,7 @@ assessLinksFixed <- function(JM, method = "eigenvalue",
 #' is varied.
 #' @param threshold (required) Default is 0.01. The Jacobian matrix is set at this fraction below
 #' the stability threshold before starting permutations.
-#' @param seed (required) Default is 1. Set seed to allow reproducability of results.
+#' @param seed (required) Default is 1. Set seed to allow reproducibility of results.
 #' @references \itemize{
 #' \item{
 #' de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction
@@ -112,12 +112,12 @@ assessLinksFixed <- function(JM, method = "eigenvalue",
 #' number of times. The probability that the food web becomes unstable is the total count of
 #' unstable matrices divided by the total number of permutations.
 #' \cr
-#' Using the method 'scalar' to asses stablity might be somewhat slower than the method 'eigenvalue'.
+#' Using the method 'scalar' to asses stability might be somewhat slower than the method 'eigenvalue'.
 #' \cr
 #' Beware that where \code{assessLinksFixed} reports the **absolute and relative** effect on stability
 #' of altering **one** interaction strength according to a **fixed** function,
 #' this function \code{assessLinksPerm} reports the **probability** that the matrix becomes unstable
-#' when a **pair** of interaction strenghts in altered between 0 and 2 time the original interaction
+#' when a **pair** of interaction strengths in altered between 0 and 2 time the original interaction
 #' strength a certain number of times.
 #' @seealso \code{getStability} \code{assessLinksFixed}
 #' @export
@@ -190,7 +190,7 @@ fluxSizeDiversity <- function(FM){
 }
 
 
-#' Get averague mutual information.
+#' Get average mutual information.
 #'
 #' Calculates average mutual information.
 #' @param FM (required) A square flow matrix with flows from source in rows to sink in columns.
@@ -335,7 +335,7 @@ getLoopWeight <- function(IS, d = NULL) {
 #' }
 #' }
 #' @details Feedback of a loop is the product of all interaction strengths
-#' in a loop (so feedback is not additative but multiplicative).
+#' in a loop (so feedback is not additive but multiplicative).
 #' @return Returns a double.
 #' @export
 getFeedback <- function(IS) {
@@ -418,7 +418,7 @@ maxNrLoops <- function(n, k = NULL) {
 #' overall feedback and stability in your system (Neutel & Thorne 2014). \cr
 #'
 #' Feedback of a loop is the product of all interaction strengths
-#' in a loop (so feedback is not additative but multiplicative).
+#' in a loop (so feedback is not additive but multiplicative).
 #'
 #' Loop weight is defined as the geometric mean of all absolute
 #' interaction strengths in a loop of length k. It combines information on
