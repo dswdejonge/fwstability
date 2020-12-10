@@ -10,6 +10,10 @@ Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevel
 # Important literature
 The following list of references are central in this package. For a full overview of relevant literature, please review the vignette.
 
+Arnoldi, J.F., Loreau, M., Haegeman, B., 2016. Resilience, reactivity and variability: A mathematical comparison of ecological stability measures. J. Theor. Biol. 389, 47–59. https://doi.org/10.1016/j.jtbi.2015.10.012
+
+Boit, A.; Gaedke, U. (2014). Benchmarking successional progress in a quantitative food web. Plos One 9(2):e90404. doi:10.1371/journal.pone.0090404
+
 de Ruiter, P. C., Neutel, A. M., & Moore, J. C. (1995). Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science, 269(5228), 1257–1260. https://doi.org/10.1126/science.269.5228.1257  
 
 May, R. M. (1972). Will a large network be stable? Nature, 238, 37–38. https://doi.org/10.1038/238413a0  
@@ -22,7 +26,9 @@ Neutel, A. M., Heesterbeek, J. A. P., Van De Koppel, J., Hoenderboom, G., Vos, A
 
 Neutel, A. M., & Thorne, M. A. S. (2014). Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity and stability. Ecology Letters, 17(6), 651–661. https://doi.org/10.1111/ele.12266  
 
-Soetaert, K., & Van Oevelen, D. (2010). Package LIM, implementing linear inverse models in R.
+Ulanowicz, R.E., 1997. Limitations on the connectivity of ecosystem flow networks. In: Rinaldo, A.; Marani, A. (eds) Biological models. Instituto Veneto de Scienze, Lettre ed Arti, Venica, pp 125-143.
+
+van Altena, C., Hemerik, L., de Ruiter, P.C. (2016). Food web stability and weighted connectance: the complexity-stability debate revisited. Theor. Ecol. 9, 49–58. https://doi.org/10.1007/s12080-015-0291-7
 
 # Installation
 ```r
