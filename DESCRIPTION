@@ -9,7 +9,8 @@ Authors@R:
            comment = c(ORCID = "0000-0002-4093-2721"))
     person(given = "Karline",
            family = "Soetaert",
-           role = "cph")
+           role = "cph",
+           email = "karline.soetaert@nioz.nl")
 Description: 
   To infer interaction strengths, stability, and biological tipping points from energy-flux food-web models. 
   References:
