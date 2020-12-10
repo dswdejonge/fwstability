@@ -1,16 +1,17 @@
 Package: fwstability
 Title: Infer Food-Web Stability
 Version: 1.0.0
-Authors@R: 
+Authors@R: c(
     person(given = "Danielle",
            family = "de Jonge",
            role = c("aut", "cre"),
            email = "mail@dswdejonge.com",
-           comment = c(ORCID = "0000-0002-4093-2721"))
+           comment = c(ORCID = "0000-0002-4093-2721")),
     person(given = "Karline",
            family = "Soetaert",
            role = "cph",
            email = "karline.soetaert@nioz.nl")
+           )
 Description: 
   To infer interaction strengths, stability, and biological tipping points from energy-flux food-web models. 
   References:
