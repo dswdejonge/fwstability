@@ -156,9 +156,6 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = T) {
   GE <- rep(NA, length = lim$NComponents)
   names(GE) <- toupper(lim$Components$name)
   AP <- getTag(vars = vars, tag = aTag)
-  ### TEMPORARY CODE - start ###
-  #AP["BAC"] <- sum(FM[,"BAC"], na.rm = TRUE)
-  ### TEMPORARY CODE - stop ###
   GP <- getTag(vars = vars, tag = gTag)
   inAE <- names(AE) %in% names(AP)
   ii <- sort(names(AE)[inAE])
@@ -166,11 +163,6 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = T) {
   inGE <- names(GE) %in% names(GP)
   ii <- sort(names(GE)[inGE])
   GE[ii] <- GP[ii] / AP[ii]
-  ### TEMPORARY CODE - start ###
-  #temp <- AE
-  #temp <- GE[names(AE)]
-  #GE <- temp
-  ### TEMPORARY CODE - stop ###
   CE <- list(AE = AE, GE = GE)
   return(CE)
 }
@@ -313,22 +305,6 @@ extractLIMdata <- function(model, verbose = T) {
   # Stocks can be given directly (stored in comp) or in parameters (stored in params)
   BM <- model$setup$Components[,"val"]
   names(BM) <- toupper(model$setup$Components[,"name"])
-  ### TEMPORARY CODE - start ###
-  #if(model$site == "dist") {
-  #  BM["DOCPHYTO_S"] <- 0.28
-  #  BM["DOCOTHER_S"] <- 6.91
-  #  BM["CARC"] <- sum(FM[,"CARC"])
-  #} else if(model$site == "undist") {
-  #  BM["DOCPHYTO_S"] <- 0.28
-  #  BM["DOCPHYTO_S"] <- 4.46
-  #  BM["CARC"] <- sum(FM[,"CARC"])
-  #} else if(model$site == "ref") {
-  #  BM["DOCPHYTO_S"] <- 0.65
-  #  BM["DOCPHYTO_S"] <- 9.47
-  #  BM["CARC"] <- sum(FM[,"CARC"])
-  #} else {stop("Error! Unknown site.")}
-  ### TEMPORARY CODE - stop ###
-
   vars <- getVariables(model$LIM, model$web)
 
   CE <- getCE(
@@ -349,12 +325,7 @@ extractLIMdata <- function(model, verbose = T) {
         message("fwstab: Default tag \"dead\" is used to search model for dead compartments.")
       }
     }
-    model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)])) #
-    ### TEMPORARY CODE - start ###
-    #deadnames = c("PHYTO_S", "PHYTO_W", "SLAB_S", "SLAB_W", "REFRAC",
-    #          "DOCPHYTO_S", "DOCOTHER_S", "CARC")
-    #model$dead <- list(names = deadnames)
-    ### TEMPORARY CODE - stop ###
+    model$dead <- list(names = c(fwnames[grepl(toupper(deadTag), fwnames)]))
   }
   dead <- getDeadInfo(
     dead = model$dead, readLIM = model$LIM,
