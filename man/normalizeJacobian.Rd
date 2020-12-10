@@ -26,3 +26,8 @@ or a diagonal with -1.
 This function normalizes the Jacobian matrix by dividing each row by
 the corresponding absolute diagonal value.
 }
+\references{
+Neutel, A. M., & Thorne, M. A. S. (2014).
+Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity
+and stability. Ecology Letters, 17(6), 651–661. https://doi.org/10.1111/ele.12266
+}

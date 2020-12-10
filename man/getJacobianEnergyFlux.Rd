@@ -98,5 +98,8 @@ Weak Links in Long Loops. Science. 296, 1120–1123. https://doi.org/10.1126/sci
 \item Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles
 and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17,
 651–661. https://doi.org/10.1111/ele.12266
+\item Moore, J. C., Berlow, E. L., Coleman, D. C., De Ruiter, P. C., Dong, Q., Hastings, A., … Wall,
+D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600.
+https://doi.org/10.1111/j.1461-0248.2004.00606.x
 }
 }

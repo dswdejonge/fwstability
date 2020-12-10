@@ -119,7 +119,9 @@ More information on the requirements of the arguments see \code{?extractLIMdata}
 }
 \item{Neutel, A.M., Thorne, M.A.S., 2014. Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity and stability. Ecol. Lett. 17, 651–661. https://doi.org/10.1111/ele.12266
 }
-\item{Wilson, E.E., Wolkovich, E.M., 2011. Scavenging: How carnivores and carrion structure communities. Trends Ecol. Evol. 26, 129–135. https://doi.org/10.1016/j.tree.2010.12.011
+\item{Moore, J. C., Berlow, E. L., Coleman, D. C., De Ruiter, P. C., Dong, Q., Hastings, A., … Wall,
+D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600.
+https://doi.org/10.1111/j.1461-0248.2004.00606.x
 }
 \item{\code{\link{LIM}} package, Soetaert & van Oevelen 2015.}
 }
