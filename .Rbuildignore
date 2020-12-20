@@ -7,3 +7,4 @@
 ^DS_Store$
 ^CRAN-RELEASE$
 ^LICENSE$
+^inst/\.DS_Store$
