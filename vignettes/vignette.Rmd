@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 
 The *fwstability* package is developed to infer food-web stability from energy-flux models. Basically, an energy-flux food-web model shows the transfer of energy or materials from one species to another when they eat each other. These models are steady-state and mass-balanced. Mathematical methods have been developed to transform these steady-state models to the dynamic realm in order to infer stability. This package implements these mathematical methods, so that you can easily infer stability from your energy-flux food-web model.  
 
-This package was introduced in our paper as cited below. This paper also provides an in-depth explanation of the science behind energy-flux food-web stability. Please cite if you are using this package:  
+We are currently preparing a paper introducing this package and an in-depth explanation of the science behind energy-flux food-web stability. Access to the manuscript is available upon reasonable request until publication:
 
 Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In preparation.  
 

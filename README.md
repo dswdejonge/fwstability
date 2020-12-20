@@ -3,10 +3,6 @@ To infer food-web (fw) stability from energy-flux food-web models.
 
 Energy-flux food-web models comprise of compartments of biomass and flows of energy or material between those compartments. This type of food-web model is often employed for ecosystem wide approaches to an ecological problem. This package encapsulates published methods to infer stability from such food-web models. These methods translate the steady-state models to the dynamic domain, and then infer interaction strengths between all compartments. Subsequently, the mathematical concept of stability of differential systems is used to infer food-web stability. This package is useful if you are comparing different ecosystems, or want to study the effect of disturbances on the food-web.  
 
-Please cite if you are using this package:  
-
-Daniëlle S.W. de Jonge, Peter C. de Ruiter, Johan van de Koppel, Dick van Oevelen. Inferring stability of energy-flux food-web models. In preparation.  
-
 # Important literature
 The following list of references are central in this package. For a full overview of relevant literature, please review the vignette.
 
