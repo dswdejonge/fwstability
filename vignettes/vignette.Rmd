@@ -32,14 +32,17 @@ This vignette provides you a quick start, and a more detailed explanation about 
 ![](Summary_figure.png)
 
 ## 1.1. Install and load
-There is also the *fwmodels* package, that contains several published energy-flux food-web models that are used as examples in this vignette.
-```{r installation, eval=FALSE}
+To install the development version of the package:
+```{r}
 # if you don't have the devtools package yet:
 install.packages("devtools")
 
-# Install the fwstability package
+# Install the fwstability package, development version:
 devtools::install_github("dswdejonge/fwstability", build_vignettes = TRUE)
+```
 
+There is also the *fwmodels* package available from github, that contains several published energy-flux food-web models that are used as examples in this vignette.
+```{r installation, eval=FALSE}
 # To use the example food-webs, install the fwmodels package as well
 devtools::install_github("dswdejonge/fwmodels")
 ```
@@ -650,59 +653,59 @@ Cw <- getCw(FM)
 ```
 
 # References
-Allesina, S., & Bondavalli, C. (2003). Steady state of ecosystem flow networks: A comparison between balancing procedures. Ecological Modelling, 165(2–3), 221–229. <doi:10.1016/S0304-3800(03)00075-9>  
+Allesina, S., & Bondavalli, C. (2003). Steady state of ecosystem flow networks: A comparison between balancing procedures. Ecological Modelling, 165(2–3), 221–229. https://doi.org/10.1016/S0304-3800(03)00075-9  
 
-Allesina, S., Grilli, J., Barabás, G., Tang, S., Aljadeff, J., & Maritan, A. (2015). Predicting the stability of large structured food webs. Nature Communications, 6, 1–6. <doi:10.1038/ncomms8842>  
+Allesina, S., Grilli, J., Barabás, G., Tang, S., Aljadeff, J., & Maritan, A. (2015). Predicting the stability of large structured food webs. Nature Communications, 6, 1–6. https://doi.org/10.1038/ncomms8842  
 
-Allesina, S., & Tang, S. (2012). Stability criteria for complex ecosystems. Nature, 483(7388), 205–208. <doi:10.1038/nature10832>  
+Allesina, S., & Tang, S. (2012). Stability criteria for complex ecosystems. Nature, 483(7388), 205–208. https://doi.org/10.1038/nature10832  
 
-Allesina, S., & Tang, S. (2015). The stability–complexity relationship at age 40: a random matrix perspective. Population Ecology, 57(1), 63–75. <doi:10.1007/s10144-014-0471-0>  
+Allesina, S., & Tang, S. (2015). The stability–complexity relationship at age 40: a random matrix perspective. Population Ecology, 57(1), 63–75. https://doi.org/10.1007/s10144-014-0471-0  
 
-Arnoldi, J. F., Loreau, M., & Haegeman, B. (2016). Resilience, reactivity and variability: A mathematical comparison of ecological stability measures. Journal of Theoretical Biology, 389, 47–59. <doi:10.1016/j.jtbi.2015.10.012>  
+Arnoldi, J. F., Loreau, M., & Haegeman, B. (2016). Resilience, reactivity and variability: A mathematical comparison of ecological stability measures. Journal of Theoretical Biology, 389, 47–59. https://doi.org/10.1016/j.jtbi.2015.10.012  
 
 Berlow, E. L., Neutel, A. M., Cohen, J. E., De Ruiter, P. C., Ebenman, B., Emmerson, M., … Petchey, O. (2004). Interaction Strengths in Food Webs: Issues and Opportunities. Journal of Animal Ecology, 73(3), 585–598.  
 
-Boit, A., & Gaedke, U. (2014). Benchmarking successional progress in a quantitative food web. PLoS ONE, 9(2). <doi:10.1371/journal.pone.0090404>  
+Boit, A., & Gaedke, U. (2014). Benchmarking successional progress in a quantitative food web. PLoS ONE, 9(2). https://doi.org/10.1371/journal.pone.0090404  
 
-Botton, S., Van Heusden, M., Parsons, J. R., Smidt, H., & Van Straalen, N. (2006). Resilience of microbial systems towards disturbances. Critical Reviews in Microbiology, 32(2), 101–112. <doi:10.1080/10408410600709933>  
+Botton, S., Van Heusden, M., Parsons, J. R., Smidt, H., & Van Straalen, N. (2006). Resilience of microbial systems towards disturbances. Critical Reviews in Microbiology, 32(2), 101–112. https://doi.org/10.1080/10408410600709933  
 
 Christensen, V., & Pauly, D. (1992). Ecopath II – a software for balancing steady-state ecosystem models and calculating network characteristics. Ecological Modelling, 61, 169–185.  
 
-Davis, R. C. (1981). Structure and Function of Two Antarctic Terrestrial Moss Communities. Ecological Monographs, 51(2), 125–143. <doi:10.2307/2937260>  
+Davis, R. C. (1981). Structure and Function of Two Antarctic Terrestrial Moss Communities. Ecological Monographs, 51(2), 125–143. https://doi.org/10.2307/2937260  
 
-de Ruiter, P. C., Neutel, A. M., & Moore, J. C. (1995). Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science, 269(5228), 1257–1260. <doi:10.1126/science.269.5228.1257>  
+de Ruiter, P. C., Neutel, A. M., & Moore, J. C. (1995). Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science, 269(5228), 1257–1260. https://doi.org/10.1126/science.269.5228.1257  
 
-de Ruiter, P. C., Van Veen, J. A., Moore, J. C., Brussaard, L., & Hunt, H. W. (1993). Calculation of nitrogen mineralization in soil food webs. Plant and Soil, 157(2), 263–273. <doi:10.1007/BF00011055>  
+de Ruiter, P. C., Van Veen, J. A., Moore, J. C., Brussaard, L., & Hunt, H. W. (1993). Calculation of nitrogen mineralization in soil food webs. Plant and Soil, 157(2), 263–273. https://doi.org/10.1007/BF00011055  
 
-Drazen, J. C., & Sutton, T. T. (2017). Dining in the Deep: The Feeding Ecology of Deep-Sea Fishes. Annual Review of Marine Science, 9(1), 337–366. <doi:10.1146/annurev-marine-010816-060543>
+Drazen, J. C., & Sutton, T. T. (2017). Dining in the Deep: The Feeding Ecology of Deep-Sea Fishes. Annual Review of Marine Science, 9(1), 337–366. https://doi.org/10.1146/annurev-marine-010816-060543
 
-Fath, B. D., Scharler, U. M., Ulanowicz, R. E., & Hannon, B. (2007). Ecological network analysis: network construction. Ecological Modelling, 208(1), 49–55. <doi:10.1016/j.ecolmodel.2007.04.029>  
+Fath, B. D., Scharler, U. M., Ulanowicz, R. E., & Hannon, B. (2007). Ecological network analysis: network construction. Ecological Modelling, 208(1), 49–55. https://doi.org/10.1016/j.ecolmodel.2007.04.029  
 
 Heal, O. W., & MacLean, S. F. (1975). Comparative productivity in ecosystems - secondary productivity. In W. H. Van Dobben & R. H. Lowe-McConnell (Eds.), Unifying Concepts in Ecology (pp. 89–108). The Hague: Dr. W. Junk.  
 
-Heymans, J. J., Coll, M., Libralato, S., Morissette, L., & Christensen, V. (2014). Global patterns in ecological indicators of marine food webs: A modelling approach. PLoS ONE, 9(4). <doi:10.1371/journal.pone.0095845>  
+Heymans, J. J., Coll, M., Libralato, S., Morissette, L., & Christensen, V. (2014). Global patterns in ecological indicators of marine food webs: A modelling approach. PLoS ONE, 9(4). https://doi.org/10.1371/journal.pone.0095845  
 
 Holling, C. S. (1959). Some characteristics of simple types of predation and parasitism. Canadian Entomology, 91, 385–398.  
 
-Hoving, H.-J. T., Perez, J. A. A., Bolstad, K. S. R., Braid, H. E., Evans, A. B., Fuchs, D., … Xavier, J. C. C. (2014). The study of deep-sea cephalopods. In Advances in Marine Biology (Vol. 67, pp. 235–359). Elsevier Ltd. <doi:10.1016/B978-0-12-800287-2.00003-2>  
+Hoving, H.-J. T., Perez, J. A. A., Bolstad, K. S. R., Braid, H. E., Evans, A. B., Fuchs, D., … Xavier, J. C. C. (2014). The study of deep-sea cephalopods. In Advances in Marine Biology (Vol. 67, pp. 235–359). Elsevier Ltd. https://doi.org/10.1016/B978-0-12-800287-2.00003-2  
 
 Hunt, H. W., Coleman, D. C., Ingham, E. R., Ingham, R. E., Elliott, E. T., Moore, J. C., … Morley, C. R. I. (1987). The detrital food web in a shortgrass prairie. Biol, 3, 57–68.  
 
-Jacquet, C., Moritz, C., Morissette, L., Legagneux, P., Massol, F., Archambault, P., & Gravel, D. (2016). No complexity–stability relationship in empirical ecosystems. Nature Communications, 7, 12573. <doi:10.1038/ncomms12573>  
+Jacquet, C., Moritz, C., Morissette, L., Legagneux, P., Massol, F., Archambault, P., & Gravel, D. (2016). No complexity–stability relationship in empirical ecosystems. Nature Communications, 7, 12573. https://doi.org/10.1038/ncomms12573  
 
-Kuiper, J. J., Van Altena, C., de Ruiter, P. C., Van Gerven, L. P. A. A., Janse, J. H., & Mooij, W. M. (2015). Food-web stability signals critical transitions in temperate shallow lakes. Nature Communications, 6, 1–7. <doi:10.1038/ncomms8727>  
+Kuiper, J. J., Van Altena, C., de Ruiter, P. C., Van Gerven, L. P. A. A., Janse, J. H., & Mooij, W. M. (2015). Food-web stability signals critical transitions in temperate shallow lakes. Nature Communications, 6, 1–7. https://doi.org/10.1038/ncomms8727  
 
-Landi, P., Minoarivelo, H. O., Brännström, Å., Hui, C., & Dieckmann, U. (2018). Complexity and stability of ecological networks: a review of the theory. Population Ecology, 60(4), 319–345. <doi:10.1007/s10144-018-0628-3>
+Landi, P., Minoarivelo, H. O., Brännström, Å., Hui, C., & Dieckmann, U. (2018). Complexity and stability of ecological networks: a review of the theory. Population Ecology, 60(4), 319–345. https://doi.org/10.1007/s10144-018-0628-3
 
-Latham, L. G. (2006). Network flow analysis algorithms. Ecological Modelling, 192(3–4), 586–600. <doi:10.1016/j.ecolmodel.2005.07.029>  
+Latham, L. G. (2006). Network flow analysis algorithms. Ecological Modelling, 192(3–4), 586–600. https://doi.org/10.1016/j.ecolmodel.2005.07.029  
 
 Logofet, D. O. (1993). Matrices and Graphs: Stability Problems in Mathematical Ecology. Boca Raton, FL: CRCPress.
 
-May, R. M. (1972). Will a large network be stable? Nature, 238, 37–38. <doi:10.1038/238413a0>  
+May, R. M. (1972). Will a large network be stable? Nature, 238, 37–38. https://doi.org/10.1038/238413a0  
 
 Montoya, J. M., Woodward, G., Emmerson, M. C., & Solé, R. V. (2009). Press Perturbations and Indirect Effects in Real Food Webs. Ecology, 90(9), 2426–2433.  
 
-Moore, J. C., Berlow, E. L., Coleman, D. C., De Ruiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600. <doi:10.1111/j.1461-0248.2004.00606.x>  
+Moore, J. C., Berlow, E. L., Coleman, D. C., De Ruiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004). Detritus, trophic dynamics and biodiversity. Ecology Letters, 7(7), 584–600. https://doi.org/10.1111/j.1461-0248.2004.00606.x  
 
 Moore, J. C., & de Ruiter, P. C. (2012). Energetic Food Webs (First). Oxford, UK: Oxford University Press.  
 
@@ -710,19 +713,19 @@ Moore, J. C., Ruiter, P. C. De, & Hunt, H. W. (1993). Influence of Productivity 
 
 Neubert, M. G., & Caswell, H. (1997). Alternatives to resilience for measuring the responses of ecological systems to perturbations. Ecology, 78(3), 653.  
 
-Neutel, A. M., Heesterbeek, J. A. P., & Ruiter, P. C. De. (2002). Stability in Real Food Webs: Weak Links in Long Loops. Science, 296(5570), 1120–1123. <doi:10.1126/science.1068326>  
+Neutel, A. M., Heesterbeek, J. A. P., & Ruiter, P. C. De. (2002). Stability in Real Food Webs: Weak Links in Long Loops. Science, 296(5570), 1120–1123. https://doi.org/10.1126/science.1068326  
 
-Neutel, A. M., Heesterbeek, J. A. P., Van De Koppel, J., Hoenderboom, G., Vos, A., Kaldeway, C., … De Ruiter, P. C. (2007). Reconciling complexity with stability in naturally assembling food webs. Nature, 449(7162), 599–602. <doi:10.1038/nature06154>  
+Neutel, A. M., Heesterbeek, J. A. P., Van De Koppel, J., Hoenderboom, G., Vos, A., Kaldeway, C., … De Ruiter, P. C. (2007). Reconciling complexity with stability in naturally assembling food webs. Nature, 449(7162), 599–602. https://doi.org/10.1038/nature06154  
 
-Neutel, A. M., & Thorne, M. A. S. (2014). Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity and stability. Ecology Letters, 17(6), 651–661. <doi:10.1111/ele.12266>  
+Neutel, A. M., & Thorne, M. A. S. (2014). Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity and stability. Ecology Letters, 17(6), 651–661. https://doi.org/10.1111/ele.12266  
 
-Nilsson, K. A., & McCann, K. S. (2016). Interaction strength revisited—clarifying the role of energy flux for food web stability. Theoretical Ecology, 9(1), 59–71. <doi:10.1007/s12080-015-0282-8>  
+Nilsson, K. A., & McCann, K. S. (2016). Interaction strength revisited—clarifying the role of energy flux for food web stability. Theoretical Ecology, 9(1), 59–71. https://doi.org/10.1007/s12080-015-0282-8  
 
-Novak, M., Yeakel, J. D., Noble, A. E., Doak, D. F., Emmerson, M., Estes, J. A., … Wootton, J. T. (2016). Characterizing Species Interactions to Understand Press Perturbations: What Is the Community Matrix? Annual Review of Ecology, Evolution, and Systematics, 47(1), 409–432. <doi:10.1146/annurev-ecolsys-032416-010215>  
+Novak, M., Yeakel, J. D., Noble, A. E., Doak, D. F., Emmerson, M., Estes, J. A., … Wootton, J. T. (2016). Characterizing Species Interactions to Understand Press Perturbations: What Is the Community Matrix? Annual Review of Ecology, Evolution, and Systematics, 47(1), 409–432. https://doi.org/10.1146/annurev-ecolsys-032416-010215  
 
 Pimm, S. L., Lawton, J. H., & Cohen, J. E. (1991). Food web patterns and their consequences. Nature, 350, 669–674.  
 
-Ramirez-Llodra, E., Brandt, A., Danovaro, R., De Mol, B., Escobar, E., German, C. R., … Vecchione, M. (2010). Deep, diverse and definitely different: Unique attributes of the world’s largest ecosystem. Biogeosciences, 7(9), 2851–2899. <doi:10.5194/bg-7-2851-2010>  
+Ramirez-Llodra, E., Brandt, A., Danovaro, R., De Mol, B., Escobar, E., German, C. R., … Vecchione, M. (2010). Deep, diverse and definitely different: Unique attributes of the world’s largest ecosystem. Biogeosciences, 7(9), 2851–2899. https://doi.org/10.5194/bg-7-2851-2010  
 
 Soetaert, K. (2009a). Package NetIndices , network indices and food web descriptors in R. Ecology, 1, 1–10.  
 
@@ -732,18 +735,18 @@ Soetaert, K., & Herman, P. M. J. (2009). A Practical Guide to Ecological Modelli
 
 Soetaert, K., & Van Oevelen, D. (2010). Package LIM, implementing linear inverse models in R, 37.
 
-van Altena, C., Hemerik, L., & de Ruiter, P. C. (2016). Food web stability and weighted connectance: the complexity-stability debate revisited. Theoretical Ecology, 9(1), 49–58. <doi:10.1007/s12080-015-0291-7>  
+van Altena, C., Hemerik, L., & de Ruiter, P. C. (2016). Food web stability and weighted connectance: the complexity-stability debate revisited. Theoretical Ecology, 9(1), 49–58. https://doi.org/10.1007/s12080-015-0291-7  
 
-van Oevelen, D., Soetaert, K., Garcia, R., de Stigter, H. C., Cunha, M. R., Pusceddu, A., & Danovaro, R. (2011). Canyon conditions impact carbon flows in food webs of three sections of the Nazaré canyon. Deep-Sea Research Part II: Topical Studies in Oceanography, 58(23–24), 2461–2476. <doi:10.1016/j.dsr2.2011.04.009>  
+van Oevelen, D., Soetaert, K., Garcia, R., de Stigter, H. C., Cunha, M. R., Pusceddu, A., & Danovaro, R. (2011). Canyon conditions impact carbon flows in food webs of three sections of the Nazaré canyon. Deep-Sea Research Part II: Topical Studies in Oceanography, 58(23–24), 2461–2476. https://doi.org/10.1016/j.dsr2.2011.04.009  
 
-van Oevelen, D., Soetaert, K., & Heip, C. (2012). Carbon flows in the benthic food web of the Porcupine Abyssal Plain: The (un)importance of labile detritus in supporting microbial and faunal carbon demands. Limnology and Oceanography, 57(2), 645–664. <doi:10.4319/lo.2012.57.2.0645>  
+van Oevelen, D., Soetaert, K., & Heip, C. (2012). Carbon flows in the benthic food web of the Porcupine Abyssal Plain: The (un)importance of labile detritus in supporting microbial and faunal carbon demands. Limnology and Oceanography, 57(2), 645–664. https://doi.org/10.4319/lo.2012.57.2.0645  
 
-van Oevelen, D., van den Meersche, K., Meysman, F. J. R., Soetaert, K., Middelburg, J. J., & Vézina, A. F. (2010). Quantifying food web flows using linear inverse models. Ecosystems, 13(1), 32–45. <doi:10.1007/s10021-009-9297-6>   
+van Oevelen, D., van den Meersche, K., Meysman, F. J. R., Soetaert, K., Middelburg, J. J., & Vézina, A. F. (2010). Quantifying food web flows using linear inverse models. Ecosystems, 13(1), 32–45. https://doi.org/10.1007/s10021-009-9297-6   
 
 Vézina, A. F., & Platt, T. (1988). Food web dynamics in the ocean. I. Best-estimates of flow networks using inverse methods. Marine Ecology Progress Series, 42, 269–287.  
 
 Wilkinson, J. H. (1965). The Algebraic Eigenvalue Problem. Oxford, UK: Clarendon Press.  
 
-Wilson, E. E., & Wolkovich, E. M. (2011). Scavenging: How carnivores and carrion structure communities. Trends in Ecology and Evolution, 26(3), 129–135. <doi:10.1016/j.tree.2010.12.011>  
+Wilson, E. E., & Wolkovich, E. M. (2011). Scavenging: How carnivores and carrion structure communities. Trends in Ecology and Evolution, 26(3), 129–135. https://doi.org/10.1016/j.tree.2010.12.011  
 
-Zwart, K. B., Burgers, S. L. G. E., Bloem, J., Bouwman, L. A., Brussaard, L., Lebbink, G., … de Ruiter, P. C. (1994). Population dynamics in the belowground food webs in two different agricultural systems. Agriculture, Ecosystems & Environment, 51(1), 187–198. <doi:10.1016/0167-8809(94)90043-4>
+Zwart, K. B., Burgers, S. L. G. E., Bloem, J., Bouwman, L. A., Brussaard, L., Lebbink, G., … de Ruiter, P. C. (1994). Population dynamics in the belowground food webs in two different agricultural systems. Agriculture, Ecosystems & Environment, 51(1), 187–198. https://doi.org/10.1016/0167-8809(94)90043-4
