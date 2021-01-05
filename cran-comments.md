@@ -5,7 +5,7 @@
 ## R CMD check results
 There were no ERRORs and WARNINGs. 
 
-Two NOTEs:
+One NOTE:
 * "New submission."
-* "Malformed Description field: should contain one or more complete sentences." References were added to the Description field in the form "Authors (year) DOI" upon request of CRAN reviewer.
+* "Possibly mis-spelled words in DESCRIPTION:" References were added to the Description field in the form "Authors (year) <doi>" upon request of CRAN reviewer. The noted possibly mis-spelled words are all author names and thus valid.
 
