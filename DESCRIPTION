@@ -15,15 +15,15 @@ Authors@R: c(
 Description: 
   To infer interaction strengths, stability, and biological tipping points from energy-flux food-web models. 
   References:
-    Arnoldi, J.F., Loreau, M., Haegeman, B. (2016). <doi:10.1016/j.jtbi.2015.10.012>
-    Boit, A., Gaedke, U. (2014). <doi:10.1371/journal.pone.0090404> 
-    de Ruiter, P. C., Neutel, A. M., & Moore, J. C. (1995) <doi:10.1126/science.269.5228.1257> 
-    May, R. M. (1972) <doi:10.1038/238413a0>
-    Moore, J. C., Berlow, E. L., Coleman, D. C., De Ruiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004) <doi:10.1111/j.1461-0248.2004.00606.x>
-    Neutel, A. M., Heesterbeek, J. A. P., & Ruiter, P. C. De. (2002) <doi:10.1126/science.1068326>
-    Neutel, A. M., Heesterbeek, J. A. P., Van De Koppel, J., Hoenderboom, G., Vos, A., Kaldeway, C., … De Ruiter, P. C. (2007) <doi:10.1038/nature06154>
-    Neutel, A. M., & Thorne, M. A. S. (2014) <doi:10.1111/ele.12266> 
-    van Altena, C., Hemerik, L., de Ruiter, P.C. (2016) <doi:10.1007/s12080-015-0291-7>
+    Arnoldi, J.F., Loreau, M., Haegeman, B. (2016). <doi:10.1016/j.jtbi.2015.10.012>.
+    Boit, A., Gaedke, U. (2014). <doi:10.1371/journal.pone.0090404>. 
+    de Ruiter, P. C., Neutel, A. M., & Moore, J. C. (1995) <doi:10.1126/science.269.5228.1257>. 
+    May, R. M. (1972) <doi:10.1038/238413a0>.
+    Moore, J. C., Berlow, E. L., Coleman, D. C., De Ruiter, P. C., Dong, Q., Hastings, A., … Wall, D. H. (2004) <doi:10.1111/j.1461-0248.2004.00606.x>.
+    Neutel, A. M., Heesterbeek, J. A. P., & Ruiter, P. C. De. (2002) <doi:10.1126/science.1068326>.
+    Neutel, A. M., Heesterbeek, J. A. P., Van De Koppel, J., Hoenderboom, G., Vos, A., Kaldeway, C., … De Ruiter, P. C. (2007) <doi:10.1038/nature06154>.
+    Neutel, A. M., & Thorne, M. A. S. (2014) <doi:10.1111/ele.12266>. 
+    van Altena, C., Hemerik, L., de Ruiter, P.C. (2016) <doi:10.1007/s12080-015-0291-7>.
 License: GPL-3
 BugReports: https://github.com/dswdejonge/fwstability/issues
 Encoding: UTF-8
