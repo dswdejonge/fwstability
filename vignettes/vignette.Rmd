@@ -306,7 +306,7 @@ animalDefTwo       : Animal -> deadDetritusTwo
 
 \#\# VARIABLES  
 animalIngestion = animalGrazPlant + animalGrazDetritus  
-animalIngestion = flowto(Animal) ! Usefull feature of LIM package
+animalIngestion = flowto(Animal) ! Useful feature of LIM package
 animalDef       = animalDefOne + animalDefTwo ! Sum all defecation flows  
 animalAss       = animalIngestion - animalDef ! Default assimilation tag "ass"  
 animalGrowth    = animalAss * animalGrowthEfficiency ! Default growht tag "growth"  
