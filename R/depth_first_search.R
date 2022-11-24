@@ -99,7 +99,7 @@ dfsk <- function(AM, node, visited, pathway, k, started, file, start){
 #' SIAM Journal on Computing, 1(2), 146–160.
 #' https://doi.org/10.1137/0201010.
 #' @export
-dfs <- function(AM, output = "allLoops", k = NULL, verbose = T){
+dfs <- function(AM, output = "allLoops", k = NULL, verbose = TRUE){
   # Check input data
   if(verbose){message("Checking input data.")}
   if(dim(AM)[1] != dim(AM)[2]){
