@@ -35,7 +35,7 @@ devtools::install_github("dswdejonge/fwstability", build_vignettes = TRUE)
 # published energy-flux models to use as examples:
 devtools::install_github("dswdejonge/fwmodels")
 
-# Read vignette:
+# Read the vignette:
 browseVignettes("fwstability") # click HTML
 ```
 
