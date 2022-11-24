@@ -90,7 +90,7 @@ checkMortalityFormat <- function(MR, dead) {
   if(!is.null(MR)) {
     if(TRUE %in% is.na(MR) && (is.null(dead) | !all(names(which(is.na(MR))) %in% dead))) {
       stop("Mortality rates of non-dead compartments cannot be NA.")
-    } else if(min(MR, na.rm = T) <= 0 | !is.numeric(MR)) {
+    } else if(min(MR, na.rm = TRUE) <= 0 | !is.numeric(MR)) {
       stop("the MR vector contains values equal or smaller than zero, or is non-numeric")
     }
   }
