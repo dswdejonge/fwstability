@@ -20,7 +20,7 @@
 #' between the same two compartments.
 #' @return Returns a named numeric matrix.
 #' @export
-getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
+getFlowMatrix <- function(readLIM, web = NULL, lim = NULL, verbose = TRUE) {
   if(is.null(lim)) {
     lim <- LIM::Setup(readLIM)
   }

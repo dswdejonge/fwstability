@@ -24,11 +24,11 @@ getDiagonalDetritus <- function(FM, BM, AE, dead_names){
   dead_i <- which(rownames(FM) %in% dead_names)
 
   if(length(dead_names) == 1) {
-    det_assimilation <- sum(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = T)
-    ontogeny <- sum(FM[dead_i, dead_i], na.rm = T)
+    det_assimilation <- sum(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = TRUE)
+    ontogeny <- sum(FM[dead_i, dead_i], na.rm = TRUE)
   } else {
-    det_assimilation <- colSums(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = T)
-    ontogeny <- rowSums(FM[dead_i, dead_i], na.rm = T)
+    det_assimilation <- colSums(t(FM[dead_i, -dead_i] * AE[-dead_i]), na.rm = TRUE)
+    ontogeny <- rowSums(FM[dead_i, dead_i], na.rm = TRUE)
   }
   result <- -((det_assimilation + ontogeny) / BM[dead_i])
   return(result)

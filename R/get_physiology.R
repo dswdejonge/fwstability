@@ -1,8 +1,8 @@
 # Output is same as flowmatrix
 getMortalityFlow <- function(FM, AE, GE, dead_names) {
   dead_i <- which(rownames(FM) %in% dead_names)
-  production <- AE*GE*colSums(FM, na.rm = T)
-  predation <- rowSums(FM[,-dead_i], na.rm = T)
+  production <- AE*GE*colSums(FM, na.rm = TRUE)
+  predation <- rowSums(FM[,-dead_i], na.rm = TRUE)
   m <- production - predation
   return(m)
 }

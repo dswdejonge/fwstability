@@ -28,7 +28,7 @@ getTag <- function(vars, tag) {
 #' This function calculates the value of these variables based on the flow solutions and LIM parameters.
 #' @return Returns a named vector with all variables.
 #' @export
-getVariables <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
+getVariables <- function(readLIM, web = NULL, lim = NULL, verbose = TRUE) {
   if(is.null(lim)){
     lim <- LIM::Setup(readLIM)
   }
@@ -85,7 +85,7 @@ getVariables <- function(readLIM, web = NULL, lim = NULL, verbose = T) {
 #' @return Returns a list with element "AE" (named vector with assimilation efficiencies) and element
 #' "GE" (named vector with growth efficiencies).
 #' @export
-getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = T) {
+getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = TRUE) {
   if(is.null(aTag)) {
     aTag <- "ass"
     if(verbose) {
@@ -131,7 +131,7 @@ getCE <- function(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = T) {
 #' @return Returns a named vector with mortality rates (per unit time).
 #' @seealso \code{getVariables}
 #' @export
-getMR <- function(BM, web, vars, mTag = NULL, verbose = T) {
+getMR <- function(BM, web, vars, mTag = NULL, verbose = TRUE) {
   if(is.null(mTag)) {
     mTag <- "mort"
     if(verbose) {
@@ -174,7 +174,7 @@ getMR <- function(BM, web, vars, mTag = NULL, verbose = T) {
 #' }
 #' @seealso \code{getFlowMatrix}
 #' @export
-getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = T) {
+getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = TRUE) {
   if(is.null(FM)) {
     FM <- getFlowMatrix(readLIM, web)
   }
@@ -203,7 +203,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
       same <- c(a, b)[duplicated(c(a, b))]
 
       DM[flows[i,"from"],flows[i,"to"]] <-
-        sum(getTag(web[same], tag = defTag), na.rm = T) /
+        sum(getTag(web[same], tag = defTag), na.rm = TRUE) /
         FM[flows[i,"from"],flows[i,"to"]]
     }
   }
@@ -246,7 +246,7 @@ getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = 
 #' compartments \code{dead}, and mortality rates \code{MR}.
 #' @seealso \code{getJacobian}
 #' @export
-extractLIMdata <- function(model, verbose = T) {
+extractLIMdata <- function(model, verbose = TRUE) {
   FM <- getFlowMatrix(readLIM = model$LIM, web = model$web, lim = model$setup)
 
   # Stocks can be given directly (stored in comp) or in parameters (stored in params)

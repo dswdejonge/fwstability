@@ -317,7 +317,7 @@ getLoopWeight <- function(IS, d = NULL) {
     LW <- abs(prod(IS)) ^ (1 / k)
   } else {
     if(k != length(d)){stop("Vector IS and vector d should be same length.")}
-    LW <- abs(prod(IS) / prod(abs(d), na.rm = T)) ^ (1 / k)
+    LW <- abs(prod(IS) / prod(abs(d), na.rm = TRUE)) ^ (1 / k)
   }
   return(LW)
 }
@@ -434,10 +434,10 @@ maxNrLoops <- function(n, k = NULL) {
 #' with feedbacks (column "fdb") and loop weights (column "lw") of
 #' those loops.
 #' @export
-assessFeedback <- function(JM, findLoops = F, k = NULL,
+assessFeedback <- function(JM, findLoops = FALSE, k = NULL,
                            output = "allLoops", file = NULL,
                            scale = TRUE, compnames = NULL,
-                           verbose = T) {
+                           verbose = TRUE) {
   if(findLoops) {
     maxL <- maxNrLoops(dim(JM)[1], k)
     if(verbose) {message(paste0(

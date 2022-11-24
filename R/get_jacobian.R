@@ -65,7 +65,7 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
     # One or multiple defecation compartments?
     if(!is.null(dead$frac)){
       DFM <- FMs$original * dead$frac
-      defecation_compartments <- colnames(dead$frac)[which(colSums(dead$frac, na.rm = T) > 0)]
+      defecation_compartments <- colnames(dead$frac)[which(colSums(dead$frac, na.rm = TRUE) > 0)]
     } else {
       DFM <- FMs$original
       defecation_compartments <- dead$names
@@ -95,12 +95,12 @@ effectOnResource <- function(FMs, BM, AE, dead = NULL){
       # distribution of defecation flow to different dead compartments
       predators <- names(which(FMs$original[consumer,-dead_i] > 0))
       d <- DFM[predators, resource] /
-              rowSums(DFM[predators, defecation_compartments,drop=F],  na.rm = T)
+              rowSums(DFM[predators, defecation_compartments,drop=FALSE],  na.rm = TRUE)
       if(!(length(d) > 0)) {
         d <- 0
       }
 
-      value <- (a - b + sum(c * d, na.rm = T)) / BM[consumer]
+      value <- (a - b + sum(c * d, na.rm = TRUE)) / BM[consumer]
       result[consumer, resource] <- value
 
       # Consumer of detritus is not a resource if it deposits detritus.
@@ -224,7 +224,7 @@ removeExternals <- function(externals, FM) {
 #' @export
 getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
                         dead = NULL, externals = NULL, MR = NULL,
-                        verbose = T, netMatrix = TRUE) {
+                        verbose = TRUE, netMatrix = TRUE) {
 
   # Remove externals
   if(!is.null(externals)) {
@@ -424,7 +424,7 @@ getNetMatrixFM <- function(FM, deadnames) {
 #' }
 #' @export
 getJacobian <- function(model = stop("Model input required"),
-                        diagonal = "model", verbose = T, netMatrix = T) {
+                        diagonal = "model", verbose = TRUE, netMatrix = TRUE) {
   if(model$type == "EF") {
     JM <- getJacobianEnergyFlux(
       FM = model$FM,
