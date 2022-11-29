@@ -123,7 +123,10 @@ getInitialStability <- function(JM) {
 #' }
 #' @export
 #' @examples
-#' \dontrun{getStability(JM)}
+#' fwnames <- c("compartment1", "compartment2", "compartment3")
+#' JM <- matrix(runif(9, 1, 10), nrow = 3, ncol = 3)
+#' rownames(JM) <- fwnames ; colnames(JM) <- fwnames
+#' getStability(JM)
 getStability <- function(JM, method = "eigenvalue",
                          MR = NULL, dead_names = NULL, iters = 100) {
   # Errors: check data format
