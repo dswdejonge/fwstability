@@ -83,7 +83,7 @@ test_that("The getWConn functions provide correct answers.", {
   expect_equal(fluxSizeDiversity(FM), H)
   expect_equal(averageMutualInfo(FM), A)
   expect_equal(getCw(FM), Cw)
-  expect_equal(Gini(as.vector(FM[which(FM > 0)])), gini)
+  expect_equal(ineq::Gini(as.vector(FM[which(FM > 0)])), gini)
 })
 
 s_ini <- max(Re(eigen(JM)$values))
