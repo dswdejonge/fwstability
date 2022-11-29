@@ -4,7 +4,7 @@
 \alias{getCE}
 \title{Get conversion efficiencies from a LIM.}
 \usage{
-getCE(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = T)
+getCE(FM, vars, lim, aTag = NULL, gTag = NULL, verbose = TRUE)
 }
 \arguments{
 \item{FM}{(required) A flow matrix with flows from source in rows to sink in columns.}

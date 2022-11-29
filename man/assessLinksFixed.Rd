@@ -9,7 +9,9 @@ assessLinksFixed(
   method = "eigenvalue",
   MR = NULL,
   dead_names = NULL,
-  func = function(x) {     return(x * 2) }
+  func = function(x) {
+     return(x * 2)
+ }
 )
 }
 \arguments{

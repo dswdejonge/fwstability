@@ -7,8 +7,8 @@
 getJacobian(
   model = stop("Model input required"),
   diagonal = "model",
-  verbose = T,
-  netMatrix = T
+  verbose = TRUE,
+  netMatrix = TRUE
 )
 }
 \arguments{

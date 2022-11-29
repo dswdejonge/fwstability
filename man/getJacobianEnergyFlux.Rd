@@ -13,7 +13,7 @@ getJacobianEnergyFlux(
   dead = NULL,
   externals = NULL,
   MR = NULL,
-  verbose = T,
+  verbose = TRUE,
   netMatrix = TRUE
 )
 }

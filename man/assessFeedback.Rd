@@ -6,13 +6,13 @@
 \usage{
 assessFeedback(
   JM,
-  findLoops = F,
+  findLoops = FALSE,
   k = NULL,
   output = "allLoops",
   file = NULL,
   scale = TRUE,
   compnames = NULL,
-  verbose = T
+  verbose = TRUE
 )
 }
 \arguments{

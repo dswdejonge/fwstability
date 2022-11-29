@@ -4,7 +4,7 @@
 \alias{dfs}
 \title{Depth-First-Search wrapper}
 \usage{
-dfs(AM, output = "allLoops", k = NULL, verbose = T)
+dfs(AM, output = "allLoops", k = NULL, verbose = TRUE)
 }
 \arguments{
 \item{AM}{(required) Adjacency matrix}

@@ -96,7 +96,10 @@ the function assumes natural mortality equals production
 (AE x GE x Consumption) minus predation (flux to all other faunal compartments).
 }
 \examples{
-\dontrun{getStability(JM)}
+fwnames <- c("compartment1", "compartment2", "compartment3")
+JM <- matrix(runif(9, 1, 10), nrow = 3, ncol = 3)
+rownames(JM) <- fwnames ; colnames(JM) <- fwnames
+getStability(JM)
 }
 \references{
 \itemize{

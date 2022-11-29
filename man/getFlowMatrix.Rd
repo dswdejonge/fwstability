@@ -4,7 +4,7 @@
 \alias{getFlowMatrix}
 \title{Get Flowmatrix from LIM}
 \usage{
-getFlowMatrix(readLIM, web = NULL, lim = NULL, verbose = T)
+getFlowMatrix(readLIM, web = NULL, lim = NULL, verbose = TRUE)
 }
 \arguments{
 \item{readLIM}{(required) A linear inverse model read into the R environment with the R-package LIM.
