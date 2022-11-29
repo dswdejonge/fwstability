@@ -96,10 +96,20 @@ the function assumes natural mortality equals production
 (AE x GE x Consumption) minus predation (flux to all other faunal compartments).
 }
 \examples{
-fwnames <- c("compartment1", "compartment2", "compartment3")
-JM <- matrix(runif(9, 1, 10), nrow = 3, ncol = 3)
-rownames(JM) <- fwnames ; colnames(JM) <- fwnames
+# Generate a random named Jacobian Matrix
+exampleJM <- function(){
+  fwnames <- c("compartment1", "compartment2", "compartment3")
+  JM <- matrix(runif(9, 1, 10), nrow = 3, ncol = 3)
+  rownames(JM) <- fwnames ; colnames(JM) <- fwnames
+  return(JM)
+}
+JM <- exampleJM()
+# Find asymptotic stability using the eigenvalue method
 getStability(JM)
+# Find asymptotic stability using the scalar method
+getStability(JM, method = "scalar", MR = diag(JM))
+# Find initial stability
+getStability(JM, method = "initial")
 }
 \references{
 \itemize{
