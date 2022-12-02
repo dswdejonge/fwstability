@@ -423,6 +423,24 @@ getNetMatrixFM <- function(FM, deadnames) {
 #' \item{\code{\link{LIM}} package, Soetaert & van Oevelen 2015.}
 #' }
 #' @export
+#' @examples
+#' ### Energy-flux model defined in R
+#' # Use example food-web model of soil
+#' model <- fwmodels::LovinkhoeveCP
+#' # Create a Jacobian matrix, with a diagonal calculated from the model (default).
+#' JM <- getJacobian(model, diagonal = "model")
+#' # Create a Jacobian matrix, with an all-zero diagonal.
+#' JM <- getJacobian(model, diagonal = 0)
+#' # Create a Jacobian matrix, with -1 on the diagonal.
+#' JM <- getJacobian(model, diagonal = -1)
+#' # Create a Jacobian matrix, with a numeric vector as diagonal
+#' diagonal <- runif(dim(model$FM)[1], min = -1, max = 0)
+#' JM <- getJacobian(model, diagonal = diagonal)
+#' ### Energy-flux model defined as a LIM
+#' lim <- Read(system.file("extdata", "foodweb2.lim", package = "fwstability"))
+#' lim_solved <- LIM::Ldei(Setup(lim))
+#' model <- list(type = "LIM", LIM = lim)
+#' JM <- getJacobian(model)
 getJacobian <- function(model = stop("Model input required"),
                         diagonal = "model", verbose = TRUE, netMatrix = TRUE) {
   if(model$type == "EF") {
@@ -488,6 +506,13 @@ getJacobian <- function(model = stop("Model input required"),
 #' Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity
 #' and stability. Ecology Letters, 17(6), 651–661. https://doi.org/10.1111/ele.12266
 #' @export
+#' @examples
+#' model <- fwmodels::LovinkhoeveCP
+#' JM <- getJacobian(model)
+#' # Normalize the matrix, all diagonal values will be set to 0 after normalization
+#' normalizeJacobian(JM)
+#' # Normalize the matrix, all diagonal values will be set to -1 after normalization
+#' normalizeJacobian(JM, allzero = FALSE)
 normalizeJacobian <- function(JM, dead_names = NULL, allzero = TRUE){
   checkMformat(JM)
   if(0 %in% diag(JM)){
