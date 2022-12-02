@@ -175,6 +175,7 @@ getMR <- function(BM, web, vars, mTag = NULL, verbose = TRUE) {
 #' @seealso \code{getFlowMatrix}
 #' @export
 getDeadInfo <- function(dead, readLIM, web, FM = NULL, defTag = NULL, verbose = TRUE) {
+  if(length(dead$names) == 0){return(NULL)}
   if(is.null(FM)) {
     FM <- getFlowMatrix(readLIM, web)
   }
