@@ -222,6 +222,19 @@ removeExternals <- function(externals, FM) {
 #' effect of the resources (rows) on the consumers (columns) - for all
 #' interactions in the food web.
 #' @export
+#' @examples
+#' # Use example food-web model of soil
+#' model <- fwmodels::LovinkhoeveCP
+#' # Create a Jacobian matrix
+#' JM <- getJacobianEnergyFlux(
+#'   FM = model$FM,
+#'   BM = model$BM,
+#'   AE = model$AE,
+#'   GE = model$GE,
+#'   diagonal = "model",
+#'   dead = model$dead,
+#'   MR = model$MR
+#')
 getJacobianEnergyFlux <- function(FM, BM, AE, GE, diagonal = "model",
                         dead = NULL, externals = NULL, MR = NULL,
                         verbose = TRUE, netMatrix = TRUE) {
