@@ -123,19 +123,14 @@ getInitialStability <- function(JM) {
 #' }
 #' @export
 #' @examples
-#' # Generate a random Jacobian Matrix (named, square, with negative diagonal)
-#' exampleJM <- function(){
-#'   fwnames <- c("compartment1", "compartment2", "compartment3")
-#'   JM <- matrix(runif(9, -1, 1), nrow = 3, ncol = 3)
-#'   diag(JM) <- -abs(diag(JM))
-#'   rownames(JM) <- fwnames ; colnames(JM) <- fwnames
-#'   return(JM)
-#' }
-#' JM <- exampleJM()
+#' # Use example food-web model of soil
+#' model <- fwmodels::LovinkhoeveCP
+#' # Calculate the Jacobian Matrix
+#' JM <- getJacobian(model)
 #' # Find asymptotic stability using the eigenvalue method
 #' getStability(JM)
 #' # Find asymptotic stability using the scalar method
-#' getStability(JM, method = "scalar", MR = abs(diag(JM)))
+#' getStability(JM, method = "scalar", MR = model$MR, dead_names = model$dead$names)
 #' # Find initial stability
 #' getStability(JM, method = "initial")
 getStability <- function(JM, method = "eigenvalue",
