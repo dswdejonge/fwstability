@@ -113,6 +113,25 @@ LIM R-package.}
 More information on the requirements of the arguments see \code{?extractLIMdata}
 }
 
+\examples{
+### Energy-flux model defined in R
+# Use example food-web model of soil
+model <- fwmodels::LovinkhoeveCP
+# Create a Jacobian matrix, with a diagonal calculated from the model (default).
+JM <- getJacobian(model, diagonal = "model")
+# Create a Jacobian matrix, with an all-zero diagonal.
+JM <- getJacobian(model, diagonal = 0)
+# Create a Jacobian matrix, with -1 on the diagonal.
+JM <- getJacobian(model, diagonal = -1)
+# Create a Jacobian matrix, with a numeric vector as diagonal
+diagonal <- runif(dim(model$FM)[1], min = -1, max = 0)
+JM <- getJacobian(model, diagonal = diagonal)
+### Energy-flux model defined as a LIM
+lim <- Read(system.file("extdata", "foodweb2.lim", package = "fwstability"))
+lim_solved <- LIM::Ldei(Setup(lim))
+model <- list(type = "LIM", LIM = lim)
+JM <- getJacobian(model)
+}
 \references{
 \itemize{
 \item{de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of Interaction Strengths, and Stability in Real Ecosystems. Science (80-. ). 269, 1257–1260. https://doi.org/10.1126/science.269.5228.1257

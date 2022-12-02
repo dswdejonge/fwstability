@@ -96,18 +96,14 @@ the function assumes natural mortality equals production
 (AE x GE x Consumption) minus predation (flux to all other faunal compartments).
 }
 \examples{
-# Generate a random named Jacobian Matrix
-exampleJM <- function(){
-  fwnames <- c("compartment1", "compartment2", "compartment3")
-  JM <- matrix(runif(9, 1, 10), nrow = 3, ncol = 3)
-  rownames(JM) <- fwnames ; colnames(JM) <- fwnames
-  return(JM)
-}
-JM <- exampleJM()
+# Use example food-web model of soil
+model <- fwmodels::LovinkhoeveCP
+# Calculate the Jacobian Matrix
+JM <- getJacobian(model)
 # Find asymptotic stability using the eigenvalue method
 getStability(JM)
 # Find asymptotic stability using the scalar method
-getStability(JM, method = "scalar", MR = diag(JM))
+getStability(JM, method = "scalar", MR = model$MR, dead_names = model$dead$names)
 # Find initial stability
 getStability(JM, method = "initial")
 }

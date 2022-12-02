@@ -26,6 +26,14 @@ or a diagonal with -1.
 This function normalizes the Jacobian matrix by dividing each row by
 the corresponding absolute diagonal value.
 }
+\examples{
+model <- fwmodels::LovinkhoeveCP
+JM <- getJacobian(model)
+# Normalize the matrix, all diagonal values will be set to 0 after normalization
+normalizeJacobian(JM)
+# Normalize the matrix, all diagonal values will be set to -1 after normalization
+normalizeJacobian(JM, allzero = FALSE)
+}
 \references{
 Neutel, A. M., & Thorne, M. A. S. (2014).
 Interaction strengths in balanced carbon cycles and the absence of a relation between ecosystem complexity

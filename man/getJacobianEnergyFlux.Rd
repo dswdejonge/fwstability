@@ -88,6 +88,20 @@ mortality rate per unit time.
 Mortality rate can also be calculated as the inverse of the natural lifespan of the species
 (per unit time).
 }
+\examples{
+# Use example food-web model of soil
+model <- fwmodels::LovinkhoeveCP
+# Create a Jacobian matrix
+JM <- getJacobianEnergyFlux(
+  FM = model$FM,
+  BM = model$BM,
+  AE = model$AE,
+  GE = model$GE,
+  diagonal = "model",
+  dead = model$dead,
+  MR = model$MR
+)
+}
 \references{
 \itemize{
 \item de Ruiter, P.C., Neutel, A.M., Moore, J.C., 1995. Energetics, Patterns of
